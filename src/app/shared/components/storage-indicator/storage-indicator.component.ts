@@ -29,54 +29,87 @@ import { Subject, takeUntil, interval } from 'rxjs';
     `
       .storage-indicator {
         position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--color-surface-primary);
-        border: 1px solid var(--color-border-primary);
-        border-radius: var(--radius-medium);
-        padding: 12px;
-        box-shadow: var(--shadow-medium);
+        top: 24px;
+        right: 24px;
+        background: var(--color-surface-elevated);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
         z-index: 1000;
-        min-width: 200px;
-        font-size: 12px;
-        transition: all 0.3s ease;
+        min-width: 220px;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      .storage-indicator:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
       }
 
       .storage-header {
-        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
       }
 
       .storage-text {
-        color: var(--color-text-secondary);
-        font-weight: 500;
+        color: var(--color-text-primary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        letter-spacing: -0.025em;
       }
 
       .storage-progress {
         width: 100%;
-        height: 4px;
+        height: 6px;
         background: var(--color-surface-secondary);
-        border-radius: 2px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
       }
 
       .storage-progress-fill {
         height: 100%;
-        background: var(--color-primary-500);
-        transition: width 0.3s ease, background-color 0.3s ease;
-        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-500),
+          var(--primary-600)
+        );
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: var(--radius-sm);
+        position: relative;
+      }
+
+      .storage-progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0.2) 100%
+        );
+        border-radius: var(--radius-sm);
       }
 
       /* Estados del indicador */
       .storage-indicator.safe .storage-progress-fill {
-        background: var(--color-primary-500);
+        background: linear-gradient(90deg, #10b981, #059669);
       }
 
       .storage-indicator.safe .storage-text {
-        color: var(--color-text-secondary);
+        color: var(--color-text-primary);
       }
 
       .storage-indicator.warning .storage-progress-fill {
-        background: #f59e0b;
+        background: linear-gradient(90deg, #f59e0b, #d97706);
       }
 
       .storage-indicator.warning .storage-text {
@@ -84,11 +117,12 @@ import { Subject, takeUntil, interval } from 'rxjs';
       }
 
       .storage-indicator.warning {
-        border-color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.3);
+        background: var(--color-surface-elevated);
       }
 
       .storage-indicator.danger .storage-progress-fill {
-        background: #ef4444;
+        background: linear-gradient(90deg, #ef4444, #dc2626);
       }
 
       .storage-indicator.danger .storage-text {
@@ -96,17 +130,63 @@ import { Subject, takeUntil, interval } from 'rxjs';
       }
 
       .storage-indicator.danger {
-        border-color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.3);
+        background: var(--color-surface-elevated);
+      }
+
+      /* Animación de pulso para estados críticos */
+      .storage-indicator.danger {
+        animation: pulse-danger 2s infinite;
+      }
+
+      @keyframes pulse-danger {
+        0%,
+        100% {
+          box-shadow: var(--shadow-md);
+        }
+        50% {
+          box-shadow: var(--shadow-md), 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
       }
 
       /* Responsivo */
       @media (max-width: 768px) {
         .storage-indicator {
-          top: 10px;
-          right: 10px;
-          padding: 8px;
-          min-width: 150px;
-          font-size: 11px;
+          top: 16px;
+          right: 16px;
+          padding: 12px;
+          min-width: 180px;
+          font-size: 0.8rem;
+        }
+
+        .storage-header {
+          margin-bottom: 8px;
+        }
+
+        .storage-text {
+          font-size: 0.8rem;
+        }
+
+        .storage-progress {
+          height: 5px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .storage-indicator {
+          top: 12px;
+          right: 12px;
+          padding: 10px;
+          min-width: 160px;
+          font-size: 0.75rem;
+        }
+
+        .storage-text {
+          font-size: 0.75rem;
+        }
+
+        .storage-progress {
+          height: 4px;
         }
       }
     `,

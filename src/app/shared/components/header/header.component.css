@@ -103,8 +103,8 @@
   }
 
   .main-logo {
-    width: 50px;
-    height: 33px;
+    width: 100px;
+    height: auto;
   }
 
   .logo-text h1 {

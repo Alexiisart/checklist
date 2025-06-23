@@ -12,6 +12,7 @@ import {
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { AlertModalComponent } from '../../shared/components/alert-modal/alert-modal.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { ExportImportDropdownComponent } from '../../shared/components/export-import-dropdown/export-import-dropdown.component';
 
 /**
  * Componente principal que muestra la pantalla de inicio con las listas guardadas
@@ -24,12 +25,21 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
     ConfirmModalComponent,
     AlertModalComponent,
     ModalComponent,
+    ExportImportDropdownComponent,
   ],
   template: `
     <div class="home-screen">
       <div class="home-header">
         <h2>Mis Listas Guardadas</h2>
-        <button class="primary-btn" (click)="goToNewList()">Nueva Lista</button>
+        <div class="header-actions">
+          <app-export-import-dropdown
+            [savedLists]="savedLists"
+            (listsUpdated)="onListsUpdated()"
+          ></app-export-import-dropdown>
+          <button class="primary-btn" (click)="goToNewList()">
+            Nueva Lista
+          </button>
+        </div>
       </div>
 
       <!-- Indicador de almacenamiento -->
@@ -258,6 +268,10 @@ export class HomeComponent implements OnInit {
         this.showAlertModal = true;
       }
     }
+
+    // Cerrar el modal de confirmación y limpiar datos
+    this.showConfirmModal = false;
+    this.confirmModalData = null;
     this.listToDelete = null;
   }
 
@@ -265,8 +279,9 @@ export class HomeComponent implements OnInit {
    * Cancela la eliminación de la lista
    */
   cancelDelete(): void {
-    this.listToDelete = null;
     this.showConfirmModal = false;
+    this.confirmModalData = null;
+    this.listToDelete = null;
   }
 
   /**
@@ -346,5 +361,13 @@ export class HomeComponent implements OnInit {
     this.showRenameModal = false;
     this.renameModalData = null;
     this.listToRename = null;
+  }
+
+  /**
+   * Maneja la actualización de listas después de importar
+   */
+  onListsUpdated(): void {
+    this.loadSavedLists();
+    this.updateStorageIndicator();
   }
 }

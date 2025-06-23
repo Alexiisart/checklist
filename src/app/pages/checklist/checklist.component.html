@@ -19,7 +19,8 @@
   </div>
 
   <!-- Indicador de progreso -->
-  <div class="progress-section" *ngIf="currentList">
+  @if (currentList) {
+  <div class="progress-section">
     <div class="progress-text">
       Progreso: {{ progress.completed }} de {{ progress.total }} tareas
       completadas
@@ -28,11 +29,13 @@
       <div class="progress-bar" [style.width.%]="progress.percentage"></div>
     </div>
   </div>
+  }
 
   <!-- Contenedor de tareas -->
-  <div class="tasks-container" *ngIf="currentList">
+  @if (currentList) {
+  <div class="tasks-container">
+    @for (task of currentList.tasks; track task.id) {
     <app-task-item
-      *ngFor="let task of currentList.tasks"
       [task]="task"
       (taskToggled)="onTaskToggled($event)"
       (subtaskToggled)="onSubtaskToggled($event)"
@@ -46,10 +49,13 @@
       (taskDeleted)="onTaskDeleted($event)"
     >
     </app-task-item>
+    }
   </div>
+  }
 
   <!-- Sección de observaciones -->
-  <div class="observations-section" *ngIf="currentList">
+  @if (currentList) {
+  <div class="observations-section">
     <label for="observations">Observaciones del día:</label>
     <textarea
       id="observations"
@@ -60,9 +66,11 @@
     >
     </textarea>
   </div>
+  }
 
   <!-- Acciones -->
-  <div class="actions" *ngIf="currentList">
+  @if (currentList) {
+  <div class="actions">
     <button class="export-btn" (click)="exportToPDF()">
       <span class="material-icons-outlined">picture_as_pdf</span> Exportar PDF
     </button>
@@ -71,39 +79,40 @@
       lista nueva
     </button>
   </div>
+  }
+
+  <!-- Modal para editar lista -->
+  <app-modal
+    [isVisible]="showEditModal"
+    [data]="editModalData"
+    (confirmed)="onEditConfirm($event)"
+    (closed)="closeEditModal()"
+  >
+  </app-modal>
+
+  <!-- Modal para guardar -->
+  <app-modal
+    [isVisible]="showSaveModalDialog"
+    [data]="saveModalData"
+    (confirmed)="onSaveConfirm($event)"
+    (closed)="closeSaveModal()"
+  >
+  </app-modal>
+
+  <!-- Modal de confirmación -->
+  <app-confirm-modal
+    [isVisible]="showConfirmModal"
+    [data]="confirmModalData"
+    (confirmed)="onConfirmAction()"
+    (cancelled)="onCancelAction()"
+  >
+  </app-confirm-modal>
+
+  <!-- Modal de alerta -->
+  <app-alert-modal
+    [isVisible]="showAlertModal"
+    [data]="alertModalData"
+    (closed)="closeAlert()"
+  >
+  </app-alert-modal>
 </div>
-
-<!-- Modal para editar lista -->
-<app-modal
-  [isVisible]="showEditModal"
-  [data]="editModalData"
-  (confirmed)="onEditConfirm($event)"
-  (closed)="closeEditModal()"
->
-</app-modal>
-
-<!-- Modal para guardar -->
-<app-modal
-  [isVisible]="showSaveModalDialog"
-  [data]="saveModalData"
-  (confirmed)="onSaveConfirm($event)"
-  (closed)="closeSaveModal()"
->
-</app-modal>
-
-<!-- Modal de confirmación -->
-<app-confirm-modal
-  [isVisible]="showConfirmModal"
-  [data]="confirmModalData"
-  (confirmed)="onConfirmAction()"
-  (cancelled)="onCancelAction()"
->
-</app-confirm-modal>
-
-<!-- Modal de alerta -->
-<app-alert-modal
-  [isVisible]="showAlertModal"
-  [data]="alertModalData"
-  (closed)="closeAlert()"
->
-</app-alert-modal>

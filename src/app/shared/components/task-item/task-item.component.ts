@@ -54,9 +54,11 @@ import { ModalComponent } from '../modal/modal.component';
       </div>
 
       <!-- Subtareas -->
-      <div class="subtasks-container" *ngIf="task.subtasks.length > 0">
+      @if (task.subtasks.length > 0) {
+      <div class="subtasks-container">
         <div class="subtasks-label">Subtareas:</div>
-        <div class="subtask-item" *ngFor="let subtask of task.subtasks">
+        @for (subtask of task.subtasks; track subtask) {
+        <div class="subtask-item">
           <input
             type="checkbox"
             class="subtask-checkbox"
@@ -80,11 +82,15 @@ import { ModalComponent } from '../modal/modal.component';
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
+        }
       </div>
+      }
 
       <!-- Errores -->
-      <div class="errors-container" *ngIf="task.errors.length > 0">
-        <div class="error-item" *ngFor="let error of task.errors">
+      @if (task.errors.length > 0) {
+      <div class="errors-container">
+        @for (error of task.errors; track error) {
+        <div class="error-item">
           <span class="error-text">{{ error.name }}</span>
           <button
             class="edit-error-btn"
@@ -97,7 +103,9 @@ import { ModalComponent } from '../modal/modal.component';
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
+        }
       </div>
+      }
     </div>
 
     <app-modal

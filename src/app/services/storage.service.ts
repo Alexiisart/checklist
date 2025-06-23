@@ -148,6 +148,42 @@ export class StorageService {
   }
 
   /**
+   * Renombra una lista guardada
+   * @param listId ID de la lista a renombrar
+   * @param newName Nuevo nombre para la lista
+   * @throws Error si no se puede renombrar la lista
+   */
+  renameList(listId: string, newName: string): void {
+    try {
+      // Cargar la lista completa
+      const listData = this.loadList(listId);
+      if (!listData) {
+        throw new Error('Lista no encontrada');
+      }
+
+      // Actualizar el nombre en los datos de la lista
+      listData.name = newName;
+      listData.modifiedDate = new Date().toISOString();
+
+      // Guardar la lista completa actualizada
+      localStorage.setItem(`list_${listId}`, JSON.stringify(listData));
+
+      // Actualizar el índice de listas
+      const existingLists = this.getSavedLists();
+      const listIndex = existingLists.findIndex((list) => list.id === listId);
+
+      if (listIndex >= 0) {
+        existingLists[listIndex].name = newName;
+        existingLists[listIndex].date = listData.modifiedDate;
+        localStorage.setItem(this.LISTS_KEY, JSON.stringify(existingLists));
+      }
+    } catch (error) {
+      console.error('Error renaming list:', error);
+      throw new Error('No se pudo renombrar la lista.');
+    }
+  }
+
+  /**
    * Calcula el tamaño total del almacenamiento utilizado
    * @returns Tamaño en bytes
    */

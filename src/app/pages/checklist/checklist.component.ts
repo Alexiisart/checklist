@@ -12,10 +12,7 @@ import {
   ChecklistState,
 } from './checklist-state.service';
 
-/**
- * Componente principal que maneja la funcionalidad del checklist
- * Permite ver y editar tareas, subtareas, errores y observaciones
- */
+// Componente principal que maneja la funcionalidad del checklist. Permite ver y editar tareas, subtareas, errores y observaciones
 @Component({
   selector: 'app-checklist',
   standalone: true,
@@ -56,9 +53,7 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.state$ = this.stateService.state$;
   }
 
-  /**
-   * Inicializa el componente suscribiéndose a los cambios de ruta y estado
-   */
+  // Inicializa el componente suscribiéndose a los cambios de ruta y estado
   ngOnInit(): void {
     // Suscribirse a cambios de ruta
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -83,27 +78,19 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Limpia recursos al destruir el componente
-   */
+  // Limpia recursos al destruir el componente
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.stateService.cleanup();
   }
 
-  /**
-   * Maneja el cambio de estado completado/no completado de una tarea
-   * @param event Objeto con el id de la tarea y su nuevo estado
-   */
+  // Maneja el cambio de estado completado/no completado de una tarea
   onTaskToggled(event: { taskId: number; completed: boolean }): void {
     this.stateService.onTaskToggled(event);
   }
 
-  /**
-   * Maneja el cambio de estado completado/no completado de una subtarea
-   * @param event Objeto con ids de tarea/subtarea y nuevo estado
-   */
+  // Maneja el cambio de estado completado/no completado de una subtarea
   onSubtaskToggled(event: {
     taskId: number;
     subtaskId: number;
@@ -112,26 +99,17 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.onSubtaskToggled(event);
   }
 
-  /**
-   * Agrega una nueva subtarea a una tarea existente
-   * @param event Objeto con id de tarea y nombre de nueva subtarea
-   */
+  // Agrega una nueva subtarea a una tarea existente
   onSubtaskAdded(event: { taskId: number; name: string }): void {
     this.stateService.onSubtaskAdded(event);
   }
 
-  /**
-   * Elimina una subtarea existente
-   * @param event Objeto con ids de tarea y subtarea a eliminar
-   */
+  // Elimina una subtarea existente
   onSubtaskRemoved(event: { taskId: number; subtaskId: number }): void {
     this.stateService.onSubtaskRemoved(event);
   }
 
-  /**
-   * Actualiza el nombre de una subtarea existente
-   * @param event Objeto con ids y nuevo nombre de subtarea
-   */
+  // Actualiza el nombre de una subtarea existente
   onSubtaskUpdated(event: {
     taskId: number;
     subtaskId: number;
@@ -140,26 +118,17 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.onSubtaskUpdated(event);
   }
 
-  /**
-   * Agrega un nuevo error a una tarea
-   * @param event Objeto con id de tarea y descripción del error
-   */
+  // Agrega un nuevo error a una tarea
   onErrorAdded(event: { taskId: number; description: string }): void {
     this.stateService.onErrorAdded(event);
   }
 
-  /**
-   * Elimina un error existente
-   * @param event Objeto con ids de tarea y error a eliminar
-   */
+  // Elimina un error existente
   onErrorRemoved(event: { taskId: number; errorId: number }): void {
     this.stateService.onErrorRemoved(event);
   }
 
-  /**
-   * Actualiza la descripción de un error existente
-   * @param event Objeto con ids y nueva descripción del error
-   */
+  // Actualiza la descripción de un error existente
   onErrorUpdated(event: {
     taskId: number;
     errorId: number;
@@ -168,111 +137,77 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.onErrorUpdated(event);
   }
 
-  /**
-   * Actualiza el nombre de una tarea existente
-   * @param event Objeto con id y nuevo nombre de tarea
-   */
+  // Actualiza el nombre de una tarea existente
   onTaskUpdated(event: { taskId: number; newName: string }): void {
     this.stateService.onTaskUpdated(event);
   }
 
-  /**
-   * Elimina una tarea existente
-   * @param taskId ID de la tarea a eliminar
-   */
+  // Elimina una tarea existente
   onTaskDeleted(taskId: number): void {
     this.stateService.onTaskDeleted(taskId);
   }
 
-  /**
-   * Maneja cambios en las observaciones generales
-   */
+  // Maneja cambios en las observaciones generales
   onObservationsChange(): void {
     this.stateService.onObservationsChange();
   }
 
-  /**
-   * Activa el modo de edición masiva de tareas
-   */
+  // Activa el modo de edición masiva de tareas
   editMode(): void {
     this.stateService.editMode();
   }
 
-  /**
-   * Confirma los cambios realizados en modo edición
-   * @param newTasksString Texto con las nuevas tareas
-   */
+  // Confirma los cambios realizados en modo edición
   onEditConfirm(newTasksString: string): void {
     this.stateService.onEditConfirm(newTasksString);
   }
 
-  /**
-   * Cierra el modal de edición masiva
-   */
+  // Cierra el modal de edición masiva
   closeEditModal(): void {
     this.stateService.closeEditModal();
   }
 
-  /**
-   * Confirma el guardado de la lista
-   * @param name Nombre con el que se guardará la lista
-   */
+  // Confirma el guardado de la lista
   onSaveConfirm(name: string): void {
     this.stateService.onSaveConfirm(name);
   }
 
-  /**
-   * Cierra el modal de guardado
-   */
+  // Cierra el modal de guardado
   closeSaveModal(): void {
     this.stateService.closeSaveModal();
   }
 
-  /**
-   * Confirma el inicio de una nueva lista
-   */
+  // Confirma el inicio de una nueva lista
   confirmStartNewList(): void {
     this.stateService.confirmStartNewList();
   }
 
-  /**
-   * Confirma la acción pendiente (limpiar lista, eliminar tarea, etc)
-   */
+  // Confirma la acción pendiente (limpiar lista, eliminar tarea, etc)
   onConfirmAction(): void {
     this.stateService.onConfirmAction();
   }
 
-  /**
-   * Cancela la acción pendiente
-   */
+  // Cancela la acción pendiente
   onCancelAction(): void {
     this.stateService.onCancelAction();
   }
 
-  /**
-   * Navega a la página principal
-   */
+  // Navega a la página principal
   goHome(): void {
     this.stateService.goHome();
   }
 
-  /**
-   * Exporta la lista actual a PDF
-   */
+  // Exporta la lista actual a PDF
   exportToPDF(): void {
     this.stateService.exportToPDF();
   }
 
-  /**
-   * Cierra el modal de alerta
-   */
+  // Cierra el modal de alerta
   closeAlert(): void {
     this.stateService.closeAlert();
   }
 
-  /**
-   * Guarda directamente el progreso sin pedir nombre
-   */
+  // Guarda directamente el progreso sin pedir nombre
   saveProgress(): void {
     this.stateService.saveProgressDirectly();
   }

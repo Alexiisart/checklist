@@ -3,9 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { ToastService } from '../../services/toast.service';
-import { SavedList, ConfirmData, AlertData } from '../../models/task.interface';
+import {
+  SavedList,
+  ConfirmData,
+  AlertData,
+  ModalData,
+} from '../../models/task.interface';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { AlertModalComponent } from '../../shared/components/alert-modal/alert-modal.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 /**
  * Componente principal que muestra la pantalla de inicio con las listas guardadas
@@ -13,7 +19,12 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ConfirmModalComponent, AlertModalComponent],
+  imports: [
+    CommonModule,
+    ConfirmModalComponent,
+    AlertModalComponent,
+    ModalComponent,
+  ],
   template: `
     <div class="home-screen">
       <div class="home-header">
@@ -22,7 +33,8 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
       </div>
 
       <!-- Indicador de almacenamiento -->
-      <div class="storage-indicator" *ngIf="storagePercentage > 60">
+      @if (storagePercentage > 60) {
+      <div class="storage-indicator">
         <div class="storage-header">
           <span class="material-icons-outlined">storage</span>
           <span class="storage-text"
@@ -35,22 +47,32 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
             [style.width.%]="storagePercentage"
           ></div>
         </div>
-        <p *ngIf="storagePercentage > 80" class="storage-warning">
+        @if (storagePercentage > 80) {
+        <p class="storage-warning">
           ⚠️ Espacio casi lleno. Considera eliminar listas antiguas.
         </p>
+        }
       </div>
+      }
 
       <!-- Lista de cards guardadas -->
-      <div class="saved-lists-container" *ngIf="savedLists.length > 0">
-        <div
-          class="list-card"
-          *ngFor="let list of savedLists"
-          (click)="loadList(list.id)"
-        >
+      @if (savedLists.length > 0) {
+      <div class="saved-lists-container">
+        @for (list of savedLists; track list.id) {
+        <div class="list-card" (click)="loadList(list.id)">
           <div class="list-card-header">
-            <h3 class="list-card-title">
-              {{ list.name || 'Lista sin nombre' }}
-            </h3>
+            <div class="title-section">
+              <h3 class="list-card-title">
+                {{ list.name || 'Lista sin nombre' }}
+              </h3>
+              <button
+                class="rename-list-btn"
+                (click)="openRenameModal(list); $event.stopPropagation()"
+                title="Renombrar lista"
+              >
+                <span class="material-icons-outlined">edit</span>
+              </button>
+            </div>
             <span class="list-card-date">{{ formatDate(list.date) }}</span>
           </div>
           <p class="list-card-preview">{{ list.preview }}</p>
@@ -76,10 +98,13 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
             </button>
           </div>
         </div>
+        }
       </div>
+      }
 
       <!-- Estado vacío -->
-      <div class="empty-state" *ngIf="savedLists.length === 0">
+      @if (savedLists.length === 0) {
+      <div class="empty-state">
         <span class="material-icons-outlined empty-icon">checklist</span>
         <h3>No tienes listas guardadas</h3>
         <p>
@@ -89,6 +114,7 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
           Crear Primera Lista
         </button>
       </div>
+      }
     </div>
 
     <app-confirm-modal
@@ -105,6 +131,14 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
       (closed)="closeAlert()"
     >
     </app-alert-modal>
+
+    <app-modal
+      [isVisible]="showRenameModal"
+      [data]="renameModalData"
+      (confirmed)="renameList($event)"
+      (closed)="closeRenameModal()"
+    >
+    </app-modal>
   `,
   styleUrls: ['./home.component.css'],
 })
@@ -125,6 +159,13 @@ export class HomeComponent implements OnInit {
   showAlertModal = false;
   /** Datos para el modal de alerta */
   alertModalData: AlertData | null = null;
+
+  /** Controla la visibilidad del modal de renombrar */
+  showRenameModal = false;
+  /** Datos para el modal de renombrar */
+  renameModalData: ModalData | null = null;
+  /** Lista que se renombrará */
+  listToRename: SavedList | null = null;
 
   constructor(
     private router: Router,
@@ -260,5 +301,50 @@ export class HomeComponent implements OnInit {
     return list.tasksCount > 0
       ? (list.completedCount / list.tasksCount) * 100
       : 0;
+  }
+
+  /**
+   * Muestra el modal para renombrar una lista
+   * @param list Lista que se desea renombrar
+   */
+  openRenameModal(list: SavedList): void {
+    this.listToRename = list;
+    this.renameModalData = {
+      title: 'Renombrar Lista',
+      label: 'Nuevo nombre de la lista:',
+      placeholder: 'Nombre de la lista...',
+      currentValue: list.name || '',
+    };
+    this.showRenameModal = true;
+  }
+
+  /**
+   * Renombra la lista con el nuevo nombre proporcionado
+   * @param newName Nuevo nombre para la lista
+   */
+  renameList(newName: string): void {
+    if (!this.listToRename || !newName.trim()) {
+      this.closeRenameModal();
+      return;
+    }
+
+    try {
+      this.storageService.renameList(this.listToRename.id, newName.trim());
+      this.toastService.showAlert(`Lista renombrada a "${newName}"`, 'success');
+      this.loadSavedLists(); // Recargar las listas para reflejar el cambio
+      this.closeRenameModal();
+    } catch (error) {
+      console.error('Error renaming list:', error);
+      this.toastService.showAlert('Error al renombrar la lista', 'danger');
+    }
+  }
+
+  /**
+   * Cierra el modal de renombrar y limpia los datos relacionados
+   */
+  closeRenameModal(): void {
+    this.showRenameModal = false;
+    this.renameModalData = null;
+    this.listToRename = null;
   }
 }

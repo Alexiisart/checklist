@@ -12,13 +12,11 @@ export interface ToastData {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div
-      *ngIf="isVisible"
-      class="alert alert-{{ data?.type || 'info' }}"
-      [@slideIn]
-    >
+    @if (isVisible) {
+    <div class="alert alert-{{ data?.type || 'info' }}" [@slideIn]>
       {{ data?.message }}
     </div>
+    }
   `,
   styles: [
     `

@@ -8,11 +8,11 @@ export interface Subtask {
 }
 
 /**
- * Interfaz que representa un error asociado a una tarea
+ * Interfaz que representa un problema que ocurrió al realizar una tarea
  */
 export interface TaskError {
-  id: number; // Identificador único del error
-  name: string; // Descripción del error
+  id: number; // Identificador único del problema
+  name: string; // Descripción del problema que ocurrió al realizar la tarea
 }
 
 /**
@@ -23,7 +23,7 @@ export interface Task {
   name: string; // Nombre o descripción de la tarea
   completed: boolean; // Estado de completado de la tarea
   subtasks: Subtask[]; // Lista de subtareas asociadas
-  errors: TaskError[]; // Lista de errores asociados
+  errors: TaskError[]; // Lista de problemas que ocurrieron al realizar la tarea
 }
 
 /**

@@ -1,44 +1,80 @@
 # 📖 Documentación Técnica - Checklist Diario
 
+> Documentación técnica completa de la aplicación Angular para gestión de checklists
+
+[![Angular](https://img.shields.io/badge/Angular-18+-red.svg)](https://angular.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue.svg)](https://www.typescriptlang.org/)
+[![RxJS](https://img.shields.io/badge/RxJS-7.8+-purple.svg)](https://rxjs.dev/)
+[![Standalone Components](https://img.shields.io/badge/Standalone%20Components-✓-green.svg)]()
+
 ## 🏗️ Arquitectura del Sistema
 
 ### Patrón de Diseño Principal
 
-La aplicación sigue el patrón **Angular Standalone Components** con arquitectura modular:
+La aplicación implementa **Clean Architecture** con **Angular Standalone Components** y separación clara de responsabilidades:
 
 ```
-┌─────────────────────────────────────────┐
-│              Presentation Layer          │
-├─────────────────────────────────────────┤
-│ Components (Pages & Shared)             │
-│ ├── home.component                      │
-│ ├── new-list.component                  │
-│ ├── checklist.component                 │
-│ └── shared/                             │
-│     ├── header.component                │
-│     ├── modal.component                 │
-│     ├── alert-modal.component           │
-│     ├── confirm-modal.component         │
-│     └── task-item.component             │
-├─────────────────────────────────────────┤
-│              Business Logic Layer        │
-├─────────────────────────────────────────┤
-│ Services                                │
-│ ├── checklist.service                   │
-│ ├── storage.service                     │
-│ ├── theme.service                       │
-│ └── pdf-export.service                  │
-├─────────────────────────────────────────┤
-│              Data Layer                  │
-├─────────────────────────────────────────┤
-│ Models & Interfaces                     │
-│ └── task.interface                      │
-├─────────────────────────────────────────┤
-│              Storage Layer               │
-├─────────────────────────────────────────┤
-│ LocalStorage (Browser API)              │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                       │
+├─────────────────────────────────────────────────────────────┤
+│ Components (Pages & Shared)                                 │
+│ ├── pages/                                                  │
+│ │   ├── home.component          # Lista de checklists      │
+│ │   ├── new-list.component      # Creación de listas       │
+│ │   └── checklist.component     # Vista principal          │
+│ └── shared/components/                                      │
+│     ├── header.component        # Navegación global        │
+│     ├── footer.component        # Información de pie       │
+│     ├── modal.component         # Modal reutilizable       │
+│     ├── task-item.component     # Item de tarea            │
+│     └── toast.component         # Notificaciones           │
+├─────────────────────────────────────────────────────────────┤
+│                    APPLICATION LAYER                        │
+├─────────────────────────────────────────────────────────────┤
+│ Services & State Management                                 │
+│ ├── checklist.service          # Lógica de negocio        │
+│ ├── checklist-state.service    # Estado del componente     │
+│ ├── storage.service            # Persistencia de datos     │
+│ ├── theme.service              # Gestión de temas          │
+│ ├── pdf-export.service         # Exportación de archivos   │
+│ └── toast.service              # Sistema notificaciones    │
+├─────────────────────────────────────────────────────────────┤
+│                      DOMAIN LAYER                           │
+├─────────────────────────────────────────────────────────────┤
+│ Models & Interfaces                                         │
+│ ├── task.interface             # Modelo de datos           │
+│ ├── checklist.interface        # Estructura de checklist   │
+│ └── types/                     # Tipos auxiliares          │
+├─────────────────────────────────────────────────────────────┤
+│                   INFRASTRUCTURE LAYER                      │
+├─────────────────────────────────────────────────────────────┤
+│ External Services & APIs                                    │
+│ ├── LocalStorage               # Almacenamiento local       │
+│ ├── jsPDF                      # Generación PDF             │
+│ └── Browser APIs               # APIs nativas del navegador │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Principios Arquitectónicos
+
+#### 🎯 **Separation of Concerns**
+
+- **Componentes**: Solo responsables de la UI y la interacción
+- **Servicios**: Lógica de negocio e integración con APIs
+- **Modelos**: Definición de estructuras de datos
+- **Guards**: Protección de rutas y validaciones
+
+#### 🔄 **Reactive Programming**
+
+- **RxJS Observables**: Para gestión de estado asíncrono
+- **BehaviorSubjects**: Para estado compartido entre componentes
+- **Operators**: Para transformación y filtrado de datos
+
+#### 📦 **Modular Architecture**
+
+- **Standalone Components**: Eliminación de NgModules
+- **Lazy Loading**: Carga bajo demanda de componentes
+- **Tree Shaking**: Optimización automática del bundle
 
 ## 🔧 Servicios Principales
 
@@ -46,37 +82,83 @@ La aplicación sigue el patrón **Angular Standalone Components** con arquitectu
 
 **Responsabilidades:**
 
-- Estado global de la aplicación
-- Lógica de negocio de tareas
-- Operaciones CRUD
-- Auto-guardado
+- 🎯 Estado global de la aplicación
+- 💼 Lógica de negocio de tareas
+- 🔄 Operaciones CRUD completas
+- 💾 Auto-guardado inteligente
+- 📊 Cálculo de progreso en tiempo real
 
 **API Pública:**
 
 ```typescript
-interface ChecklistService {
-  // Observables de estado
+@Injectable({
+  providedIn: "root",
+})
+export class ChecklistService {
+  // 📡 Observables de estado reactivo
   currentList$: Observable<ChecklistData | null>;
   hasUnsavedChanges$: Observable<boolean>;
+  progress$: Observable<ProgressData>;
 
-  // Gestión de listas
+  // 🆕 Gestión de listas
   createNewList(taskNames: string[]): ChecklistData;
   loadCurrentProgress(): void;
   clearCurrentList(): void;
+  loadListById(listId: string): ChecklistData | null;
 
-  // Operaciones de tareas
+  // ✅ Operaciones de tareas
   toggleTask(taskId: string): void;
-  addSubtask(taskId: string, subtaskText: string): void;
-  addError(taskId: string, errorText: string): void;
+  addTask(taskName: string): void;
   editTask(taskId: string, newText: string): void;
   deleteTask(taskId: string): void;
+  reorderTasks(oldIndex: number, newIndex: number): void;
 
-  // Observaciones
+  // 📋 Gestión de subtareas
+  addSubtask(taskId: string, subtaskText: string): void;
+  toggleSubtask(taskId: string, subtaskId: string): void;
+  editSubtask(taskId: string, subtaskId: string, newText: string): void;
+  deleteSubtask(taskId: string, subtaskId: string): void;
+
+  // 🚨 Gestión de errores
+  addError(taskId: string, errorText: string): void;
+  editError(taskId: string, errorId: string, newText: string): void;
+  deleteError(taskId: string, errorId: string): void;
+
+  // 📝 Observaciones
   updateObservations(observations: string): void;
 
-  // Persistencia
+  // 💾 Persistencia
   saveProgress(): void;
   saveList(listName: string): string;
+  exportToJSON(): string;
+  importFromJSON(jsonData: string): boolean;
+}
+
+// 📊 Interfaces de datos
+interface ChecklistData {
+  id: string;
+  name?: string;
+  tasks: Task[];
+  observations: string;
+  createdAt: Date;
+  updatedAt: Date;
+  metadata: {
+    totalTasks: number;
+    completedTasks: number;
+    totalSubtasks: number;
+    completedSubtasks: number;
+    errorCount: number;
+  };
+}
+
+interface Task {
+  id: string;
+  name: string;
+  completed: boolean;
+  subtasks: Subtask[];
+  errors: TaskError[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
@@ -84,83 +166,260 @@ interface ChecklistService {
 
 **Responsabilidades:**
 
-- Interfaz con localStorage
-- Gestión de límites de almacenamiento
-- Serialización/deserialización
-- Generación de IDs únicos
+- 🗄️ Interfaz robusta con localStorage
+- 📊 Gestión inteligente de límites de almacenamiento
+- 🔄 Serialización/deserialización segura
+- 🆔 Generación de IDs únicos
+- 🛡️ Validación y migración de datos
 
-**Funciones Principales:**
+**API Completa:**
 
 ```typescript
-/**
- * Guarda los datos del checklist actual
- * @param data - Datos del checklist a guardar
- */
-saveChecklistData(data: ChecklistData): void
+@Injectable({
+  providedIn: "root",
+})
+export class StorageService {
+  // 🔧 Configuración
+  private readonly STORAGE_KEYS = {
+    CURRENT_LIST: "checklist_data",
+    SAVED_LISTS_INDEX: "saved_lists",
+    THEME_PREFERENCE: "theme_preference",
+    APP_CONFIG: "app_config",
+  } as const;
 
-/**
- * Carga los datos del checklist actual
- * @returns Datos del checklist o null si no existe
- */
-loadChecklistData(): ChecklistData | null
+  private readonly MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  private readonly WARNING_THRESHOLD = 0.8; // 80%
 
-/**
- * Guarda una lista nombrada permanentemente
- * @param id - ID único de la lista
- * @param data - Datos de la lista
- * @param name - Nombre de la lista
- */
-saveNamedList(id: string, data: ChecklistData, name: string): void
+  // 📋 Gestión de checklist actual
+  saveChecklistData(data: ChecklistData): void;
+  loadChecklistData(): ChecklistData | null;
+  clearChecklistData(): void;
+  hasCurrentChecklist(): boolean;
 
-/**
- * Calcula el uso actual del almacenamiento
- * @returns Porcentaje de uso (0-100)
- */
-getStorageUsage(): number
+  // 🗂️ Gestión de listas guardadas
+  saveNamedList(data: ChecklistData, name: string): string;
+  loadNamedList(listId: string): ChecklistData | null;
+  deleteNamedList(listId: string): boolean;
+  getAllSavedLists(): SavedListSummary[];
+  updateListMetadata(listId: string, updates: Partial<ListMetadata>): void;
+
+  // 📊 Análisis de almacenamiento
+  getStorageUsage(): StorageUsageInfo;
+  isStorageNearLimit(): boolean;
+  getStorageStats(): StorageStats;
+  cleanupOldData(maxAge: number): number; // Retorna items eliminados
+
+  // 🔧 Utilidades
+  generateUniqueId(): string;
+  exportAllData(): string;
+  importAllData(jsonData: string): ImportResult;
+  validateStorageIntegrity(): ValidationResult;
+  migrateDataIfNeeded(): MigrationResult;
+
+  // 🛡️ Manejo de errores
+  isStorageAvailable(): boolean;
+  handleStorageError(error: Error): void;
+  getStorageErrorInfo(): StorageErrorInfo | null;
+}
+
+// 📊 Interfaces de datos
+interface StorageUsageInfo {
+  used: number; // Bytes utilizados
+  total: number; // Límite total
+  percentage: number; // Porcentaje de uso
+  isNearLimit: boolean;
+  remainingSpace: number;
+}
+
+interface SavedListSummary {
+  id: string;
+  name: string;
+  taskCount: number;
+  completedCount: number;
+  errorCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  size: number; // Tamaño en bytes
+}
+
+interface ImportResult {
+  success: boolean;
+  importedLists: number;
+  skippedLists: number;
+  errors: string[];
+}
 ```
 
 ### ThemeService
 
 **Responsabilidades:**
 
-- Gestión del tema claro/oscuro
-- Persistencia de preferencias
-- Detección de tema del sistema
+- 🎨 Gestión completa del tema claro/oscuro
+- 💾 Persistencia de preferencias del usuario
+- 🔍 Detección automática del tema del sistema
+- 🔄 Sincronización con cambios del sistema
+- ⚡ Aplicación instantánea de temas
 
 ```typescript
-/**
- * Inicializa el servicio de temas
- * Detecta preferencias del usuario o del sistema
- */
-initializeTheme(): void
+@Injectable({
+  providedIn: "root",
+})
+export class ThemeService {
+  // 📡 Estado reactivo del tema
+  currentTheme$: Observable<ThemeType>;
+  isSystemTheme$: Observable<boolean>;
 
-/**
- * Cambia entre tema claro y oscuro
- */
-toggleTheme(): void
+  /**
+   * 🚀 Inicializa el servicio de temas
+   * Detecta preferencias del usuario o del sistema
+   */
+  initializeTheme(): void;
 
-/**
- * Establece un tema específico
- * @param theme - 'light' o 'dark'
- */
-setTheme(theme: 'light' | 'dark'): void
+  /**
+   * 🔄 Cambia entre tema claro y oscuro
+   */
+  toggleTheme(): void;
+
+  /**
+   * 🎨 Establece un tema específico
+   * @param theme - 'light' | 'dark' | 'system'
+   */
+  setTheme(theme: ThemeType): void;
+
+  /**
+   * 🔍 Obtiene el tema actual
+   * @returns Tema activo actual
+   */
+  getCurrentTheme(): ThemeType;
+
+  /**
+   * 🌟 Detecta si el sistema soporta tema oscuro
+   */
+  isSystemDarkModeSupported(): boolean;
+
+  /**
+   * 👁️ Observa cambios en el tema del sistema
+   */
+  watchSystemThemeChanges(): Observable<boolean>;
+
+  /**
+   * 🧩 Aplica el tema al DOM
+   * @param theme - Tema a aplicar
+   */
+  private applyThemeToDOM(theme: ThemeType): void;
+}
+
+// 🎨 Tipos de tema
+type ThemeType = "light" | "dark" | "system";
+
+interface ThemeConfig {
+  type: ThemeType;
+  appliedTheme: "light" | "dark";
+  isSystemDefault: boolean;
+  timestamp: Date;
+}
 ```
 
 ### PdfExportService
 
 **Responsabilidades:**
 
-- Generación de PDF para impresión
-- Formateo del contenido
-- Estilos de impresión
+- 📄 Generación profesional de PDF para impresión
+- 🎨 Formateo avanzado del contenido
+- 📊 Estilos optimizados para impresión
+- 📈 Inclusión de gráficos de progreso
+- 🔧 Configuración personalizable
 
 ```typescript
-/**
- * Exporta el checklist actual a PDF
- * @param data - Datos del checklist
- * @param listName - Nombre del checklist
- */
-exportToPdf(data: ChecklistData, listName?: string): void
+@Injectable({
+  providedIn: "root",
+})
+export class PdfExportService {
+  /**
+   * 📄 Exporta el checklist actual a PDF
+   * @param data - Datos del checklist
+   * @param options - Opciones de exportación
+   */
+  exportToPdf(data: ChecklistData, options?: PdfExportOptions): void;
+
+  /**
+   * 🎨 Genera vista previa del PDF
+   * @param data - Datos del checklist
+   * @returns URL de la vista previa
+   */
+  generatePreview(data: ChecklistData): string;
+
+  /**
+   * ⚙️ Configura opciones por defecto
+   * @param options - Nuevas opciones por defecto
+   */
+  setDefaultOptions(options: Partial<PdfExportOptions>): void;
+}
+
+interface PdfExportOptions {
+  fileName?: string;
+  includeProgress: boolean;
+  includeObservations: boolean;
+  includeErrors: boolean;
+  pageFormat: "A4" | "Letter";
+  orientation: "portrait" | "landscape";
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+}
+```
+
+### ToastService
+
+**Responsabilidades:**
+
+- 🔔 Sistema de notificaciones no intrusivas
+- 🎯 Diferentes tipos de mensajes (éxito, error, info, warning)
+- ⏰ Gestión automática de tiempo de vida
+- 📱 Soporte para múltiples notificaciones
+- 🎨 Animaciones suaves
+
+```typescript
+@Injectable({
+  providedIn: "root",
+})
+export class ToastService {
+  // 📡 Observable de notificaciones activas
+  toasts$: Observable<Toast[]>;
+
+  /**
+   * ✅ Muestra notificación de éxito
+   */
+  showSuccess(message: string, options?: ToastOptions): void;
+
+  /**
+   * ❌ Muestra notificación de error
+   */
+  showError(message: string, options?: ToastOptions): void;
+
+  /**
+   * ℹ️ Muestra notificación informativa
+   */
+  showInfo(message: string, options?: ToastOptions): void;
+
+  /**
+   * ⚠️ Muestra notificación de advertencia
+   */
+  showWarning(message: string, options?: ToastOptions): void;
+
+  /**
+   * 🗑️ Elimina una notificación específica
+   */
+  dismissToast(toastId: string): void;
+
+  /**
+   * 🧹 Limpia todas las notificaciones
+   */
+  clearAll(): void;
+}
 ```
 
 ## 📱 Componentes de UI

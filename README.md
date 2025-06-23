@@ -13,7 +13,7 @@
 
 - 📝 **Creación rápida**: Escribe tareas separadas por comas y genera tu checklist instantáneamente
 - ✅ **Sistema de subtareas**: Cada tarea puede tener múltiples subtareas con seguimiento independiente
-- 🚨 **Registro de errores**: Documenta problemas específicos por tarea para seguimiento detallado
+- 🚨 **Registro de errores**: Documenta errores encontrados durante la ejecución de cada tarea para seguimiento detallado
 - 🎯 **Progreso visual**: Barras de progreso animadas que muestran el avance en tiempo real
 - 📝 **Observaciones**: Campo libre para notas adicionales del día
 
@@ -184,7 +184,7 @@ src/
 #### Agregar Elementos
 
 - **Subtarea**: Botón "➕ Subtarea" → Modal para escribir
-- **Error**: Botón "🚨 Error" → Modal para describir problema
+- **Error**: Botón "🚨 Error" → Modal para documentar errores encontrados durante la ejecución de la tarea
 
 #### Editar Contenido
 

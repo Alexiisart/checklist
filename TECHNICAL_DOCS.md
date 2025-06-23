@@ -119,7 +119,7 @@ export class ChecklistService {
   editSubtask(taskId: string, subtaskId: string, newText: string): void;
   deleteSubtask(taskId: string, subtaskId: string): void;
 
-  // 🚨 Gestión de errores
+  // 🚨 Gestión de errores (errores encontrados durante la ejecución)
   addError(taskId: string, errorText: string): void;
   editError(taskId: string, errorId: string, newText: string): void;
   deleteError(taskId: string, errorId: string): void;

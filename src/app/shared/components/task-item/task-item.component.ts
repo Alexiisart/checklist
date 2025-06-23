@@ -46,9 +46,10 @@ import { ModalComponent } from '../modal/modal.component';
         <button
           class="add-error-btn"
           (click)="showAddError()"
-          title="Agregar error"
+          title="Documentar problemas que ocurrieron al realizar esta tarea"
         >
-          <span class="material-icons-outlined">warning</span> Error
+          <span class="material-icons-outlined">warning</span> Documentar
+          problema
         </button>
       </div>
 
@@ -88,7 +89,7 @@ import { ModalComponent } from '../modal/modal.component';
           <button
             class="edit-error-btn"
             (click)="editError(error)"
-            title="Editar error"
+            title="Editar problema que ocurrió al realizar la tarea"
           >
             <span class="material-icons-outlined">edit</span>
           </button>
@@ -142,19 +143,19 @@ export class TaskItemComponent {
     newName: string;
   }>();
 
-  /** Evento emitido cuando se agrega un nuevo error */
+  /** Evento emitido cuando se documenta un problema que ocurrió al realizar la tarea */
   @Output() errorAdded = new EventEmitter<{
     taskId: number;
     description: string;
   }>();
 
-  /** Evento emitido cuando se elimina un error */
+  /** Evento emitido cuando se elimina un problema documentado */
   @Output() errorRemoved = new EventEmitter<{
     taskId: number;
     errorId: number;
   }>();
 
-  /** Evento emitido cuando se actualiza un error */
+  /** Evento emitido cuando se actualiza un problema documentado */
   @Output() errorUpdated = new EventEmitter<{
     taskId: number;
     errorId: number;
@@ -253,29 +254,29 @@ export class TaskItemComponent {
   }
 
   /**
-   * Muestra el modal para agregar un nuevo error
+   * Muestra el modal para documentar un problema que ocurrió al realizar la tarea
    */
   showAddError(): void {
     this.currentAction = 'add-error';
     this.modalData = {
-      title: 'Reportar Error',
-      label: 'Descripción del error:',
+      title: 'Documentar Problema',
+      label: 'Describe qué problema ocurrió al realizar esta tarea:',
       placeholder:
-        'Ejemplo: Sistema lento, Falta información, Error de conexión...',
+        'Ejemplo: Cliente no disponible, Faltan documentos, No se pudo acceder al sistema, Información incompleta...',
     };
     this.showModal = true;
   }
 
   /**
-   * Muestra el modal para editar un error existente
+   * Muestra el modal para editar un problema que ocurrió al realizar la tarea
    * @param error Error que se va a editar
    */
   editError(error: TaskError): void {
     this.currentAction = 'edit-error';
     this.currentError = error;
     this.modalData = {
-      title: 'Editar Error',
-      label: 'Descripción del error:',
+      title: 'Editar Problema',
+      label: 'Describe qué problema ocurrió al realizar esta tarea:',
       placeholder: error.name,
       currentValue: error.name,
     };

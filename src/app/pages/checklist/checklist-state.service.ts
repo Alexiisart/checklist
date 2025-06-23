@@ -362,7 +362,7 @@ export class ChecklistStateService implements OnDestroy {
 
     if (saved) {
       this.updateState({ hasUnsavedChanges: false });
-      this.toastService.showAlert('Progreso guardado', 'success', 2000);
+      this.toastService.showAlert('Lista actualizada', 'success', 2000);
     } else {
       this.toastService.showAlert('Error al guardar', 'danger');
     }

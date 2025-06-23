@@ -79,10 +79,6 @@
   }
 }
 
-.tasks-container {
-  margin-bottom: 30px;
-}
-
 .observations-section {
   background: var(--bg-card);
   border: 1px solid var(--border-color);

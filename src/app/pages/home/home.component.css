@@ -11,6 +11,12 @@
   margin-bottom: var(--space-8);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .home-header h2 {
   margin: 0;
   font-size: 1.875rem;

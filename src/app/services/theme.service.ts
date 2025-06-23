@@ -20,18 +20,16 @@ export class ThemeService {
 
   /**
    * Inicializa el tema de la aplicación.
-   * Verifica si hay un tema guardado en localStorage o usa la preferencia del sistema.
+   * Usa tema claro por defecto, o el tema guardado en localStorage.
    */
   private initTheme(): void {
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
 
     if (savedTheme) {
       this.setTheme(savedTheme === 'dark');
     } else {
-      this.setTheme(prefersDark);
+      // Usar tema claro por defecto
+      this.setTheme(false);
     }
   }
 

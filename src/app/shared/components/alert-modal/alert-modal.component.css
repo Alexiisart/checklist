@@ -1,0 +1,38 @@
+@import "../modal/modal.component.css";
+
+.modal-content.success .modal-header {
+  border-bottom-color: var(--success-color);
+  border-bottom-width: 1px;
+}
+
+.modal-content.warning .modal-header {
+  border-bottom-color: var(--warning-color);
+  border-bottom-width: 1px;
+}
+
+.modal-content.danger .modal-header {
+  border-bottom-color: var(--danger-color);
+  border-bottom-width: 1px;
+}
+
+.modal-content.info .modal-header {
+  border-bottom-color: var(--info-color);
+  border-bottom-width: 1px;
+}
+
+.modal-content.success .close-modal-btn,
+.modal-content.success .primary-btn {
+  color: var(--success-color);
+  border-width: 1px;
+}
+
+.modal-content.success .close-modal-btn:hover,
+.modal-content.success .primary-btn:hover {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.modal-body p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}

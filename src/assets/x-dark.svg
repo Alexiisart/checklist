@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17.12 17.1">
+  <!-- Generator: Adobe Illustrator 29.6.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 207)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #afc5d1;
+      }
+
+      .st1 {
+        fill: none;
+      }
+
+      .st2 {
+        isolation: isolate;
+      }
+
+      .st3 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="st1" width="17.12" height="17.1"/>
+    </clipPath>
+  </defs>
+  <g id="Grupo_60" class="st2">
+    <g id="Grupo_39">
+      <g class="st3">
+        <g id="Grupo_38">
+          <path id="Trazado_11" class="st0" d="M0,.63l3.64,4.96s3.85-.44,4.91,2.96v-2.82L5.02.62H0Z"/>
+          <path id="Trazado_12" class="st0" d="M16.48,0l-4.96,3.64s.44,3.85-2.96,4.91h2.81l5.12-3.53V0Z"/>
+          <path id="Trazado_13" class="st0" d="M17.12,16.48l-3.64-4.96s-3.85.44-4.91-2.96v2.82l3.53,5.12h5.03Z"/>
+          <path id="Trazado_14" class="st0" d="M.64,17.1l4.96-3.64s-.44-3.85,2.96-4.91h-2.82L.63,12.08v5.02Z"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

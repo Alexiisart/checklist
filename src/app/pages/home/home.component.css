@@ -1,0 +1,222 @@
+.home-screen {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+}
+
+.home-header h2 {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
+}
+
+.saved-lists-container {
+  border: 1px solid var(--color-border);
+  padding: var(--space-8);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.list-card {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.list-card:hover {
+  border-color: var(--color-border-focus);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.list-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.list-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+}
+
+.list-card-date {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.list-card-preview {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.list-card-stats {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.list-card-progress {
+  background: var(--neutral-200);
+  border-radius: var(--radius-sm);
+  height: 4px;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.list-card-progress-bar {
+  background: var(--primary-600);
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.delete-list-btn {
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-list-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.storage-indicator {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-xs);
+}
+
+.storage-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.storage-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.storage-progress {
+  background: var(--neutral-200);
+  border-radius: var(--radius-sm);
+  height: 6px;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.storage-progress-fill {
+  background: var(--color-warning);
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.storage-warning {
+  margin: 8px 0 0 0;
+  font-size: 0.875rem;
+  color: var(--warning-color);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .saved-lists-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .home-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .home-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .list-card {
+    padding: 16px;
+  }
+
+  .list-card-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}

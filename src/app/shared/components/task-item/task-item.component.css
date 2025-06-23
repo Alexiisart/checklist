@@ -1,0 +1,303 @@
+.task-item {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-xs);
+}
+
+.task-item.completed {
+  opacity: 0.7;
+  background: var(--color-surface);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.task-checkbox {
+  margin: 0;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.task-title {
+  flex: 1;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  min-width: 150px;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.subtask-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+}
+
+.subtask-btn:hover {
+  background: var(--color-border-focus);
+  color: white;
+  border-color: var(--color-border-focus);
+}
+
+.subtasks-label,
+.errors-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+.subtasks-container,
+.errors-container {
+  margin-left: 24px;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+
+.subtask-checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+
+.subtask-text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.subtask-text.completed {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.error-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(220, 53, 69, 0.1);
+  border-left: 1px solid var(--color-error);
+}
+
+.error-text {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--color-error);
+}
+
+.remove-error-btn,
+.remove-subtask-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+}
+
+.remove-error-btn:hover,
+.remove-subtask-btn:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.add-error-btn {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-error);
+}
+
+.add-error-btn:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.edit-task-btn,
+.edit-subtask-btn,
+.edit-error-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.edit-task-btn:hover,
+.edit-subtask-btn:hover,
+.edit-error-btn:hover {
+  background: var(--primary-600);
+  color: white;
+}
+
+.delete-task-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.delete-task-btn:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+/* Estilos de impresión para task-items */
+@media print {
+  .task-item {
+    border: 1px solid #ddd !important;
+    background: white !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10px !important;
+    padding: 10px !important;
+  }
+
+  .task-item.completed {
+    background: #f0f0f0 !important;
+  }
+
+  .task-item.completed .task-title {
+    text-decoration: none !important;
+    color: #2d3436 !important;
+    font-weight: 600;
+  }
+
+  .task-item.completed .task-title::after {
+    content: " ✓";
+    color: #28a745;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .subtasks-label,
+  .errors-label {
+    font-weight: bold !important;
+    margin-top: 8px !important;
+    margin-bottom: 4px !important;
+    font-size: 0.85rem !important;
+    color: #333 !important;
+    padding-left: 20px !important;
+  }
+
+  .subtask-item,
+  .error-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 4px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .subtask-item .subtask-text.completed {
+    text-decoration: none !important;
+    color: #2d3436 !important;
+    font-weight: 500;
+  }
+
+  .subtask-item .subtask-text.completed::after {
+    content: " ✓";
+    color: #28a745;
+    font-weight: bold;
+    margin-left: 6px;
+  }
+
+  .error-item {
+    background: #ffe6e6 !important;
+    border: 1px solid #ffcccc !important;
+    color: #721c24 !important;
+  }
+
+  /* Ocultar elementos de interacción en impresión */
+  .subtask-btn,
+  .remove-error-btn,
+  .add-error-btn,
+  .edit-task-btn,
+  .edit-subtask-btn,
+  .edit-error-btn,
+  .delete-task-btn,
+  .task-checkbox,
+  .subtask-checkbox {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .task-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .task-title {
+    min-width: auto;
+    order: -1;
+  }
+
+  .task-checkbox {
+    align-self: flex-start;
+  }
+
+  .subtask-btn,
+  .add-error-btn {
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .subtasks-container,
+  .errors-container {
+    margin-left: 0;
+  }
+}

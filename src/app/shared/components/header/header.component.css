@@ -1,0 +1,129 @@
+.header {
+  text-align: center;
+  margin-bottom: var(--space-10);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+
+.header-text {
+  flex: 1;
+  text-align: center;
+}
+
+.spacer {
+  min-width: 44px;
+}
+
+.theme-toggle {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  box-shadow: var(--shadow-xs);
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-border-focus);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle .material-icons-outlined {
+  margin: 0;
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  transition: color 0.3s ease;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.main-logo {
+  width: 100px;
+  height: auto;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-logo:hover {
+  transform: scale(1.05);
+}
+
+.sub-logo {
+  width: 100px;
+  height: auto;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sub-logo:hover {
+  transform: scale(1.02);
+}
+
+.logo-text h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .logo-container {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .main-logo {
+    width: 50px;
+    height: 33px;
+  }
+
+  .logo-text h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .theme-toggle {
+    padding: var(--space-2);
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .spacer {
+    min-width: 40px;
+  }
+}

@@ -1,0 +1,109 @@
+<div class="checklist-section">
+  <div class="section-header">
+    <h2>Mi Checklist</h2>
+    <div class="header-buttons">
+      <button class="secondary-btn" (click)="goHome()">
+        <span class="material-icons-outlined">home</span> Inicio
+      </button>
+      <button
+        class="secondary-btn"
+        (click)="saveProgress()"
+        title="Guardar progreso automáticamente"
+      >
+        <span class="material-icons-outlined">save</span> Guardar
+      </button>
+      <button class="secondary-btn" (click)="editMode()">
+        <span class="material-icons-outlined">edit</span> Editar Lista
+      </button>
+    </div>
+  </div>
+
+  <!-- Indicador de progreso -->
+  <div class="progress-section" *ngIf="currentList">
+    <div class="progress-text">
+      Progreso: {{ progress.completed }} de {{ progress.total }} tareas
+      completadas
+    </div>
+    <div class="progress-indicator">
+      <div class="progress-bar" [style.width.%]="progress.percentage"></div>
+    </div>
+  </div>
+
+  <!-- Contenedor de tareas -->
+  <div class="tasks-container" *ngIf="currentList">
+    <app-task-item
+      *ngFor="let task of currentList.tasks"
+      [task]="task"
+      (taskToggled)="onTaskToggled($event)"
+      (subtaskToggled)="onSubtaskToggled($event)"
+      (subtaskAdded)="onSubtaskAdded($event)"
+      (subtaskRemoved)="onSubtaskRemoved($event)"
+      (subtaskUpdated)="onSubtaskUpdated($event)"
+      (errorAdded)="onErrorAdded($event)"
+      (errorRemoved)="onErrorRemoved($event)"
+      (errorUpdated)="onErrorUpdated($event)"
+      (taskUpdated)="onTaskUpdated($event)"
+      (taskDeleted)="onTaskDeleted($event)"
+    >
+    </app-task-item>
+  </div>
+
+  <!-- Sección de observaciones -->
+  <div class="observations-section" *ngIf="currentList">
+    <label for="observations">Observaciones del día:</label>
+    <textarea
+      id="observations"
+      [(ngModel)]="currentList.observations"
+      (input)="onObservationsChange()"
+      placeholder="Notas adicionales, comentarios importantes..."
+      rows="4"
+    >
+    </textarea>
+  </div>
+
+  <!-- Acciones -->
+  <div class="actions" *ngIf="currentList">
+    <button class="export-btn" (click)="exportToPDF()">
+      <span class="material-icons-outlined">picture_as_pdf</span> Exportar PDF
+    </button>
+    <button class="secondary-btn" (click)="confirmStartNewList()">
+      <span class="material-icons-outlined">add_circle_outline</span> Comenzar
+      lista nueva
+    </button>
+  </div>
+</div>
+
+<!-- Modal para editar lista -->
+<app-modal
+  [isVisible]="showEditModal"
+  [data]="editModalData"
+  (confirmed)="onEditConfirm($event)"
+  (closed)="closeEditModal()"
+>
+</app-modal>
+
+<!-- Modal para guardar -->
+<app-modal
+  [isVisible]="showSaveModalDialog"
+  [data]="saveModalData"
+  (confirmed)="onSaveConfirm($event)"
+  (closed)="closeSaveModal()"
+>
+</app-modal>
+
+<!-- Modal de confirmación -->
+<app-confirm-modal
+  [isVisible]="showConfirmModal"
+  [data]="confirmModalData"
+  (confirmed)="onConfirmAction()"
+  (cancelled)="onCancelAction()"
+>
+</app-confirm-modal>
+
+<!-- Modal de alerta -->
+<app-alert-modal
+  [isVisible]="showAlertModal"
+  [data]="alertModalData"
+  (closed)="closeAlert()"
+>
+</app-alert-modal>

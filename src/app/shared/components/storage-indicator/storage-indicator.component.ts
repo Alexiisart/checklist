@@ -35,7 +35,7 @@ import { Subject, takeUntil, interval } from 'rxjs';
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
         padding: 16px;
-        z-index: 1000;
+        z-index: 10;
         min-width: 220px;
         font-size: 0.875rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

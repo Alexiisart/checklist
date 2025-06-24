@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { ChecklistService } from '../checklist.service';
-import { UuidService } from '../uuid.service';
-import { StorageService } from '../storage.service';
-import { ToastService } from '../toast.service';
+import { ChecklistService } from '../../checklist.service';
+import { UuidService } from '../../uuid.service';
+import { StorageService } from '../../storage.service';
+import { ToastService } from '../../toast.service';
 import {
   SavedList,
   ChecklistData,
   ConfirmData,
-} from '../../models/task.interface';
+} from '../../../models/task.interface';
 import { BehaviorSubject } from 'rxjs';
 
 /**

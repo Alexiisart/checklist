@@ -111,8 +111,8 @@
 
   <!-- Modal para editar lista -->
   <app-modal
-    [isVisible]="showEditModal"
-    [data]="editModalData"
+    [isVisible]="(showEditModal$ | async) ?? false"
+    [data]="editModalData$ | async"
     (confirmed)="onEditConfirm($event)"
     (closed)="closeEditModal()"
   >
@@ -120,17 +120,26 @@
 
   <!-- Modal para guardar -->
   <app-modal
-    [isVisible]="showSaveModalDialog"
-    [data]="saveModalData"
+    [isVisible]="(showSaveModal$ | async) ?? false"
+    [data]="saveModalData$ | async"
     (confirmed)="onSaveConfirm($event)"
     (closed)="closeSaveModal()"
   >
   </app-modal>
 
-  <!-- Modal de confirmación -->
+  <!-- Modal de confirmación para tareas -->
   <app-confirm-modal
-    [isVisible]="showConfirmModal"
-    [data]="confirmModalData"
+    [isVisible]="(taskShowConfirmModal$ | async) ?? false"
+    [data]="taskConfirmModalData$ | async"
+    (confirmed)="confirmTaskDeletion()"
+    (cancelled)="cancelTaskDeletion()"
+  >
+  </app-confirm-modal>
+
+  <!-- Modal de confirmación para navegación -->
+  <app-confirm-modal
+    [isVisible]="(navigationShowConfirmModal$ | async) ?? false"
+    [data]="navigationConfirmModalData$ | async"
     (confirmed)="onConfirmAction()"
     (cancelled)="onCancelAction()"
   >
@@ -138,8 +147,8 @@
 
   <!-- Modal de alerta -->
   <app-alert-modal
-    [isVisible]="showAlertModal"
-    [data]="alertModalData"
+    [isVisible]="(showAlertModal$ | async) ?? false"
+    [data]="alertModalData$ | async"
     (closed)="closeAlert()"
   >
   </app-alert-modal>

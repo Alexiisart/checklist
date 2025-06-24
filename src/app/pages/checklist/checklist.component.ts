@@ -12,8 +12,20 @@ import {
   ChecklistStateService,
   ChecklistState,
 } from './checklist-state.service';
+import {
+  ChecklistTasksService,
+  ChecklistSubtasksService,
+  ChecklistErrorsService,
+  ChecklistModalsService,
+  ChecklistNavigationService,
+  ChecklistExportService,
+} from '../../services/functions/checklist';
 
-// Componente principal que maneja la funcionalidad del checklist. Permite ver y editar tareas, subtareas, errores y observaciones
+/**
+ * Componente principal del checklist.
+ * Sigue el patrón arquitectónico de HomeComponent con servicios de funciones inyectados directamente.
+ * Ver CHECKLIST_ARCHITECTURE.md para detalles completos de la arquitectura.
+ */
 @Component({
   selector: 'app-checklist',
   standalone: true,
@@ -31,28 +43,69 @@ import {
   styleUrls: ['./checklist.component.css'],
 })
 export class ChecklistComponent implements OnInit, OnDestroy {
-  // Estado reactivo desde el service
-  state$: Observable<ChecklistState>;
+  // ===== ESTADO BÁSICO =====
+  public state$: Observable<ChecklistState>;
 
-  // Propiedades expuestas para el template (compatibilidad con HTML original)
+  // Propiedades para el template (compatibilidad con HTML existente)
   currentList: any = null;
   progress = { completed: 0, total: 0, percentage: 0 };
-  showEditModal = false;
-  editModalData: any = null;
-  showSaveModalDialog = false;
-  saveModalData: any = null;
-  showConfirmModal = false;
-  confirmModalData: any = null;
-  showAlertModal = false;
-  alertModalData: any = null;
 
+  // ===== OBSERVABLES DE SERVICIOS DE FUNCIONES =====
+
+  // Observables del servicio de tareas
+  public taskShowConfirmModal$!: Observable<boolean>;
+  public taskConfirmModalData$!: Observable<any>;
+
+  // Observables del servicio de modales
+  public showEditModal$!: Observable<boolean>;
+  public editModalData$!: Observable<any>;
+  public showSaveModal$!: Observable<boolean>;
+  public saveModalData$!: Observable<any>;
+  public showAlertModal$!: Observable<boolean>;
+  public alertModalData$!: Observable<any>;
+
+  // Observables del servicio de navegación
+  public navigationShowConfirmModal$!: Observable<boolean>;
+  public navigationConfirmModalData$!: Observable<any>;
+
+  // ===== CONTROL DE SUBSCRIPCIONES =====
   private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
-    private stateService: ChecklistStateService
+    private stateService: ChecklistStateService,
+    // Servicios de funciones
+    private tasksService: ChecklistTasksService,
+    private subtasksService: ChecklistSubtasksService,
+    private errorsService: ChecklistErrorsService,
+    private modalsService: ChecklistModalsService,
+    private navigationService: ChecklistNavigationService,
+    private exportService: ChecklistExportService
   ) {
+    // Inicializar observable del estado básico
     this.state$ = this.stateService.state$;
+
+    // Inicializar observables de servicios de funciones
+    this.initializeServiceObservables();
+  }
+
+  /** Inicializa todos los observables de los servicios de funciones */
+  private initializeServiceObservables(): void {
+    // Observables del servicio de tareas
+    this.taskShowConfirmModal$ = this.tasksService.showConfirmModal$;
+    this.taskConfirmModalData$ = this.tasksService.confirmModalData$;
+
+    // Observables del servicio de modales
+    this.showEditModal$ = this.modalsService.showEditModal$;
+    this.editModalData$ = this.modalsService.editModalData$;
+    this.showSaveModal$ = this.modalsService.showSaveModal$;
+    this.saveModalData$ = this.modalsService.saveModalData$;
+    this.showAlertModal$ = this.modalsService.showAlertModal$;
+    this.alertModalData$ = this.modalsService.alertModalData$;
+
+    // Observables del servicio de navegación
+    this.navigationShowConfirmModal$ = this.navigationService.showConfirmModal$;
+    this.navigationConfirmModalData$ = this.navigationService.confirmModalData$;
   }
 
   // Inicializa el componente suscribiéndose a los cambios de ruta y estado
@@ -69,14 +122,6 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.state$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
       this.currentList = state.currentList;
       this.progress = state.progress;
-      this.showEditModal = state.showEditModal;
-      this.editModalData = state.editModalData;
-      this.showSaveModalDialog = state.showSaveModalDialog;
-      this.saveModalData = state.saveModalData;
-      this.showConfirmModal = state.showConfirmModal;
-      this.confirmModalData = state.confirmModalData;
-      this.showAlertModal = state.showAlertModal;
-      this.alertModalData = state.alertModalData;
     });
   }
 
@@ -87,7 +132,9 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.cleanup();
   }
 
-  // Función de tracking personalizada para el ngFor de tareas
+  // ===== MÉTODOS DE CICLO DE VIDA Y UTILIDADES =====
+
+  /** Función de tracking personalizada para el ngFor de tareas */
   trackByTaskId(index: number, task: any): string | number {
     // Si no hay ID válido, usar el índice como fallback
     if (!task || (!task.id && task.id !== 0)) {
@@ -97,28 +144,62 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     return task.id;
   }
 
-  // Maneja el cambio de estado completado/no completado de una tarea
+  // ===== GESTIÓN DE TAREAS =====
+
+  /** Maneja el cambio de estado completado/no completado de una tarea */
   onTaskToggled(event: { taskId: number; completed: boolean }): void {
-    this.stateService.onTaskToggled(event);
+    this.tasksService.toggleTask(event.taskId, event.completed);
+    this.stateService.markAsChanged();
   }
 
-  // Maneja el cambio de estado completado/no completado de una subtarea
+  /** Actualiza el nombre de una tarea existente */
+  onTaskUpdated(event: { taskId: number; newName: string }): void {
+    this.tasksService.updateTask(event.taskId, event.newName);
+    this.stateService.markAsChanged();
+  }
+
+  /** Elimina una tarea existente */
+  onTaskDeleted(taskId: number): void {
+    this.tasksService.initiateTaskDeletion(taskId);
+  }
+
+  /** Confirma la eliminación de la tarea */
+  confirmTaskDeletion(): void {
+    this.tasksService.confirmTaskDeletion();
+    this.stateService.markAsChanged();
+  }
+
+  /** Cancela la eliminación de la tarea */
+  cancelTaskDeletion(): void {
+    this.tasksService.cancelTaskDeletion();
+  }
+
+  // ===== GESTIÓN DE SUBTAREAS =====
+
+  /** Maneja el cambio de estado completado/no completado de una subtarea */
   onSubtaskToggled(event: {
     taskId: number;
     subtaskId: number;
     completed: boolean;
   }): void {
-    this.stateService.onSubtaskToggled(event);
+    this.subtasksService.toggleSubtask(
+      event.taskId,
+      event.subtaskId,
+      event.completed
+    );
+    this.stateService.markAsChanged();
   }
 
   // Agrega una nueva subtarea a una tarea existente
   onSubtaskAdded(event: { taskId: number; name: string }): void {
-    this.stateService.onSubtaskAdded(event);
+    this.subtasksService.addSubtask(event.taskId, event.name);
+    this.stateService.markAsChanged();
   }
 
   // Elimina una subtarea existente
   onSubtaskRemoved(event: { taskId: number; subtaskId: number }): void {
-    this.stateService.onSubtaskRemoved(event);
+    this.subtasksService.removeSubtask(event.taskId, event.subtaskId);
+    this.stateService.markAsChanged();
   }
 
   // Actualiza el nombre de una subtarea existente
@@ -127,119 +208,191 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     subtaskId: number;
     newName: string;
   }): void {
-    this.stateService.onSubtaskUpdated(event);
+    this.subtasksService.updateSubtask(
+      event.taskId,
+      event.subtaskId,
+      event.newName
+    );
+    this.stateService.markAsChanged();
   }
 
-  // Agrega un nuevo error a una tarea
+  // ===== GESTIÓN DE ERRORES =====
+
+  /** Agrega un nuevo error a una tarea */
   onErrorAdded(event: { taskId: number; description: string }): void {
-    this.stateService.onErrorAdded(event);
+    this.errorsService.addError(event.taskId, event.description);
+    this.stateService.markAsChanged();
   }
 
-  // Elimina un error existente
+  /** Elimina un error existente */
   onErrorRemoved(event: { taskId: number; errorId: number }): void {
-    this.stateService.onErrorRemoved(event);
+    this.errorsService.removeError(event.taskId, event.errorId);
+    this.stateService.markAsChanged();
   }
 
-  // Actualiza la descripción de un error existente
+  /** Actualiza la descripción de un error existente */
   onErrorUpdated(event: {
     taskId: number;
     errorId: number;
     newDescription: string;
   }): void {
-    this.stateService.onErrorUpdated(event);
+    this.errorsService.updateError(
+      event.taskId,
+      event.errorId,
+      event.newDescription
+    );
+    this.stateService.markAsChanged();
   }
 
-  // Actualiza el nombre de una tarea existente
-  onTaskUpdated(event: { taskId: number; newName: string }): void {
-    this.stateService.onTaskUpdated(event);
-  }
+  // ===== EXPORTACIÓN =====
 
-  // Elimina una tarea existente
-  onTaskDeleted(taskId: number): void {
-    this.stateService.onTaskDeleted(taskId);
-  }
-
-  // Exporta una tarea específica a TXT
+  /** Exporta una tarea específica a TXT */
   onTaskExported(taskId: number): void {
-    this.stateService.exportSingleTaskToTXT(taskId);
+    if (this.currentList) {
+      this.exportService.exportSingleTaskToTXT(this.currentList, taskId);
+    }
   }
 
-  // Maneja cambios en las observaciones generales
-  onObservationsChange(): void {
-    this.stateService.onObservationsChange();
-  }
-
-  // Activa el modo de edición masiva de tareas
-  editMode(): void {
-    this.stateService.editMode();
-  }
-
-  // Confirma los cambios realizados en modo edición
-  onEditConfirm(newTasksString: string): void {
-    this.stateService.onEditConfirm(newTasksString);
-  }
-
-  // Cierra el modal de edición masiva
-  closeEditModal(): void {
-    this.stateService.closeEditModal();
-  }
-
-  // Confirma el guardado de la lista
-  onSaveConfirm(name: string): void {
-    this.stateService.onSaveConfirm(name);
-  }
-
-  // Cierra el modal de guardado
-  closeSaveModal(): void {
-    this.stateService.closeSaveModal();
-  }
-
-  // Confirma el inicio de una nueva lista
-  confirmStartNewList(): void {
-    this.stateService.confirmStartNewList();
-  }
-
-  // Confirma la acción pendiente (limpiar lista, eliminar tarea, etc)
-  onConfirmAction(): void {
-    this.stateService.onConfirmAction();
-  }
-
-  // Cancela la acción pendiente
-  onCancelAction(): void {
-    this.stateService.onCancelAction();
-  }
-
-  // Navega a la página principal
-  goHome(): void {
-    this.stateService.goHome();
-  }
-
-  // Exporta la lista actual a PDF
+  /** Exporta la lista actual a PDF */
   exportToPDF(): void {
-    this.stateService.exportToPDF();
+    if (this.currentList) {
+      this.exportService.exportToPDF(this.currentList);
+    }
   }
 
-  // Exporta la lista actual a TXT
+  /** Exporta la lista actual a TXT */
   exportToTXT(): void {
-    this.stateService.exportToTXT();
+    if (this.currentList) {
+      this.exportService.exportToTXT(this.currentList);
+    }
   }
 
-  // Cierra el modal de alerta
+  // ===== NAVEGACIÓN Y OBSERVACIONES =====
+
+  /** Maneja cambios en las observaciones generales */
+  onObservationsChange(): void {
+    if (this.currentList) {
+      this.navigationService.updateObservations(this.currentList.observations);
+      this.stateService.markAsChanged();
+    }
+  }
+
+  /** Activa el modo de edición masiva de tareas */
+  editMode(): void {
+    if (!this.currentList) return;
+
+    const tasksString = this.currentList.tasks
+      .map((task: any) => task.name)
+      .join(', ');
+
+    this.modalsService.showEditModal(tasksString);
+  }
+
+  /** Confirma los cambios realizados en modo edición masiva */
+  onEditConfirm(newTasksString: string): void {
+    this.navigationService.editTasksInBulk(newTasksString);
+    this.stateService.markAsChanged();
+    this.modalsService.closeEditModal();
+  }
+
+  /** Cierra el modal de edición masiva */
+  closeEditModal(): void {
+    this.modalsService.closeEditModal();
+  }
+
+  /** Confirma el guardado de la lista */
+  onSaveConfirm(name: string): void {
+    const saved = this.navigationService.saveList(name);
+
+    if (saved) {
+      this.stateService.updateState({ hasUnsavedChanges: false });
+      this.modalsService.closeSaveModal();
+
+      // Si hay una acción pendiente en navegación, manejarla
+      if (this.navigationService.currentPendingAction === 'go-home') {
+        setTimeout(() => {
+          // El navigationService maneja la navegación
+        }, 1000);
+      }
+    }
+  }
+
+  /** Cierra el modal de guardado */
+  closeSaveModal(): void {
+    this.modalsService.closeSaveModal();
+  }
+
+  /** Confirma el inicio de una nueva lista */
+  confirmStartNewList(): void {
+    this.navigationService.confirmStartNewList();
+  }
+
+  /** Confirma la acción pendiente (limpiar lista, eliminar tarea, etc) */
+  onConfirmAction(): void {
+    this.navigationService.confirmAction(this.currentList);
+
+    // Si la acción requiere mostrar modal de guardado, hacerlo
+    if (
+      this.navigationService.currentPendingAction === 'go-home' &&
+      (!this.currentList?.name || this.currentList.name.trim() === '')
+    ) {
+      this.navigationService.setPendingAction('go-home');
+      this.showSaveModalDialog();
+    }
+  }
+
+  /** Cancela la acción pendiente */
+  onCancelAction(): void {
+    this.navigationService.cancelAction();
+  }
+
+  /** Navega a la página principal */
+  goHome(): void {
+    this.navigationService.goHome();
+  }
+
+  // ===== MODALES Y UTILIDADES =====
+
+  /** Muestra el modal para guardar la lista (incluye sugerencia automática de nombre) */
+  showSaveModalDialog(): void {
+    let suggestedName = this.currentList?.name || '';
+
+    // Si no tiene nombre, sugerir el nombre de la primera tarea
+    if (!suggestedName || suggestedName.trim() === '') {
+      const firstTask = this.currentList?.tasks?.[0];
+      if (firstTask) {
+        suggestedName = firstTask.name;
+      }
+    }
+
+    this.modalsService.showSaveModal(suggestedName);
+  }
+
+  /** Cierra el modal de alerta */
   closeAlert(): void {
-    this.stateService.closeAlert();
+    this.modalsService.closeAlertModal();
   }
 
-  // Guarda directamente el progreso o pide nombre si no lo tiene
+  /** Guarda directamente el progreso o pide nombre si no lo tiene */
   saveProgress(): void {
-    this.stateService.saveProgressDirectly();
+    const saved = this.navigationService.saveProgressDirectly(this.currentList);
+
+    if (saved) {
+      this.stateService.updateState({ hasUnsavedChanges: false });
+    } else if (
+      this.currentList &&
+      (!this.currentList.name || this.currentList.name.trim() === '')
+    ) {
+      this.showSaveModalDialog();
+    }
   }
 
-  // Obtiene el texto del botón de guardar según el estado
+  /** Obtiene el texto del botón de guardar según el estado */
   getSaveButtonText(): string {
     return this.currentList?.name ? 'Guardar' : 'Guardar como...';
   }
 
-  // Obtiene el tooltip del botón de guardar según el estado
+  /** Obtiene el tooltip del botón de guardar según el estado */
   getSaveButtonTooltip(): string {
     return this.currentList?.name
       ? 'Actualizar la lista guardada'

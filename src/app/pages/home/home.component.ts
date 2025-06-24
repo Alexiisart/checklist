@@ -11,10 +11,10 @@ import { ExportImportDropdownComponent } from '../../shared/components/export-im
 import { StorageProgressIndicatorComponent } from '../../shared/components/storage-progress-indicator/storage-progress-indicator.component';
 import { ButtonComponent } from '../../shared/atomic/buttons';
 import { HomeStateService } from './home-state.service';
-import { DuplicateListService } from '../../services/functions/duplicate-list.service';
-import { RenameListService } from '../../services/functions/rename-list.service';
-import { DeleteListService } from '../../services/functions/delete-list.service';
-import { OpenNewTabService } from '../../services/functions/open-new-tab.service';
+import { DuplicateListService } from '../../services/functions/home/duplicate-list.service';
+import { RenameListService } from '../../services/functions/home/rename-list.service';
+import { DeleteListService } from '../../services/functions/home/delete-list.service';
+import { OpenNewTabService } from '../../services/functions/home/open-new-tab.service';
 import { SavedList } from '../../models/task.interface';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas

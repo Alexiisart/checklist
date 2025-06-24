@@ -27,24 +27,7 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
           (checkedChange)="onTaskToggle($event)"
         ></app-checkbox>
         <span class="task-title">{{ task.name }}</span>
-        <app-button
-          type="icon"
-          iconLeft="edit"
-          size="sm"
-          title="Editar tarea"
-          extraClasses="edit-task-btn"
-          (clickEvent)="editTask()"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="delete"
-          size="sm"
-          title="Eliminar tarea"
-          extraClasses="delete-task-btn"
-          (clickEvent)="deleteTask()"
-        >
-        </app-button>
+
         <app-button
           type="ghost"
           text="Subtarea"
@@ -67,11 +50,29 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
         </app-button>
         <app-button
           type="icon"
+          iconLeft="edit"
+          size="sm"
+          title="Editar tarea"
+          extraClasses="edit-task-btn"
+          (clickEvent)="editTask()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
           iconLeft="file_download"
           size="sm"
           title="Exportar esta tarea con sus subtareas"
           extraClasses="export-task-btn"
           (clickEvent)="exportTask()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
+          iconLeft="delete"
+          size="sm"
+          title="Eliminar tarea"
+          extraClasses="delete-task-btn"
+          (clickEvent)="deleteTask()"
         >
         </app-button>
       </div>

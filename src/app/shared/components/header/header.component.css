@@ -19,34 +19,6 @@
   min-width: 44px;
 }
 
-.theme-toggle {
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  box-shadow: var(--shadow-xs);
-}
-
-.theme-toggle:hover {
-  border-color: var(--color-border-focus);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.theme-toggle .material-icons-outlined {
-  margin: 0;
-  font-size: 20px;
-  color: var(--color-text-secondary);
-  transition: color 0.3s ease;
-}
-
 .logo-container {
   display: flex;
   flex-direction: column;
@@ -115,12 +87,6 @@
   .subtitle {
     font-size: 0.75rem;
     text-align: center;
-  }
-
-  .theme-toggle {
-    padding: var(--space-2);
-    min-width: 40px;
-    min-height: 40px;
   }
 
   .spacer {

@@ -7,80 +7,101 @@ import {
   ModalData,
 } from '../../../models/task.interface';
 import { ModalComponent } from '../modal/modal.component';
+import { ButtonComponent } from '../../atomic/buttons';
+import { CheckboxComponent } from '../../atomic/checkboxes';
 
-/**
- * Componente que representa un elemento de tarea individual.
- * Permite gestionar tareas, subtareas y errores asociados.
- */
+// Componente que representa un elemento de tarea individual. Permite gestionar tareas, subtareas y errores asociados.
 @Component({
   selector: 'app-task-item',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule, ModalComponent, ButtonComponent, CheckboxComponent],
   template: `
     <div class="task-item" [class.completed]="task.completed">
       <div class="task-header">
-        <input
-          type="checkbox"
-          class="task-checkbox"
+        <app-checkbox
+          type="success"
+          size="md"
           [checked]="task.completed"
-          (change)="onTaskToggle($event)"
-        />
+          [inputId]="'task-' + task.id"
+          ariaLabel="Marcar tarea como completada"
+          (checkedChange)="onTaskToggle($event)"
+        ></app-checkbox>
         <span class="task-title">{{ task.name }}</span>
-        <button class="edit-task-btn" (click)="editTask()" title="Editar tarea">
-          <span class="material-icons-outlined">edit</span>
-        </button>
-        <button
-          class="delete-task-btn"
-          (click)="deleteTask()"
+        <app-button
+          type="icon"
+          iconLeft="edit"
+          size="sm"
+          title="Editar tarea"
+          extraClasses="edit-task-btn"
+          (clickEvent)="editTask()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
+          iconLeft="delete"
+          size="sm"
           title="Eliminar tarea"
+          extraClasses="delete-task-btn"
+          (clickEvent)="deleteTask()"
         >
-          <span class="material-icons-outlined">delete</span>
-        </button>
-        <button
-          class="subtask-btn add-subtask-btn"
-          (click)="showAddSubtask()"
+        </app-button>
+        <app-button
+          type="ghost"
+          text="Subtarea"
+          iconLeft="add"
+          size="sm"
           title="Agregar subtarea"
+          extraClasses="subtask-btn add-subtask-btn"
+          (clickEvent)="showAddSubtask()"
         >
-          <span class="material-icons-outlined">add</span> Subtarea
-        </button>
-        <button
-          class="add-error-btn"
-          (click)="showAddError()"
+        </app-button>
+        <app-button
+          type="ghost"
+          text="Documentar problema"
+          iconLeft="warning"
+          size="sm"
           title="Documentar problemas que ocurrieron al realizar esta tarea"
+          extraClasses="add-error-btn"
+          (clickEvent)="showAddError()"
         >
-          <span class="material-icons-outlined">warning</span> Documentar
-          problema
-        </button>
+        </app-button>
       </div>
 
       <!-- Subtareas -->
       @if (task.subtasks.length > 0) {
       <div class="subtasks-container">
         <div class="subtasks-label">Subtareas:</div>
-        @for (subtask of task.subtasks; track subtask.id) {
+        @for (subtask of task.subtasks; track trackBySubtaskId($index, subtask))
+        {
         <div class="subtask-item">
-          <input
-            type="checkbox"
-            class="subtask-checkbox"
+          <app-checkbox
+            type="default"
+            size="md"
             [checked]="subtask.completed"
-            (change)="onSubtaskToggle(subtask, $event)"
-          />
+            [inputId]="'subtask-' + subtask.id"
+            ariaLabel="Marcar subtarea como completada"
+            (checkedChange)="onSubtaskToggle(subtask, $event)"
+          ></app-checkbox>
           <span class="subtask-text" [class.completed]="subtask.completed">{{
             subtask.name
           }}</span>
-          <button
-            class="edit-subtask-btn"
-            (click)="editSubtask(subtask)"
+          <app-button
+            type="icon"
+            iconLeft="edit"
+            size="xs"
             title="Editar subtarea"
+            extraClasses="edit-subtask-btn"
+            (clickEvent)="editSubtask(subtask)"
           >
-            <span class="material-icons-outlined">edit</span>
-          </button>
-          <button
-            class="subtask-btn remove-subtask-btn"
-            (click)="removeSubtask(subtask)"
+          </app-button>
+          <app-button
+            type="icon"
+            iconLeft="close"
+            size="xs"
+            extraClasses="subtask-btn remove-subtask-btn"
+            (clickEvent)="removeSubtask(subtask)"
           >
-            <span class="material-icons-outlined">close</span>
-          </button>
+          </app-button>
         </div>
         }
       </div>
@@ -89,19 +110,26 @@ import { ModalComponent } from '../modal/modal.component';
       <!-- Errores -->
       @if (task.errors.length > 0) {
       <div class="errors-container">
-        @for (error of task.errors; track error.id) {
+        @for (error of task.errors; track trackByErrorId($index, error)) {
         <div class="error-item">
           <span class="error-text">{{ error.name }}</span>
-          <button
-            class="edit-error-btn"
-            (click)="editError(error)"
+          <app-button
+            type="icon"
+            iconLeft="edit"
+            size="xs"
             title="Editar problema que ocurrió al realizar la tarea"
+            extraClasses="edit-error-btn"
+            (clickEvent)="editError(error)"
           >
-            <span class="material-icons-outlined">edit</span>
-          </button>
-          <button class="remove-error-btn" (click)="removeError(error)">
-            <span class="material-icons-outlined">close</span>
-          </button>
+          </app-button>
+          <app-button
+            type="icon"
+            iconLeft="close"
+            size="xs"
+            extraClasses="remove-error-btn"
+            (clickEvent)="removeError(error)"
+          >
+          </app-button>
         </div>
         }
       </div>
@@ -119,73 +147,73 @@ import { ModalComponent } from '../modal/modal.component';
   styleUrls: ['./task-item.component.css'],
 })
 export class TaskItemComponent {
-  /** Tarea que se mostrará en el componente */
+  // Tarea que se mostrará en el componente
   @Input() task!: Task;
 
-  /** Evento emitido cuando se cambia el estado de completado de la tarea */
+  // Evento emitido cuando se cambia el estado de completado de la tarea
   @Output() taskToggled = new EventEmitter<{
     taskId: number;
     completed: boolean;
   }>();
 
-  /** Evento emitido cuando se cambia el estado de completado de una subtarea */
+  // Evento emitido cuando se cambia el estado de completado de una subtarea
   @Output() subtaskToggled = new EventEmitter<{
     taskId: number;
     subtaskId: number;
     completed: boolean;
   }>();
 
-  /** Evento emitido cuando se agrega una nueva subtarea */
+  // Evento emitido cuando se agrega una nueva subtarea
   @Output() subtaskAdded = new EventEmitter<{ taskId: number; name: string }>();
 
-  /** Evento emitido cuando se elimina una subtarea */
+  // Evento emitido cuando se elimina una subtarea
   @Output() subtaskRemoved = new EventEmitter<{
     taskId: number;
     subtaskId: number;
   }>();
 
-  /** Evento emitido cuando se actualiza una subtarea */
+  // Evento emitido cuando se actualiza una subtarea
   @Output() subtaskUpdated = new EventEmitter<{
     taskId: number;
     subtaskId: number;
     newName: string;
   }>();
 
-  /** Evento emitido cuando se documenta un problema que ocurrió al realizar la tarea */
+  // Evento emitido cuando se documenta un problema que ocurrió al realizar la tarea
   @Output() errorAdded = new EventEmitter<{
     taskId: number;
     description: string;
   }>();
 
-  /** Evento emitido cuando se elimina un problema documentado */
+  // Evento emitido cuando se elimina un problema documentado
   @Output() errorRemoved = new EventEmitter<{
     taskId: number;
     errorId: number;
   }>();
 
-  /** Evento emitido cuando se actualiza un problema documentado */
+  // Evento emitido cuando se actualiza un problema documentado
   @Output() errorUpdated = new EventEmitter<{
     taskId: number;
     errorId: number;
     newDescription: string;
   }>();
 
-  /** Evento emitido cuando se actualiza la tarea */
+  // Evento emitido cuando se actualiza la tarea
   @Output() taskUpdated = new EventEmitter<{
     taskId: number;
     newName: string;
   }>();
 
-  /** Evento emitido cuando se elimina la tarea */
+  // Evento emitido cuando se elimina la tarea
   @Output() taskDeleted = new EventEmitter<number>();
 
-  /** Controla la visibilidad del modal */
+  // Controla la visibilidad del modal
   showModal = false;
 
-  /** Datos que se mostrarán en el modal */
+  // Datos que se mostrarán en el modal
   modalData: ModalData | null = null;
 
-  /** Acción actual que se está realizando */
+  // Acción actual que se está realizando
   currentAction:
     | 'add-subtask'
     | 'edit-subtask'
@@ -194,38 +222,61 @@ export class TaskItemComponent {
     | 'edit-task'
     | null = null;
 
-  /** Subtarea actual que se está editando */
+  // Subtarea actual que se está editando
   currentSubtask: Subtask | null = null;
 
-  /** Error actual que se está editando */
+  // Error actual que se está editando
   currentError: TaskError | null = null;
 
-  /**
-   * Maneja el cambio de estado de la tarea principal
-   * @param event Evento del checkbox
-   */
-  onTaskToggle(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.taskToggled.emit({ taskId: this.task.id, completed: target.checked });
+  // Funciones de tracking personalizadas para evitar errores de IDs duplicados
+  trackBySubtaskId(index: number, subtask: Subtask): string | number {
+    // Si no hay ID válido, usar el índice como fallback
+    if (!subtask || (!subtask.id && subtask.id !== 0)) {
+      console.warn(
+        'Subtarea sin ID válido detectada en índice:',
+        index,
+        subtask
+      );
+      return `fallback-subtask-${index}`;
+    }
+    return subtask.id;
   }
 
-  /**
-   * Maneja el cambio de estado de una subtarea
-   * @param subtask Subtarea que se está modificando
-   * @param event Evento del checkbox
-   */
-  onSubtaskToggle(subtask: Subtask, event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.subtaskToggled.emit({
+  trackByErrorId(index: number, error: TaskError): string | number {
+    // Si no hay ID válido, usar el índice como fallback
+    if (!error || (!error.id && error.id !== 0)) {
+      console.warn('Error sin ID válido detectado en índice:', index, error);
+      return `fallback-error-${index}`;
+    }
+    return error.id;
+  }
+
+  // Maneja el cambio de estado de la tarea principal
+  onTaskToggle(checked: boolean): void {
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    this.task.completed = checked;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.taskToggled.emit({
       taskId: this.task.id,
-      subtaskId: subtask.id,
-      completed: target.checked,
+      completed: checked,
     });
   }
 
-  /**
-   * Muestra el modal para agregar una nueva subtarea
-   */
+  // Maneja el cambio de estado de una subtarea
+  onSubtaskToggle(subtask: Subtask, checked: boolean): void {
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    subtask.completed = checked;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.subtaskToggled.emit({
+      taskId: this.task.id,
+      subtaskId: subtask.id,
+      completed: checked,
+    });
+  }
+
+  // Muestra el modal para agregar una nueva subtarea
   showAddSubtask(): void {
     this.currentAction = 'add-subtask';
     this.modalData = {
@@ -237,10 +288,7 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  /**
-   * Muestra el modal para editar una subtarea existente
-   * @param subtask Subtarea que se va a editar
-   */
+  // Muestra el modal para editar una subtarea existente
   editSubtask(subtask: Subtask): void {
     this.currentAction = 'edit-subtask';
     this.currentSubtask = subtask;
@@ -253,17 +301,12 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  /**
-   * Elimina una subtarea
-   * @param subtask Subtarea que se va a eliminar
-   */
+  // Elimina una subtarea
   removeSubtask(subtask: Subtask): void {
     this.subtaskRemoved.emit({ taskId: this.task.id, subtaskId: subtask.id });
   }
 
-  /**
-   * Muestra el modal para documentar un problema que ocurrió al realizar la tarea
-   */
+  // Muestra el modal para documentar un problema que ocurrió al realizar la tarea
   showAddError(): void {
     this.currentAction = 'add-error';
     this.modalData = {
@@ -275,10 +318,7 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  /**
-   * Muestra el modal para editar un problema que ocurrió al realizar la tarea
-   * @param error Error que se va a editar
-   */
+  // Muestra el modal para editar un problema que ocurrió al realizar la tarea
   editError(error: TaskError): void {
     this.currentAction = 'edit-error';
     this.currentError = error;
@@ -291,17 +331,12 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  /**
-   * Elimina un error
-   * @param error Error que se va a eliminar
-   */
+  // Elimina un error
   removeError(error: TaskError): void {
     this.errorRemoved.emit({ taskId: this.task.id, errorId: error.id });
   }
 
-  /**
-   * Muestra el modal para editar la tarea principal
-   */
+  // Muestra el modal para editar la tarea principal
   editTask(): void {
     this.currentAction = 'edit-task';
     this.modalData = {
@@ -313,17 +348,12 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  /**
-   * Elimina la tarea principal
-   */
+  // Elimina la tarea principal
   deleteTask(): void {
     this.taskDeleted.emit(this.task.id);
   }
 
-  /**
-   * Maneja la confirmación del modal según la acción actual
-   * @param value Valor ingresado en el modal
-   */
+  // Maneja la confirmación del modal según la acción actual
   onModalConfirm(value: string): void {
     switch (this.currentAction) {
       case 'add-subtask':
@@ -356,9 +386,7 @@ export class TaskItemComponent {
     }
   }
 
-  /**
-   * Cierra el modal y reinicia los valores relacionados
-   */
+  // Cierra el modal y reinicia los valores relacionados
   closeModal(): void {
     this.showModal = false;
     this.currentAction = null;

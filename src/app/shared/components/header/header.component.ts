@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ThemeService } from '../../../services/theme.service';
+import { ButtonComponent } from '../../atomic/buttons';
 
 /**
  * Componente que representa el encabezado de la aplicación.
@@ -10,19 +11,19 @@ import { ThemeService } from '../../../services/theme.service';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   template: `
     <header class="header">
       <div class="header-content">
-        <button
-          class="theme-toggle"
-          (click)="toggleTheme()"
+        <app-button
+          type="icon"
+          iconLeft="{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}"
+          size="sm"
           title="Cambiar tema"
+          extraClasses="theme-toggle"
+          (clickEvent)="toggleTheme()"
         >
-          <span class="material-icons-outlined">
-            {{ isDarkTheme ? 'light_mode' : 'dark_mode' }}
-          </span>
-        </button>
+        </app-button>
         <div class="header-text">
           <div class="logo-container">
             <img [src]="logoSrc" alt="CheckList Diario" class="main-logo" />

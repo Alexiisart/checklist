@@ -75,6 +75,7 @@ export class ChecklistStateService implements OnDestroy {
       this.loadList(this.listId);
     }
     this.startAutoSave();
+    this.updateState({ hasUnsavedChanges: true });
   }
 
   /** Limpia recursos y detiene el autoguardado */

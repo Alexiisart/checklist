@@ -76,10 +76,24 @@ export interface ToastData {
   ],
 })
 export class ToastComponent {
+  /**
+   * Indica si el toast está visible
+   */
   @Input() isVisible = false;
+
+  /**
+   * Datos del toast a mostrar
+   */
   @Input() data: ToastData | null = null;
+
+  /**
+   * Evento emitido cuando se cierra el toast
+   */
   @Output() closed = new EventEmitter<void>();
 
+  /**
+   * Inicializa el componente y configura el temporizador para ocultar el toast
+   */
   ngOnInit() {
     if (this.isVisible && this.data) {
       const duration = this.data.duration || 3000;
@@ -89,6 +103,10 @@ export class ToastComponent {
     }
   }
 
+  /**
+   * Oculta el toast con una animación de salida
+   * y emite el evento closed cuando termina
+   */
   private hideToast() {
     const alert = document.querySelector('.alert') as HTMLElement;
     if (alert) {

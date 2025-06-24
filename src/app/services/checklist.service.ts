@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   Task,
   Subtask,
@@ -7,75 +7,59 @@ import {
   ChecklistData,
 } from '../models/task.interface';
 import { StorageService } from './storage.service';
+import { UuidService } from './uuid.service';
 
-/**
- * Servicio para gestionar las listas de verificación (checklists)
- * Maneja la creación, actualización y eliminación de tareas y subtareas
- */
+// Servicio para gestionar las listas de verificación (checklists).
+// Maneja la creación, actualización y eliminación de tareas y subtareas
 @Injectable({
   providedIn: 'root',
 })
 export class ChecklistService {
-  /** Subject que mantiene la lista actual */
+  // Subject que mantiene la lista actual
   private currentListSubject = new BehaviorSubject<ChecklistData | null>(null);
-  /** Observable público de la lista actual */
+  // Observable público de la lista actual
   public currentList$ = this.currentListSubject.asObservable();
 
-  /** Subject que indica si hay cambios sin guardar */
+  // Subject que indica si hay cambios sin guardar
   private hasUnsavedChangesSubject = new BehaviorSubject<boolean>(false);
-  /** Observable público de cambios sin guardar */
+  // Observable público de cambios sin guardar
   public hasUnsavedChanges$ = this.hasUnsavedChangesSubject.asObservable();
 
-  constructor(private storageService: StorageService) {
+  constructor(
+    private storageService: StorageService,
+    private uuidService: UuidService
+  ) {
     this.loadCurrentProgress();
   }
 
-  private idCounter = 0;
-
-  /**
-   * Genera un ID único garantizado usando UUID simplificado
-   * @returns ID único garantizado
-   */
+  // Genera un ID numérico único usando UUIDs como base
   private generateUniqueId(): number {
-    this.idCounter++;
-    // Crear un ID único usando timestamp + contador + performance.now para máxima precisión
-    const timestamp = Date.now();
-    const performanceTime = Math.floor(performance.now() * 1000);
-    const counter = this.idCounter;
-    const random = Math.floor(Math.random() * 10000);
-
-    // Combinar todos los valores para crear un ID único
-    return parseInt(
-      `${timestamp}${performanceTime}${counter}${random}`.slice(-15)
-    );
+    return this.uuidService.generateNumericId();
   }
 
-  /**
-   * Verifica y corrige IDs duplicados en una lista
-   * @param listData Lista a verificar
-   */
-  private ensureUniqueIds(listData: ChecklistData): void {
+  // Verifica y corrige IDs duplicados en una lista
+  public ensureUniqueIds(listData: ChecklistData): void {
     const usedIds = new Set<number>();
+    let hasChanges = false;
 
     // Verificar y corregir IDs de tareas
     for (const task of listData.tasks) {
-      if (usedIds.has(task.id)) {
+      if (!task.id || usedIds.has(task.id)) {
         task.id = this.generateUniqueId();
-        // Asegurar que el nuevo ID sea único
-        while (usedIds.has(task.id)) {
-          task.id = this.generateUniqueId();
-        }
+        hasChanges = true;
       }
       usedIds.add(task.id);
 
       // Verificar y corregir IDs de subtareas
       const subtaskIds = new Set<number>();
       for (const subtask of task.subtasks) {
-        if (subtaskIds.has(subtask.id) || usedIds.has(subtask.id)) {
+        if (
+          !subtask.id ||
+          subtaskIds.has(subtask.id) ||
+          usedIds.has(subtask.id)
+        ) {
           subtask.id = this.generateUniqueId();
-          while (subtaskIds.has(subtask.id) || usedIds.has(subtask.id)) {
-            subtask.id = this.generateUniqueId();
-          }
+          hasChanges = true;
         }
         subtaskIds.add(subtask.id);
         usedIds.add(subtask.id);
@@ -84,40 +68,29 @@ export class ChecklistService {
       // Verificar y corregir IDs de errores
       const errorIds = new Set<number>();
       for (const error of task.errors) {
-        if (errorIds.has(error.id) || usedIds.has(error.id)) {
+        if (!error.id || errorIds.has(error.id) || usedIds.has(error.id)) {
           error.id = this.generateUniqueId();
-          while (errorIds.has(error.id) || usedIds.has(error.id)) {
-            error.id = this.generateUniqueId();
-          }
+          hasChanges = true;
         }
         errorIds.add(error.id);
         usedIds.add(error.id);
       }
     }
+
+    // Si hubo cambios, actualizar la fecha de modificación
+    if (hasChanges) {
+      listData.modifiedDate = new Date().toISOString();
+    }
   }
 
-  /**
-   * Crea una nueva lista de verificación
-   * @param taskNames Array de nombres de tareas
-   * @returns Nueva lista de verificación
-   */
+  // Crea una nueva lista de verificación
   createNewList(taskNames: string[]): ChecklistData {
     const tasks: Task[] = [];
-    const usedIds = new Set<number>();
 
     // Crear tareas con IDs únicos garantizados
     for (const name of taskNames) {
-      let taskId = this.generateUniqueId();
-
-      // Asegurar que el ID sea único (por si acaso)
-      while (usedIds.has(taskId)) {
-        taskId = this.generateUniqueId();
-      }
-
-      usedIds.add(taskId);
-
       tasks.push({
-        id: taskId,
+        id: this.generateUniqueId(),
         name: name.trim(),
         completed: false,
         subtasks: [],
@@ -139,11 +112,7 @@ export class ChecklistService {
     return newList;
   }
 
-  /**
-   * Carga una lista existente
-   * @param listId ID de la lista a cargar
-   * @returns Lista cargada o null si no existe
-   */
+  // Carga una lista existente
   loadList(listId: string): ChecklistData | null {
     const listData = this.storageService.loadList(listId);
     if (listData) {
@@ -155,11 +124,7 @@ export class ChecklistService {
     return listData;
   }
 
-  /**
-   * Marca o desmarca una tarea como completada
-   * @param taskId ID de la tarea
-   * @param completed Estado de completado
-   */
+  // Marca o desmarca una tarea como completada
   toggleTask(taskId: number, completed: boolean): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -179,12 +144,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Marca o desmarca una subtarea como completada
-   * @param taskId ID de la tarea principal
-   * @param subtaskId ID de la subtarea
-   * @param completed Estado de completado
-   */
+  // Marca o desmarca una subtarea como completada
   toggleSubtask(taskId: number, subtaskId: number, completed: boolean): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -211,11 +171,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Agrega una nueva subtarea a una tarea
-   * @param taskId ID de la tarea principal
-   * @param name Nombre de la subtarea (puede incluir múltiples separadas por +)
-   */
+  // Agrega una nueva subtarea a una tarea
   addSubtask(taskId: number, name: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -228,7 +184,7 @@ export class ChecklistService {
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
 
-      subtasks.forEach((subtaskName, index) => {
+      subtasks.forEach((subtaskName) => {
         const newSubtask: Subtask = {
           id: this.generateUniqueId(),
           name: subtaskName,
@@ -241,11 +197,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Elimina una subtarea
-   * @param taskId ID de la tarea principal
-   * @param subtaskId ID de la subtarea a eliminar
-   */
+  // Elimina una subtarea
   removeSubtask(taskId: number, subtaskId: number): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -257,12 +209,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Actualiza el nombre de una subtarea
-   * @param taskId ID de la tarea principal
-   * @param subtaskId ID de la subtarea
-   * @param newName Nuevo nombre
-   */
+  // Actualiza el nombre de una subtarea
   updateSubtask(taskId: number, subtaskId: number, newName: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -277,11 +224,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Agrega un error a una tarea
-   * @param taskId ID de la tarea
-   * @param description Descripción del error
-   */
+  // Agrega un error a una tarea
   addError(taskId: number, description: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -297,11 +240,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Elimina un error de una tarea
-   * @param taskId ID de la tarea
-   * @param errorId ID del error a eliminar
-   */
+  // Elimina un error de una tarea
   removeError(taskId: number, errorId: number): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -313,12 +252,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Actualiza la descripción de un error
-   * @param taskId ID de la tarea
-   * @param errorId ID del error
-   * @param newDescription Nueva descripción
-   */
+  // Actualiza la descripción de un error
   updateError(taskId: number, errorId: number, newDescription: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -333,11 +267,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Actualiza el nombre de una tarea
-   * @param taskId ID de la tarea
-   * @param newName Nuevo nombre
-   */
+  // Actualiza el nombre de una tarea
   updateTask(taskId: number, newName: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -349,10 +279,7 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Elimina una tarea
-   * @param taskId ID de la tarea a eliminar
-   */
+  // Elimina una tarea
   deleteTask(taskId: number): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -361,10 +288,7 @@ export class ChecklistService {
     this.updateList(currentList);
   }
 
-  /**
-   * Actualiza la lista completa de tareas
-   * @param newTasksString String con las tareas separadas por comas
-   */
+  // Actualiza la lista completa de tareas
   updateTasks(newTasksString: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -374,14 +298,22 @@ export class ChecklistService {
       .map((task) => task.trim())
       .filter((task) => task);
 
-    // Mantener datos existentes para tareas que no cambiaron
+    // Crear una copia de las tareas actuales para buscar coincidencias
+    const availableTasks = [...currentList.tasks];
     const updatedTasks: Task[] = [];
 
-    newTaskNames.forEach((name, index) => {
-      const existingTask = currentList.tasks.find((t) => t.name === name);
-      if (existingTask) {
+    newTaskNames.forEach((name) => {
+      // Buscar una tarea existente que no haya sido usada aún
+      const existingTaskIndex = availableTasks.findIndex(
+        (t) => t.name === name
+      );
+
+      if (existingTaskIndex !== -1) {
+        // Usar la tarea existente y removerla de disponibles
+        const existingTask = availableTasks.splice(existingTaskIndex, 1)[0];
         updatedTasks.push(existingTask);
       } else {
+        // Crear nueva tarea
         updatedTasks.push({
           id: this.generateUniqueId(),
           name,
@@ -396,10 +328,7 @@ export class ChecklistService {
     this.updateList(currentList);
   }
 
-  /**
-   * Actualiza las observaciones de la lista
-   * @param observations Nuevas observaciones
-   */
+  // Actualiza las observaciones de la lista
   updateObservations(observations: string): void {
     const currentList = this.getCurrentList();
     if (!currentList) return;
@@ -408,11 +337,7 @@ export class ChecklistService {
     this.updateList(currentList);
   }
 
-  /**
-   * Guarda la lista actual con un nombre (igual que saveListWithName del original)
-   * @param name Nombre de la lista
-   * @returns boolean indicando si se guardó exitosamente
-   */
+  // Guarda la lista actual con un nombre (igual que saveListWithName del original)
   saveList(name: string): boolean {
     // Validación de nombre vacío (igual que el original)
     if (!name.trim()) {
@@ -436,27 +361,19 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Limpia la lista actual
-   */
+  // Limpia la lista actual
   clearAll(): void {
     this.currentListSubject.next(null);
     this.storageService.clearCurrentProgress();
     this.setUnsavedChanges(false);
   }
 
-  /**
-   * Obtiene la lista actual
-   * @returns Lista actual o null si no hay ninguna
-   */
+  // Obtiene la lista actual
   private getCurrentList(): ChecklistData | null {
     return this.currentListSubject.value;
   }
 
-  /**
-   * Actualiza la lista y marca cambios sin guardar
-   * @param list Lista actualizada
-   */
+  // Actualiza la lista y marca cambios sin guardar
   private updateList(list: ChecklistData): void {
     list.modifiedDate = new Date().toISOString();
     this.currentListSubject.next({ ...list });
@@ -466,9 +383,7 @@ export class ChecklistService {
     this.storageService.saveCurrentProgress(list);
   }
 
-  /**
-   * Carga el progreso guardado
-   */
+  // Carga el progreso guardado
   private loadCurrentProgress(): void {
     const savedData = this.storageService.loadCurrentProgress();
     if (savedData) {
@@ -479,18 +394,12 @@ export class ChecklistService {
     }
   }
 
-  /**
-   * Actualiza el estado de cambios sin guardar
-   * @param hasChanges true si hay cambios pendientes
-   */
+  // Actualiza el estado de cambios sin guardar
   private setUnsavedChanges(hasChanges: boolean): void {
     this.hasUnsavedChangesSubject.next(hasChanges);
   }
 
-  /**
-   * Obtiene el progreso actual de la lista
-   * @returns Objeto con el total de tareas, completadas y porcentaje
-   */
+  // Obtiene el progreso actual de la lista
   getProgress(): { completed: number; total: number; percentage: number } {
     const currentList = this.getCurrentList();
     if (!currentList) {

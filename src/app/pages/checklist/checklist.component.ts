@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, Observable } from 'rxjs';
 import { TaskItemComponent } from '../../shared/components/task-item/task-item.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { AlertModalComponent } from '../../shared/components/alert-modal/alert-modal.component';
+import { ButtonComponent } from '../../shared/atomic/buttons';
+import { InputComponent } from '../../shared/atomic/inputs';
 import {
   ChecklistStateService,
   ChecklistState,
@@ -18,11 +19,12 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     TaskItemComponent,
     ModalComponent,
     ConfirmModalComponent,
     AlertModalComponent,
+    ButtonComponent,
+    InputComponent,
   ],
   providers: [ChecklistStateService],
   templateUrl: './checklist.component.html',
@@ -83,6 +85,16 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.stateService.cleanup();
+  }
+
+  // Función de tracking personalizada para el ngFor de tareas
+  trackByTaskId(index: number, task: any): string | number {
+    // Si no hay ID válido, usar el índice como fallback
+    if (!task || (!task.id && task.id !== 0)) {
+      console.warn('Tarea sin ID válido detectada en índice:', index, task);
+      return `fallback-task-${index}`;
+    }
+    return task.id;
   }
 
   // Maneja el cambio de estado completado/no completado de una tarea

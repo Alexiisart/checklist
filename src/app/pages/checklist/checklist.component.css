@@ -70,21 +70,11 @@
   animation: shimmer 2s infinite;
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
 .observations-section {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 30px;
+  margin: 30px 0;
 }
 
 .observations-section label {
@@ -108,19 +98,7 @@
   flex-wrap: wrap;
 }
 
-.export-btn {
-  background: var(--primary-900);
-  color: white;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
-  border: 1px solid var(--primary-900);
-}
-
-.export-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
-}
-
-/* Estilos para impresión - Idénticos al original */
+/* Estilos para impresión */
 @media print {
   .checklist-section {
     background: white !important;
@@ -151,21 +129,13 @@
     resize: none !important;
     min-height: auto !important;
   }
-
-  /* Elementos que deben estar ocultos en impresión */
-  .export-btn,
-  .primary-btn,
-  .secondary-btn,
-  .danger-btn,
-  .new-list-btn {
-    display: none !important;
-  }
 }
 
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
     text-align: center;
+    margin-bottom: 0;
   }
 
   .section-header h2 {
@@ -180,14 +150,5 @@
   .actions {
     flex-direction: column;
     gap: 12px;
-  }
-
-  .actions button {
-    width: 100%;
-  }
-
-  .progress-section,
-  .observations-section {
-    padding: 16px;
   }
 }

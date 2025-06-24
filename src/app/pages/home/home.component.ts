@@ -1,406 +1,227 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { StorageService } from '../../services/storage.service';
-import { ToastService } from '../../services/toast.service';
-import {
-  SavedList,
-  ConfirmData,
-  AlertData,
-  ModalData,
-} from '../../models/task.interface';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
+import { ListCardComponent } from '../../shared/components/list-card/list-card.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { AlertModalComponent } from '../../shared/components/alert-modal/alert-modal.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ExportImportDropdownComponent } from '../../shared/components/export-import-dropdown/export-import-dropdown.component';
+import { StorageProgressIndicatorComponent } from '../../shared/components/storage-progress-indicator/storage-progress-indicator.component';
+import { ButtonComponent } from '../../shared/atomic/buttons';
+import { HomeStateService } from './home-state.service';
+import { SavedList } from '../../models/task.interface';
 
-/**
- * Componente principal que muestra la pantalla de inicio con las listas guardadas
- */
+// Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    SearchInputComponent,
+    ListCardComponent,
+    EmptyStateComponent,
     ConfirmModalComponent,
     AlertModalComponent,
     ModalComponent,
     ExportImportDropdownComponent,
+    StorageProgressIndicatorComponent,
+    ButtonComponent,
   ],
+  providers: [HomeStateService],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit {
-  /** Lista de listas guardadas */
-  savedLists: SavedList[] = [];
-  /** Porcentaje de almacenamiento usado */
-  storagePercentage = 0;
+export class HomeComponent implements OnInit, OnDestroy {
+  // Observables públicos para el template
+  public savedLists$!: Observable<SavedList[]>;
+  public filteredLists$!: Observable<SavedList[]>;
+  public storagePercentage$!: Observable<number>;
+  public modalState$!: Observable<any>;
+  public selectionState$!: Observable<any>;
+  public searchState$!: Observable<any>;
+  public selectedCount$!: Observable<number>;
 
-  /** Controla la visibilidad del modal de confirmación */
-  showConfirmModal = false;
-  /** Datos para el modal de confirmación */
-  confirmModalData: ConfirmData | null = null;
-  /** Lista que se eliminará tras confirmación */
-  listToDelete: SavedList | null = null;
+  // Subject para limpiar subscripciones
+  private readonly destroy$ = new Subject<void>();
 
-  /** Controla la visibilidad del modal de alerta */
-  showAlertModal = false;
-  /** Datos para el modal de alerta */
-  alertModalData: AlertData | null = null;
-
-  /** Controla la visibilidad del modal de renombrar */
-  showRenameModal = false;
-  /** Datos para el modal de renombrar */
-  renameModalData: ModalData | null = null;
-  /** Lista que se renombrará */
-  listToRename: SavedList | null = null;
-
-  /** Modo de selección masiva activado */
-  isSelectionMode = false;
-  /** IDs de listas seleccionadas para eliminación masiva */
-  selectedListIds = new Set<string>();
-
-  /** Término de búsqueda para filtrar listas */
+  // Propiedades para el template (usando async pipe donde sea posible)
   searchTerm = '';
-  /** Listas filtradas por búsqueda */
-  filteredLists: SavedList[] = [];
 
-  constructor(
-    private router: Router,
-    private storageService: StorageService,
-    private toastService: ToastService
-  ) {}
+  constructor(private homeStateService: HomeStateService) {
+    // Inicializar observables en el constructor
+    this.savedLists$ = this.homeStateService.savedLists$;
+    this.filteredLists$ = this.homeStateService.filteredLists$;
+    this.storagePercentage$ = this.homeStateService.storagePercentage$;
+    this.modalState$ = this.homeStateService.modalState$;
+    this.selectionState$ = this.homeStateService.selectionState$;
+    this.searchState$ = this.homeStateService.searchState$;
+    this.selectedCount$ = this.homeStateService.selectedCount$;
+  }
 
-  /**
-   * Inicializa el componente cargando las listas guardadas y el indicador de almacenamiento
-   */
+  // Inicializa el componente
   ngOnInit(): void {
-    this.loadSavedLists();
-    this.updateStorageIndicator();
-  }
+    this.homeStateService.initialize();
 
-  /**
-   * Carga las listas guardadas desde el servicio de almacenamiento
-   */
-  loadSavedLists(): void {
-    this.savedLists = this.storageService.getSavedLists();
-    this.updateFilteredLists();
-  }
-
-  /**
-   * Actualiza el indicador de porcentaje de almacenamiento usado
-   */
-  updateStorageIndicator(): void {
-    this.storagePercentage = this.storageService.getStoragePercentage();
-  }
-
-  /**
-   * Navega a la pantalla de creación de nueva lista (como goToNewList del original)
-   */
-  async goToNewList(): Promise<void> {
-    // TODO: Verificar si hay cambios sin guardar cuando implementemos el estado global
-    // Por ahora navegar directamente
-    this.router.navigate(['/new-list']);
-  }
-
-  /**
-   * Carga una lista específica para su edición
-   * @param listId ID de la lista a cargar
-   */
-  loadList(listId: string): void {
-    const list = this.savedLists.find((l) => l.id === listId);
-    if (list) {
-      this.toastService.showAlert(`Lista "${list.name}" cargada`, 'success');
-    }
-    this.router.navigate(['/checklist', listId]);
-  }
-
-  /**
-   * Muestra el modal de confirmación para eliminar una lista
-   * @param list Lista que se desea eliminar
-   */
-  confirmDeleteList(list: SavedList): void {
-    this.listToDelete = list;
-    this.confirmModalData = {
-      title: 'Eliminar lista',
-      message: `¿Estás seguro de que quieres eliminar la lista "${
-        list.name || 'Sin nombre'
-      }"? Esta acción no se puede deshacer.`,
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
-    };
-    this.showConfirmModal = true;
-  }
-
-  /**
-   * Elimina la lista confirmada y muestra una alerta con el resultado
-   */
-  deleteConfirmedList(): void {
-    if (this.selectedListIds.size > 0) {
-      // Eliminación masiva
-      this.deleteSelectedLists();
-    } else if (this.listToDelete) {
-      // Eliminación individual
-      try {
-        this.storageService.deleteList(this.listToDelete.id);
-        this.loadSavedLists();
-        this.updateStorageIndicator();
-
-        this.toastService.showAlert('Lista eliminada', 'info');
-      } catch (error) {
-        this.alertModalData = {
-          message: 'Error al eliminar la lista',
-          type: 'danger',
-        };
-        this.showAlertModal = true;
-      }
-    }
-
-    // Cerrar el modal de confirmación y limpiar datos
-    this.showConfirmModal = false;
-    this.confirmModalData = null;
-    this.listToDelete = null;
-  }
-
-  /**
-   * Cancela la eliminación de la lista
-   */
-  cancelDelete(): void {
-    this.showConfirmModal = false;
-    this.confirmModalData = null;
-    this.listToDelete = null;
-  }
-
-  /**
-   * Cierra el modal de alerta
-   */
-  closeAlert(): void {
-    this.showAlertModal = false;
-  }
-
-  /**
-   * Formatea una fecha en string al formato local español
-   * @param dateString Fecha en formato string
-   * @returns Fecha formateada
-   */
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
-
-  /**
-   * Calcula el porcentaje de progreso de una lista
-   * @param list Lista para calcular el progreso
-   * @returns Porcentaje de tareas completadas
-   */
-  getProgressPercentage(list: SavedList): number {
-    return list.tasksCount > 0
-      ? (list.completedCount / list.tasksCount) * 100
-      : 0;
-  }
-
-  /**
-   * Muestra el modal para renombrar una lista
-   * @param list Lista que se desea renombrar
-   */
-  openRenameModal(list: SavedList): void {
-    this.listToRename = list;
-    this.renameModalData = {
-      title: 'Renombrar Lista',
-      label: 'Nuevo nombre de la lista:',
-      placeholder: 'Nombre de la lista...',
-      currentValue: list.name || '',
-    };
-    this.showRenameModal = true;
-  }
-
-  /**
-   * Renombra la lista con el nuevo nombre proporcionado
-   * @param newName Nuevo nombre para la lista
-   */
-  renameList(newName: string): void {
-    if (!this.listToRename || !newName.trim()) {
-      this.closeRenameModal();
-      return;
-    }
-
-    try {
-      this.storageService.renameList(this.listToRename.id, newName.trim());
-      this.toastService.showAlert(`Lista renombrada a "${newName}"`, 'success');
-      this.loadSavedLists(); // Recargar las listas para reflejar el cambio
-      this.closeRenameModal();
-    } catch (error) {
-      console.error('Error renaming list:', error);
-      this.toastService.showAlert('Error al renombrar la lista', 'danger');
-    }
-  }
-
-  /**
-   * Cierra el modal de renombrar y limpia los datos relacionados
-   */
-  closeRenameModal(): void {
-    this.showRenameModal = false;
-    this.renameModalData = null;
-    this.listToRename = null;
-  }
-
-  /**
-   * Maneja la actualización de listas después de importar
-   */
-  onListsUpdated(): void {
-    this.loadSavedLists();
-    this.updateStorageIndicator();
-  }
-
-  /**
-   * Activa o desactiva el modo de selección masiva
-   */
-  toggleSelectionMode(): void {
-    this.isSelectionMode = !this.isSelectionMode;
-    if (!this.isSelectionMode) {
-      this.selectedListIds.clear();
-    }
-  }
-
-  /**
-   * Selecciona o deselecciona una lista
-   */
-  toggleListSelection(listId: string): void {
-    if (this.selectedListIds.has(listId)) {
-      this.selectedListIds.delete(listId);
-    } else {
-      this.selectedListIds.add(listId);
-    }
-  }
-
-  /**
-   * Verifica si una lista está seleccionada
-   */
-  isListSelected(listId: string): boolean {
-    return this.selectedListIds.has(listId);
-  }
-
-  /**
-   * Selecciona todas las listas
-   */
-  selectAllLists(): void {
-    this.selectedListIds.clear();
-    this.savedLists.forEach((list) => this.selectedListIds.add(list.id));
-  }
-
-  /**
-   * Deselecciona todas las listas
-   */
-  deselectAllLists(): void {
-    this.selectedListIds.clear();
-  }
-
-  /**
-   * Obtiene el número de listas seleccionadas
-   */
-  getSelectedCount(): number {
-    return this.selectedListIds.size;
-  }
-
-  /**
-   * Confirma la eliminación masiva de listas seleccionadas
-   */
-  confirmDeleteSelected(): void {
-    if (this.selectedListIds.size === 0) {
-      this.toastService.showAlert(
-        'Selecciona al menos una lista para eliminar',
-        'warning'
-      );
-      return;
-    }
-
-    this.confirmModalData = {
-      title: 'Eliminar Listas Seleccionadas',
-      message: `¿Estás seguro de que deseas eliminar ${
-        this.selectedListIds.size
-      } lista${
-        this.selectedListIds.size > 1 ? 's' : ''
-      }? Esta acción no se puede deshacer.`,
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
-    };
-    this.showConfirmModal = true;
-  }
-
-  /**
-   * Ejecuta la eliminación masiva después de confirmación
-   */
-  private deleteSelectedLists(): void {
-    try {
-      const deletedCount = this.selectedListIds.size;
-      const selectedIds = Array.from(this.selectedListIds);
-
-      selectedIds.forEach((listId) => {
-        this.storageService.deleteList(listId);
+    // Suscribirse al término de búsqueda para el two-way binding
+    this.homeStateService.searchState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.searchTerm = state.searchTerm;
       });
+  }
 
-      this.loadSavedLists();
-      this.updateStorageIndicator();
-      this.selectedListIds.clear();
-      this.isSelectionMode = false;
+  // Limpia las subscripciones al destruir el componente
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-      this.toastService.showAlert(
-        `${deletedCount} lista${
-          deletedCount > 1 ? 's eliminadas' : ' eliminada'
-        } correctamente`,
-        'success'
-      );
-    } catch (error) {
-      console.error('Error eliminando listas:', error);
-      this.toastService.showAlert('Error al eliminar las listas', 'danger');
+  // ========== DELEGACIÓN DE MÉTODOS AL SERVICE ==========
+
+  // Navega a la pantalla de creación de nueva lista
+  async goToNewList(): Promise<void> {
+    await this.homeStateService.goToNewList();
+  }
+
+  // Carga una lista específica para su edición
+  loadList(listId: string): void {
+    this.homeStateService.loadList(listId);
+  }
+
+  // Muestra el modal de confirmación para eliminar una lista
+  confirmDeleteList(list: SavedList): void {
+    this.homeStateService.confirmDeleteList(list);
+  }
+
+  // Elimina la lista confirmada
+  deleteConfirmedList(): void {
+    this.homeStateService.deleteConfirmedList();
+  }
+
+  // Cancela la eliminación de la lista
+  cancelDelete(): void {
+    this.homeStateService.cancelDelete();
+  }
+
+  // Cierra el modal de alerta
+  closeAlert(): void {
+    this.homeStateService.closeAlert();
+  }
+
+  // Muestra el modal para renombrar una lista
+  openRenameModal(list: SavedList): void {
+    this.homeStateService.openRenameModal(list);
+  }
+
+  // Renombra la lista con el nuevo nombre proporcionado
+  renameList(newName: string): void {
+    this.homeStateService.renameList(newName);
+  }
+
+  // Cierra el modal de renombrar
+  closeRenameModal(): void {
+    this.homeStateService.closeRenameModal();
+  }
+
+  // Maneja la actualización de listas después de importar
+  onListsUpdated(): void {
+    this.homeStateService.onListsUpdated();
+  }
+
+  // Activa o desactiva el modo de selección masiva
+  toggleSelectionMode(): void {
+    this.homeStateService.toggleSelectionMode();
+  }
+
+  // Selecciona o deselecciona una lista
+  toggleListSelection(listId: string): void {
+    this.homeStateService.toggleListSelection(listId);
+  }
+
+  // Verifica si una lista está seleccionada
+  isListSelected(listId: string): boolean {
+    return this.homeStateService.isListSelected(listId);
+  }
+
+  // Selecciona todas las listas
+  selectAllLists(): void {
+    this.homeStateService.selectAllLists();
+  }
+
+  // Deselecciona todas las listas
+  deselectAllLists(): void {
+    this.homeStateService.deselectAllLists();
+  }
+
+  // Confirma la eliminación masiva de listas seleccionadas
+  confirmDeleteSelected(): void {
+    this.homeStateService.confirmDeleteSelected();
+  }
+
+  // Maneja el cambio en el término de búsqueda
+  onSearchChange(searchTerm?: string): void {
+    if (searchTerm !== undefined) {
+      this.searchTerm = searchTerm;
     }
+    this.homeStateService.updateSearchTerm(this.searchTerm);
   }
 
-  /**
-   * Actualiza la lista filtrada basada en el término de búsqueda
-   */
-  private updateFilteredLists(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredLists = [...this.savedLists];
-    } else {
-      const searchTermLower = this.searchTerm.toLowerCase();
-      this.filteredLists = this.savedLists.filter(
-        (list) =>
-          (list.name || 'Lista sin nombre')
-            .toLowerCase()
-            .includes(searchTermLower) ||
-          (list.preview || '').toLowerCase().includes(searchTermLower)
-      );
-    }
-  }
-
-  /**
-   * Obtiene las listas filtradas por búsqueda
-   */
-  getFilteredLists(): SavedList[] {
-    return this.filteredLists;
-  }
-
-  /**
-   * Maneja el cambio en el término de búsqueda
-   */
-  onSearchChange(): void {
-    this.updateFilteredLists();
-  }
-
-  /**
-   * Limpia el término de búsqueda
-   */
+  // Limpia el término de búsqueda
   clearSearch(): void {
     this.searchTerm = '';
-    this.updateFilteredLists();
+    this.homeStateService.clearSearch();
+  }
+
+  // Maneja el clic en una tarjeta de lista
+  onListCardClick(listId: string): void {
+    const selectionState = this.homeStateService.getCurrentSelectionState();
+    if (selectionState.isSelectionMode) {
+      this.toggleListSelection(listId);
+    } else {
+      this.loadList(listId);
+    }
+  }
+
+  // ========== MÉTODOS UTILITARIOS ==========
+
+  // Formatea una fecha en string al formato local español
+  formatDate(dateString: string): string {
+    return this.homeStateService.formatDate(dateString);
+  }
+
+  // Calcula el porcentaje de progreso de una lista
+  getProgressPercentage(list: SavedList): number {
+    return this.homeStateService.getProgressPercentage(list);
+  }
+
+  // ========== MÉTODOS SÍNCRONOS PARA EL TEMPLATE ==========
+  // Estos métodos devuelven valores actuales para uso inmediato en el template
+
+  // Obtiene las listas filtradas para uso síncrono en el template
+  getFilteredLists(): SavedList[] {
+    // Si necesitas acceso síncrono a las listas filtradas
+    const currentLists = this.homeStateService.getCurrentSavedLists();
+    const currentSearchTerm = this.homeStateService.getCurrentSearchTerm();
+
+    if (!currentSearchTerm.trim()) {
+      return [...currentLists];
+    }
+
+    const searchTermLower = currentSearchTerm.toLowerCase();
+    return currentLists.filter(
+      (list) =>
+        (list.name || 'Lista sin nombre')
+          .toLowerCase()
+          .includes(searchTermLower) ||
+        (list.preview || '').toLowerCase().includes(searchTermLower)
+    );
+  }
+
+  // Obtiene el número de listas seleccionadas de forma síncrona
+  getSelectedCount(): number {
+    return this.homeStateService.getCurrentSelectionState().selectedListIds
+      .size;
   }
 }

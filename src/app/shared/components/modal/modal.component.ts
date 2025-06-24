@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ModalData } from '../../../models/task.interface';
+import { ButtonComponent } from '../../atomic/buttons';
+import { InputComponent } from '../../atomic/inputs';
 
 /**
  * Componente modal reutilizable para entrada de texto.
@@ -10,7 +11,7 @@ import { ModalData } from '../../../models/task.interface';
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ButtonComponent, InputComponent],
   template: `
     <div
       class="modal"
@@ -21,24 +22,43 @@ import { ModalData } from '../../../models/task.interface';
       <div class="modal-content">
         <div class="modal-header">
           <h3>{{ data?.title || 'Agregar elemento' }}</h3>
-          <button class="close-modal-btn" (click)="close()">
-            <span class="material-icons-outlined">close</span>
-          </button>
+          <app-button
+            type="icon"
+            iconLeft="close"
+            size="sm"
+            extraClasses="close-modal-btn"
+            (clickEvent)="close()"
+          >
+          </app-button>
         </div>
         <div class="modal-body">
-          <label for="modalTextarea">{{ data?.label || 'Descripción:' }}</label>
-          <textarea
-            id="modalTextarea"
-            [(ngModel)]="inputValue"
+          <app-input
+            inputId="modalTextarea"
+            [label]="data?.label || 'Descripción:'"
             [placeholder]="data?.placeholder || 'Escribe aquí...'"
-            rows="4"
-            (keydown)="onKeyDown($event)"
-          >
-          </textarea>
+            [isTextarea]="true"
+            [rows]="4"
+            [(value)]="inputValue"
+            (keydownEvent)="onKeyDown($event)"
+            size="md"
+            variant="default"
+          ></app-input>
         </div>
         <div class="modal-footer">
-          <button class="secondary-btn" (click)="close()">Cancelar</button>
-          <button class="primary-btn" (click)="confirm()">Agregar</button>
+          <app-button
+            type="secondary"
+            text="Cancelar"
+            size="md"
+            (clickEvent)="close()"
+          >
+          </app-button>
+          <app-button
+            type="primary"
+            text="Agregar"
+            size="md"
+            (clickEvent)="confirm()"
+          >
+          </app-button>
         </div>
       </div>
     </div>

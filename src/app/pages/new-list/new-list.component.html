@@ -1,0 +1,73 @@
+<div class="input-section">
+  <!-- Sección de encabezado -->
+  <div class="input-header">
+    <app-button
+      type="secondary"
+      text="Volver"
+      iconLeft="home"
+      size="md"
+      (clickEvent)="backToHome()"
+    >
+    </app-button>
+    <h2>Nueva Lista</h2>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Sección de entrada de tareas -->
+  <div class="input-container">
+    <app-input
+      inputId="taskInput"
+      label="Ingresa tus tareas separadas por comas:"
+      placeholder="Comer, dormir, etc."
+      [isTextarea]="true"
+      [rows]="3"
+      [disabled]="isGenerating"
+      [(value)]="taskInput"
+      (valueChange)="onTaskInputChange()"
+      (keydownEvent)="onKeyPress($event)"
+      size="md"
+      variant="default"
+    ></app-input>
+
+    <app-button
+      type="primary"
+      text="{{ isGenerating ? 'Generando...' : 'Generar Checklist' }}"
+      size="md"
+      [disabled]="!taskInput.trim() || isGenerating"
+      (clickEvent)="generateChecklist()"
+    >
+    </app-button>
+  </div>
+
+  <!-- Sección de ejemplo -->
+  <div class="example-section">
+    <h3>💡 Ejemplo de uso:</h3>
+    <div class="example-input">
+      <strong>Input:</strong> Cliente, Vehículos, Reclamos, Seguimiento de
+      pólizas
+    </div>
+    <div class="example-result">
+      <strong>Resultado:</strong>
+      <ul>
+        <li>☐ Cliente</li>
+        <li>☐ Vehículos</li>
+        <li>☐ Reclamos</li>
+        <li>☐ Seguimiento de pólizas</li>
+      </ul>
+      <p class="example-note">
+        ✨ Luego podrás agregar subtareas, errores, observaciones y más!
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Sección de modal -->
+
+<!-- Modal de confirmación -->
+<app-confirm-modal
+  [isVisible]="showConfirmModal"
+  [data]="confirmModalData"
+  (confirmed)="onConfirmAction()"
+  (cancelled)="onCancelAction()"
+>
+</app-confirm-modal>

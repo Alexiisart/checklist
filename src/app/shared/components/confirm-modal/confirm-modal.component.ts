@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmData } from '../../../models/task.interface';
+import { ButtonComponent } from '../../atomic/buttons';
 
 /**
  * Componente modal de confirmación.
@@ -9,7 +10,7 @@ import { ConfirmData } from '../../../models/task.interface';
 @Component({
   selector: 'app-confirm-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   template: `
     <div
       class="modal"
@@ -20,9 +21,14 @@ import { ConfirmData } from '../../../models/task.interface';
       <div class="modal-content" style="border-width: 1px">
         <div class="modal-header" style="border-bottom-width: 1px">
           <h3>{{ data?.title || 'Confirmar acción' }}</h3>
-          <button class="close-modal-btn" (click)="cancel()">
-            <span class="material-icons-outlined">close</span>
-          </button>
+          <app-button
+            type="icon"
+            iconLeft="close"
+            size="sm"
+            extraClasses="close-modal-btn"
+            (clickEvent)="cancel()"
+          >
+          </app-button>
         </div>
         <div class="modal-body">
           <p>
@@ -30,12 +36,20 @@ import { ConfirmData } from '../../../models/task.interface';
           </p>
         </div>
         <div class="modal-footer" style="border-top-width: 1px">
-          <button class="secondary-btn" (click)="cancel()">
-            {{ data?.cancelText || 'Cancelar' }}
-          </button>
-          <button class="primary-btn" (click)="confirm()">
-            {{ data?.confirmText || 'Confirmar' }}
-          </button>
+          <app-button
+            type="secondary"
+            text="{{ data?.cancelText || 'Cancelar' }}"
+            size="md"
+            (clickEvent)="cancel()"
+          >
+          </app-button>
+          <app-button
+            type="primary"
+            text="{{ data?.confirmText || 'Confirmar' }}"
+            size="md"
+            (clickEvent)="confirm()"
+          >
+          </app-button>
         </div>
       </div>
     </div>

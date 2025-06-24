@@ -105,7 +105,38 @@ export class PdfExportService {
         
         .print-checkbox {
           margin-right: 10px;
-          transform: scale(1.2);
+          font-size: 18px;
+          color: #10b981;
+          font-weight: bold;
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #d1d5db;
+          border-radius: 4px;
+          background: white;
+        }
+        
+        .print-checkbox.checked {
+          background: #10b981;
+          border-color: #10b981;
+          color: white;
+        }
+        
+        .print-checkbox-unchecked {
+          margin-right: 10px;
+          font-size: 18px;
+          color: #6b7280;
+          font-weight: bold;
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #d1d5db;
+          border-radius: 4px;
+          background: white;
         }
         
         .print-task-name {
@@ -130,6 +161,38 @@ export class PdfExportService {
         
         .print-subtask-checkbox {
           margin-right: 8px;
+          font-size: 14px;
+          color: #10b981;
+          font-weight: bold;
+          width: 16px;
+          height: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #d1d5db;
+          border-radius: 3px;
+          background: white;
+        }
+        
+        .print-subtask-checkbox.checked {
+          background: #10b981;
+          border-color: #10b981;
+          color: white;
+        }
+        
+        .print-subtask-checkbox-unchecked {
+          margin-right: 8px;
+          font-size: 14px;
+          color: #6b7280;
+          font-weight: bold;
+          width: 16px;
+          height: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #d1d5db;
+          border-radius: 3px;
+          background: white;
         }
         
         .print-subtask-text {
@@ -260,9 +323,11 @@ export class PdfExportService {
       printHTML += `
         <div class="${taskClass}">
           <div class="print-task-header">
-            <input type="checkbox" class="print-checkbox" ${
-              task.completed ? 'checked' : ''
-            } disabled>
+            <span class="${
+              task.completed
+                ? 'print-checkbox checked'
+                : 'print-checkbox-unchecked'
+            }">${task.completed ? '✓' : ''}</span>
             <span class="${taskNameClass}">${task.name}</span>
           </div>
       `;
@@ -275,9 +340,11 @@ export class PdfExportService {
             : 'print-subtask-text';
           printHTML += `
             <div class="print-subtask">
-              <input type="checkbox" class="print-subtask-checkbox" ${
-                subtask.completed ? 'checked' : ''
-              } disabled>
+              <span class="${
+                subtask.completed
+                  ? 'print-subtask-checkbox checked'
+                  : 'print-subtask-checkbox-unchecked'
+              }">${subtask.completed ? '✓' : ''}</span>
               <span class="${subtaskTextClass}">${subtask.name}</span>
             </div>
           `;

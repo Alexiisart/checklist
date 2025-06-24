@@ -25,6 +25,9 @@
 
 .input-container {
   background: var(--color-surface-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
@@ -96,17 +99,6 @@ textarea {
   font-size: 0.875rem;
   color: var(--color-text-muted);
   font-style: italic;
-}
-
-.primary-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.primary-btn:disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-xs);
 }
 
 @media (max-width: 768px) {

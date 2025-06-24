@@ -1,18 +1,19 @@
 <div class="dropdown-container">
-  <button
-    class="dropdown-toggle"
-    (click)="toggleDropdown()"
-    [class.active]="stateService.isDropdownOpen()"
+  <app-button
+    type="secondary"
+    text="Exportar/Importar"
+    iconLeft="import_export"
+    iconRight="expand_more"
+    size="sm"
+    [extraClasses]="
+      stateService.isDropdownOpen()
+        ? 'dropdown-toggle active'
+        : 'dropdown-toggle'
+    "
     title="Opciones de exportar/importar"
+    (clickEvent)="toggleDropdown()"
   >
-    <span class="material-icons-outlined">import_export</span>
-    <span class="dropdown-text">Exportar/Importar</span>
-    <span
-      class="material-icons-outlined dropdown-icon"
-      [class.rotated]="stateService.isDropdownOpen()"
-      >expand_more</span
-    >
-  </button>
+  </app-button>
 
   @if (stateService.isDropdownOpen()) {
   <div class="dropdown-menu" (click)="$event.stopPropagation()">
@@ -20,15 +21,25 @@
     <div class="dropdown-section">
       <div class="section-title">Exportar</div>
 
-      <button class="dropdown-item" (click)="exportAll()">
-        <span class="material-icons-outlined">download</span>
-        <span>Exportar todas las listas</span>
-      </button>
+      <app-button
+        type="ghost"
+        text="Exportar todas las listas"
+        iconLeft="download"
+        size="sm"
+        extraClasses="dropdown-item"
+        (clickEvent)="exportAll()"
+      >
+      </app-button>
 
-      <button class="dropdown-item" (click)="toggleSelectionMode()">
-        <span class="material-icons-outlined">checklist</span>
-        <span>Exportar listas seleccionadas</span>
-      </button>
+      <app-button
+        type="ghost"
+        text="Exportar listas seleccionadas"
+        iconLeft="checklist"
+        size="sm"
+        extraClasses="dropdown-item"
+        (clickEvent)="toggleSelectionMode()"
+      >
+      </app-button>
     </div>
 
     <div class="dropdown-divider"></div>
@@ -37,10 +48,15 @@
     <div class="dropdown-section">
       <div class="section-title">Importar</div>
 
-      <button class="dropdown-item" (click)="triggerFileInput()">
-        <span class="material-icons-outlined">upload</span>
-        <span>Importar listas desde archivo</span>
-      </button>
+      <app-button
+        type="ghost"
+        text="Importar listas desde archivo"
+        iconLeft="upload"
+        size="sm"
+        extraClasses="dropdown-item"
+        (clickEvent)="triggerFileInput()"
+      >
+      </app-button>
     </div>
 
     <!-- Input de archivo oculto -->
@@ -62,29 +78,45 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3>Seleccionar listas para exportar</h3>
-      <button class="close-modal-btn" (click)="cancelExportSelection()">
-        <span class="material-icons-outlined">close</span>
-      </button>
+      <app-button
+        type="icon"
+        iconLeft="close"
+        size="sm"
+        extraClasses="close-modal-btn"
+        (clickEvent)="cancelExportSelection()"
+      >
+      </app-button>
     </div>
 
     <div class="modal-body">
       <div class="selection-actions">
-        <button class="action-btn secondary" (click)="selectAllExport()">
-          Seleccionar todas
-        </button>
-        <button class="action-btn secondary" (click)="selectNoneExport()">
-          Deseleccionar todas
-        </button>
+        <app-button
+          type="secondary"
+          text="Seleccionar todas"
+          size="sm"
+          (clickEvent)="selectAllExport()"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          text="Deseleccionar todas"
+          size="sm"
+          (clickEvent)="selectNoneExport()"
+        >
+        </app-button>
       </div>
 
       <div class="selection-list">
         @for (list of savedLists; track list.id) {
         <label class="selection-item">
-          <input
-            type="checkbox"
+          <app-checkbox
+            type="primary"
+            size="md"
             [checked]="stateService.isListSelectedForExport(list.id)"
-            (change)="toggleExportListSelection(list.id)"
-          />
+            [inputId]="'export-list-' + list.id"
+            ariaLabel="Seleccionar para exportar"
+            (checkedChange)="toggleExportListSelection(list.id)"
+          ></app-checkbox>
           <span class="list-info">
             <span class="list-name">{{ list.name || "Lista sin nombre" }}</span>
             <span class="list-details"
@@ -97,18 +129,23 @@
     </div>
 
     <div class="modal-footer">
-      <button class="secondary-btn" (click)="cancelExportSelection()">
-        Cancelar
-      </button>
-      <button
-        class="primary-btn"
-        (click)="exportSelected()"
-        [disabled]="stateService.getSelectedExportListsCount() === 0"
+      <app-button
+        type="secondary"
+        text="Cancelar"
+        size="md"
+        (clickEvent)="cancelExportSelection()"
       >
-        Exportar {{ stateService.getSelectedExportListsCount() }} lista{{
-          stateService.getSelectedExportListsCount() !== 1 ? "s" : ""
-        }}
-      </button>
+      </app-button>
+      <app-button
+        type="primary"
+        text="Exportar {{ stateService.getSelectedExportListsCount() }} lista{{
+          stateService.getSelectedExportListsCount() !== 1 ? 's' : ''
+        }}"
+        size="md"
+        [disabled]="stateService.getSelectedExportListsCount() === 0"
+        (clickEvent)="exportSelected()"
+      >
+      </app-button>
     </div>
   </div>
 </div>
@@ -131,9 +168,14 @@ stateService.getImportPreview()) {
   <div class="modal-content list-selection-modal">
     <div class="modal-header">
       <h3>⚠️ Espacio Insuficiente - Selecciona las Listas a Importar</h3>
-      <button class="close-modal-btn" (click)="cancelManualSelection()">
-        <span class="material-icons-outlined">close</span>
-      </button>
+      <app-button
+        type="icon"
+        iconLeft="close"
+        size="sm"
+        extraClasses="close-modal-btn"
+        (clickEvent)="cancelManualSelection()"
+      >
+      </app-button>
     </div>
 
     <div class="modal-body">
@@ -172,13 +214,21 @@ stateService.getImportPreview()) {
           <div class="header-actions">
             <div class="selection-actions">
               @if (canImportAllLists()) {
-              <button class="action-btn secondary" (click)="selectAllImport()">
-                Seleccionar todas
-              </button>
+              <app-button
+                type="secondary"
+                text="Seleccionar todas"
+                size="sm"
+                (clickEvent)="selectAllImport()"
+              >
+              </app-button>
               }
-              <button class="action-btn secondary" (click)="selectNoneImport()">
-                Deseleccionar todas
-              </button>
+              <app-button
+                type="secondary"
+                text="Deseleccionar todas"
+                size="sm"
+                (clickEvent)="selectNoneImport()"
+              >
+              </app-button>
             </div>
             <span class="selection-count"
               >{{ stateService.getSelectedImportListsCount() }} de
@@ -197,15 +247,20 @@ stateService.getImportPreview()) {
               item.size > stateService.getRemainingSpace()
             "
           >
-            <input
-              type="checkbox"
+            <app-checkbox
+              type="primary"
+              size="md"
               [checked]="stateService.isListSelectedForImport(item.list.id)"
               [disabled]="
                 !stateService.isListSelectedForImport(item.list.id) &&
                 item.size > stateService.getRemainingSpace()
               "
-              (change)="toggleListForImport(item.list.id, item.size, $event)"
-            />
+              [inputId]="'import-list-' + item.list.id"
+              ariaLabel="Seleccionar para importar"
+              (checkedChange)="
+                toggleListForImport(item.list.id, item.size, $event)
+              "
+            ></app-checkbox>
             <div class="list-info">
               <div class="list-main-info">
                 <span class="list-name">{{
@@ -238,21 +293,25 @@ stateService.getImportPreview()) {
     </div>
 
     <div class="modal-footer">
-      <button class="secondary-btn" (click)="cancelManualSelection()">
-        Cancelar
-      </button>
-      <button
-        class="primary-btn"
-        (click)="confirmManualSelection()"
-        [disabled]="stateService.getSelectedImportListsCount() === 0"
+      <app-button
+        type="secondary"
+        text="Cancelar"
+        size="md"
+        (clickEvent)="cancelManualSelection()"
       >
-        Importar {{ stateService.getSelectedImportListsCount() }} lista{{
-          stateService.getSelectedImportListsCount() !== 1 ? "s" : ""
-        }}
-        seleccionada{{
-          stateService.getSelectedImportListsCount() !== 1 ? "s" : ""
-        }}
-      </button>
+      </app-button>
+      <app-button
+        type="primary"
+        text="Importar {{ stateService.getSelectedImportListsCount() }} lista{{
+          stateService.getSelectedImportListsCount() !== 1 ? 's' : ''
+        }} seleccionada{{
+          stateService.getSelectedImportListsCount() !== 1 ? 's' : ''
+        }}"
+        size="md"
+        [disabled]="stateService.getSelectedImportListsCount() === 0"
+        (clickEvent)="confirmManualSelection()"
+      >
+      </app-button>
     </div>
   </div>
 </div>

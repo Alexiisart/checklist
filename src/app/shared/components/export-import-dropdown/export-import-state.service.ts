@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ExportImportService } from '../../../services/export-import.service';
 import { ToastService } from '../../../services/toast.service';
 import { SavedList, ConfirmData } from '../../../models/task.interface';

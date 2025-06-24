@@ -1,185 +1,141 @@
 <div class="home-screen">
+  <!-- Header -->
   <div class="home-header">
     <h2>Mis Listas Guardadas</h2>
     <div class="header-actions">
-      @if (!isSelectionMode) { @if (savedLists.length > 0) {
-      <button class="secondary-btn" (click)="toggleSelectionMode()">
-        <span class="material-icons-outlined">checklist</span>
-        Seleccionar
-      </button>
+      <!-- Acciones normales -->
+      @if (!(selectionState$ | async)?.isSelectionMode) { @if ((savedLists$ |
+      async)?.length ?? 0 > 0) {
+      <app-button
+        type="secondary"
+        text="Seleccionar"
+        iconLeft="checklist"
+        (clickEvent)="toggleSelectionMode()"
+      >
+      </app-button>
       }
       <app-export-import-dropdown
-        [savedLists]="savedLists"
+        [savedLists]="(savedLists$ | async) ?? []"
         (listsUpdated)="onListsUpdated()"
       ></app-export-import-dropdown>
 
-      <button class="primary-btn" (click)="goToNewList()">Nueva Lista</button>
-      } @else {
+      <app-button
+        type="primary"
+        text="Nueva Lista"
+        (clickEvent)="goToNewList()"
+      >
+      </app-button>
+      }
+      <!-- Acciones de selección -->
+      @else {
       <div class="selection-actions">
-        <button class="action-btn secondary" (click)="selectAllLists()">
-          Seleccionar todas
-        </button>
-        <button class="action-btn secondary" (click)="deselectAllLists()">
-          Deseleccionar todas
-        </button>
-        <button
-          class="danger-btn"
-          (click)="confirmDeleteSelected()"
-          [disabled]="getSelectedCount() === 0"
+        <app-button
+          type="ghost"
+          text="Seleccionar todas"
+          (clickEvent)="selectAllLists()"
         >
-          <span class="material-icons-outlined">delete</span>
-          Eliminar ({{ getSelectedCount() }})
-        </button>
-        <button class="secondary-btn" (click)="toggleSelectionMode()">
-          Cancelar
-        </button>
+        </app-button>
+        <app-button
+          type="ghost"
+          text="Deseleccionar todas"
+          (clickEvent)="deselectAllLists()"
+        >
+        </app-button>
+        <app-button
+          type="danger"
+          text="Eliminar ({{ selectedCount$ | async }})"
+          iconLeft="delete"
+          [disabled]="(selectedCount$ | async) === 0"
+          (clickEvent)="confirmDeleteSelected()"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          text="Cancelar"
+          (clickEvent)="toggleSelectionMode()"
+        >
+        </app-button>
       </div>
       }
     </div>
   </div>
 
   <!-- Indicador de almacenamiento -->
-  @if (storagePercentage > 60) {
-  <div class="storage-indicator">
-    <div class="storage-header">
-      <span class="material-icons-outlined">storage</span>
-      <span class="storage-text">Espacio usado: {{ storagePercentage }}%</span>
-    </div>
-    <div class="storage-progress">
-      <div
-        class="storage-progress-fill"
-        [style.width.%]="storagePercentage"
-      ></div>
-    </div>
-    @if (storagePercentage > 80) {
-    <p class="storage-warning">
-      ⚠️ Espacio casi lleno. Considera eliminar listas antiguas.
-    </p>
-    }
-  </div>
-  }
+  <app-storage-progress-indicator
+    [storagePercentage]="(storagePercentage$ | async) ?? 0"
+  >
+  </app-storage-progress-indicator>
 
   <!-- Lista de cards guardadas -->
-  @if (savedLists.length > 0) {
+  @if ((savedLists$ | async)?.length ?? 0 > 0) {
   <div class="saved-lists-container">
     <!-- Barra de búsqueda -->
-    <div class="search-container">
-      <div class="search-input-wrapper">
-        <span class="material-icons-outlined search-icon">search</span>
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Buscar listas..."
-          [(ngModel)]="searchTerm"
-          (input)="onSearchChange()"
-        />
-        @if (searchTerm) {
-        <button class="clear-search-btn" (click)="clearSearch()">
-          <span class="material-icons-outlined">close</span>
-        </button>
-        }
-      </div>
-    </div>
+    <app-search-input
+      [searchTerm]="searchTerm"
+      placeholder="Buscar listas..."
+      (searchChange)="onSearchChange($event)"
+      (clearSearch)="clearSearch()"
+    >
+    </app-search-input>
 
     <!-- Grid de listas -->
     <div class="lists-grid">
-      @for (list of getFilteredLists(); track list.id) {
-      <div
-        class="list-card"
-        [class.selection-mode]="isSelectionMode"
-        [class.selected]="isListSelected(list.id)"
-        (click)="
-          isSelectionMode ? toggleListSelection(list.id) : loadList(list.id)
-        "
+      @for (list of filteredLists$ | async; track list.id) {
+      <app-list-card
+        [list]="list"
+        [isSelectionMode]="(selectionState$ | async)?.isSelectionMode ?? false"
+        [isSelected]="isListSelected(list.id)"
+        [formattedDate]="formatDate(list.date)"
+        [progressPercentage]="getProgressPercentage(list)"
+        (cardClick)="onListCardClick($event)"
+        (toggleSelection)="toggleListSelection($event)"
+        (rename)="openRenameModal($event)"
+        (delete)="confirmDeleteList($event)"
       >
-        @if (isSelectionMode) {
-        <div class="selection-checkbox">
-          <input
-            type="checkbox"
-            [checked]="isListSelected(list.id)"
-            (click)="$event.stopPropagation()"
-            (change)="toggleListSelection(list.id)"
-          />
-        </div>
-        }
-        <div class="list-card-header">
-          <div class="title-section">
-            <h3 class="list-card-title">
-              {{ list.name || "Lista sin nombre" }}
-            </h3>
-            @if (!isSelectionMode) {
-            <button
-              class="rename-list-btn"
-              (click)="openRenameModal(list); $event.stopPropagation()"
-              title="Renombrar lista"
-            >
-              <span class="material-icons-outlined">edit</span>
-            </button>
-            }
-          </div>
-          <span class="list-card-date">{{ formatDate(list.date) }}</span>
-        </div>
-        <p class="list-card-preview">{{ list.preview }}</p>
-        <div class="list-card-stats">
-          <span
-            >{{ list.completedCount }} de
-            {{ list.tasksCount }} completadas</span
-          >
-        </div>
-        <div class="list-card-progress">
-          <div
-            class="list-card-progress-bar"
-            [style.width.%]="getProgressPercentage(list)"
-          ></div>
-        </div>
-        @if (!isSelectionMode) {
-        <div class="list-card-actions" (click)="$event.stopPropagation()">
-          <button
-            class="delete-list-btn"
-            (click)="confirmDeleteList(list)"
-            title="Eliminar lista"
-          >
-            <span class="material-icons-outlined">delete</span>
-          </button>
-        </div>
-        }
-      </div>
+      </app-list-card>
       }
     </div>
   </div>
   }
 
   <!-- Estado vacío -->
-  @if (savedLists.length === 0) {
-  <div class="empty-state">
-    <span class="material-icons-outlined empty-icon">checklist</span>
-    <h3>No tienes listas guardadas</h3>
-    <p>Crea tu primera lista para comenzar a organizar tus tareas diarias</p>
-    <button class="primary-btn" (click)="goToNewList()">
-      Crear Primera Lista
-    </button>
-  </div>
+  @if ((savedLists$ | async)?.length === 0) {
+  <app-empty-state
+    icon="checklist"
+    title="No tienes listas guardadas"
+    message="Crea tu primera lista para comenzar a organizar tus tareas diarias"
+    buttonText="Crear Primera Lista"
+    buttonType="primary"
+    buttonSize="lg"
+    (buttonClick)="goToNewList()"
+  >
+  </app-empty-state>
   }
 </div>
 
+<!-- Modales -->
+
+<!-- Confirmar eliminación de lista -->
 <app-confirm-modal
-  [isVisible]="showConfirmModal"
-  [data]="confirmModalData"
+  [isVisible]="(modalState$ | async)?.showConfirmModal ?? false"
+  [data]="(modalState$ | async)?.confirmModalData"
   (confirmed)="deleteConfirmedList()"
   (cancelled)="cancelDelete()"
 >
 </app-confirm-modal>
 
+<!-- Alertas -->
 <app-alert-modal
-  [isVisible]="showAlertModal"
-  [data]="alertModalData"
+  [isVisible]="(modalState$ | async)?.showAlertModal ?? false"
+  [data]="(modalState$ | async)?.alertModalData"
   (closed)="closeAlert()"
 >
 </app-alert-modal>
 
+<!-- Modal de renombrar lista -->
 <app-modal
-  [isVisible]="showRenameModal"
-  [data]="renameModalData"
+  [isVisible]="(modalState$ | async)?.showRenameModal ?? false"
+  [data]="(modalState$ | async)?.renameModalData"
   (confirmed)="renameList($event)"
   (closed)="closeRenameModal()"
 >

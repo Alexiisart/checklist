@@ -5,7 +5,6 @@ import {
   Output,
   HostListener,
   ElementRef,
-  OnInit,
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +14,8 @@ import { ExportImportStateService } from './export-import-state.service';
 import { ToastService } from '../../../services/toast.service';
 import { SavedList } from '../../../models/task.interface';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { ButtonComponent } from '../../atomic/buttons';
+import { CheckboxComponent } from '../../atomic/checkboxes';
 
 /**
  * Componente dropdown para opciones de exportar/importar listas
@@ -22,11 +23,16 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 @Component({
   selector: 'app-export-import-dropdown',
   standalone: true,
-  imports: [CommonModule, ConfirmModalComponent],
+  imports: [
+    CommonModule,
+    ConfirmModalComponent,
+    ButtonComponent,
+    CheckboxComponent,
+  ],
   templateUrl: './export-import-dropdown.component.html',
   styleUrls: ['./export-import-dropdown.component.css'],
 })
-export class ExportImportDropdownComponent implements OnInit, OnDestroy {
+export class ExportImportDropdownComponent implements OnDestroy {
   /** Listas guardadas disponibles */
   @Input() savedLists: SavedList[] = [];
 
@@ -42,10 +48,6 @@ export class ExportImportDropdownComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private elementRef: ElementRef
   ) {}
-
-  ngOnInit(): void {
-    /** Suscribirse a cambios de estado si es necesario */
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -183,12 +185,20 @@ export class ExportImportDropdownComponent implements OnInit, OnDestroy {
   }
 
   /** Alterna la selección de una lista para importar */
-  toggleListForImport(listId: string, listSize: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
+  toggleListForImport(
+    listId: string,
+    listSize: number,
+    checked: boolean
+  ): void {
     const success = this.stateService.toggleListForImport(listId, listSize);
 
+    // Si no pudo cambiar el estado (por ejemplo, por límites de espacio),
+    // el checkbox mantendrá su estado anterior automáticamente
     if (!success) {
-      input.checked = !input.checked;
+      this.toastService.showAlert(
+        'No hay suficiente espacio disponible',
+        'warning'
+      );
     }
   }
 

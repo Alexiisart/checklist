@@ -65,24 +65,37 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
       </div>
       @if (!isSelectionMode) {
       <div class="list-card-actions" (click)="$event.stopPropagation()">
-        <app-button
-          type="icon"
-          iconLeft="content_copy"
-          size="sm"
-          title="Duplicar lista"
-          extraClasses="duplicate-list-btn"
-          (clickEvent)="onDuplicate()"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="delete"
-          size="sm"
-          title="Eliminar lista"
-          extraClasses="delete-list-btn"
-          (clickEvent)="onDelete()"
-        >
-        </app-button>
+        <div class="actions-left">
+          <app-button
+            type="icon"
+            iconLeft="open_in_new"
+            size="sm"
+            title="Abrir en nueva pestaña"
+            extraClasses="open-new-tab-btn"
+            (clickEvent)="onOpenInNewTab()"
+          >
+          </app-button>
+        </div>
+        <div class="actions-right">
+          <app-button
+            type="icon"
+            iconLeft="content_copy"
+            size="sm"
+            title="Duplicar lista"
+            extraClasses="duplicate-list-btn"
+            (clickEvent)="onDuplicate()"
+          >
+          </app-button>
+          <app-button
+            type="icon"
+            iconLeft="delete"
+            size="sm"
+            title="Eliminar lista"
+            extraClasses="delete-list-btn"
+            (clickEvent)="onDelete()"
+          >
+          </app-button>
+        </div>
       </div>
       }
     </div>
@@ -179,10 +192,21 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
 
       .list-card-actions {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+      }
+
+      .actions-left {
+        display: flex;
         align-items: center;
         gap: 8px;
-        margin-top: auto;
+      }
+
+      .actions-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
       .title-section .rename-list-btn {
@@ -211,6 +235,11 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
         background: rgba(59, 130, 246, 0.1);
         color: var(--primary-600);
         opacity: 1;
+      }
+
+      .list-card-actions .open-new-tab-btn:hover {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--color-success);
       }
 
       /* Estilos para modo selección */
@@ -311,6 +340,11 @@ export class ListCardComponent {
   @Output() duplicate = new EventEmitter<SavedList>();
 
   /**
+   * Evento emitido cuando se quiere abrir en una nueva pestaña
+   */
+  @Output() openInNewTab = new EventEmitter<string>();
+
+  /**
    * Maneja el clic en la tarjeta
    */
   onCardClick(): void {
@@ -343,5 +377,12 @@ export class ListCardComponent {
    */
   onDelete(): void {
     this.delete.emit(this.list);
+  }
+
+  /**
+   * Maneja el evento de abrir en una nueva pestaña
+   */
+  onOpenInNewTab(): void {
+    this.openInNewTab.emit(this.list.id);
   }
 }

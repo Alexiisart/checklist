@@ -14,6 +14,7 @@ import { HomeStateService } from './home-state.service';
 import { DuplicateListService } from '../../services/functions/duplicate-list.service';
 import { RenameListService } from '../../services/functions/rename-list.service';
 import { DeleteListService } from '../../services/functions/delete-list.service';
+import { OpenNewTabService } from '../../services/functions/open-new-tab.service';
 import { SavedList } from '../../models/task.interface';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
@@ -68,7 +69,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private homeStateService: HomeStateService,
     private duplicateListService: DuplicateListService,
     private renameListService: RenameListService,
-    private deleteListService: DeleteListService
+    private deleteListService: DeleteListService,
+    private openNewTabService: OpenNewTabService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -265,6 +267,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   cancelDelete(): void {
     this.deleteListService.cancelDelete();
+  }
+
+  // Abrir lista en nueva pestaña
+  openListInNewTab(listId: string): void {
+    this.openNewTabService.openListInNewTab(listId);
   }
 
   // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========

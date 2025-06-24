@@ -207,8 +207,20 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.closeAlert();
   }
 
-  // Guarda directamente el progreso sin pedir nombre
+  // Guarda directamente el progreso o pide nombre si no lo tiene
   saveProgress(): void {
     this.stateService.saveProgressDirectly();
+  }
+
+  // Obtiene el texto del botón de guardar según el estado
+  getSaveButtonText(): string {
+    return this.currentList?.name ? 'Guardar' : 'Guardar como...';
+  }
+
+  // Obtiene el tooltip del botón de guardar según el estado
+  getSaveButtonTooltip(): string {
+    return this.currentList?.name
+      ? 'Actualizar la lista guardada'
+      : 'Guardar la lista con un nombre';
   }
 }

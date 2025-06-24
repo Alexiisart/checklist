@@ -61,6 +61,34 @@ export class StorageService {
    */
   saveList(listData: ChecklistData): void {
     try {
+      // Calcular el tamaño que ocupará la nueva lista
+      const listJson = JSON.stringify(listData);
+      const listKey = `list_${listData.id}`;
+      const newListSize = (listJson.length + listKey.length) * 2; // UTF-16
+
+      // Verificar si ya existe la lista (para actualizaciones)
+      const existingData = localStorage.getItem(listKey);
+      const existingSize = existingData
+        ? (existingData.length + listKey.length) * 2
+        : 0;
+
+      // Calcular espacio necesario (diferencia si es actualización, total si es nueva)
+      const spaceNeeded = newListSize - existingSize;
+
+      // Verificar espacio disponible solo si se necesita más espacio
+      if (spaceNeeded > 0) {
+        const currentSize = this.calculateStorageSize();
+        const availableSpace = this.MAX_STORAGE_SIZE - currentSize;
+
+        if (spaceNeeded > availableSpace) {
+          throw new Error(
+            `No hay espacio suficiente. Se necesitan ${this.formatBytes(
+              spaceNeeded
+            )} pero solo hay ${this.formatBytes(availableSpace)} disponibles.`
+          );
+        }
+      }
+
       const existingLists = this.getSavedLists();
       const listIndex = existingLists.findIndex(
         (list) => list.id === listData.id
@@ -85,7 +113,7 @@ export class StorageService {
       }
 
       // Guardar la lista completa
-      localStorage.setItem(`list_${listData.id}`, JSON.stringify(listData));
+      localStorage.setItem(listKey, listJson);
 
       // Guardar el índice de listas
       localStorage.setItem(this.LISTS_KEY, JSON.stringify(existingLists));
@@ -94,6 +122,13 @@ export class StorageService {
       this.checkAndAlertStorageLimits();
     } catch (error) {
       console.error('Error saving list:', error);
+      // Re-lanzar el error original si contiene información específica
+      if (
+        error instanceof Error &&
+        error.message.includes('espacio suficiente')
+      ) {
+        throw error;
+      }
       throw new Error('No se pudo guardar la lista. Espacio insuficiente.');
     }
   }
@@ -189,11 +224,29 @@ export class StorageService {
    */
   calculateStorageSize(): number {
     let totalSize = 0;
+
+    // Solo contar las claves de nuestra aplicación
+    const appKeys = [
+      this.STORAGE_KEY, // 'checklist_data'
+      this.LISTS_KEY, // 'saved_lists'
+    ];
+
+    // Agregar todas las claves de listas individuales (list_*)
     for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        totalSize += localStorage[key].length + key.length;
+      if (localStorage.hasOwnProperty(key) && key.startsWith('list_')) {
+        appKeys.push(key);
       }
     }
+
+    // Calcular tamaño solo de nuestras claves
+    for (const key of appKeys) {
+      const value = localStorage.getItem(key);
+      if (value !== null) {
+        // UTF-16 usa 2 bytes por carácter
+        totalSize += (key.length + value.length) * 2;
+      }
+    }
+
     return totalSize;
   }
 
@@ -223,126 +276,21 @@ export class StorageService {
   }
 
   /**
-   * Obtiene la lista más antigua por fecha de actualización
-   * @returns Lista más antigua o null
-   */
-  getOldestList(): ChecklistData | null {
-    const savedLists = this.getSavedLists();
-    if (savedLists.length === 0) return null;
-
-    let oldestList: ChecklistData | null = null;
-    let oldestDate: Date | null = null;
-
-    for (const savedList of savedLists) {
-      const fullList = this.loadList(savedList.id);
-      if (fullList) {
-        const listDate = new Date(
-          fullList.modifiedDate || fullList.createdDate
-        );
-        if (!oldestDate || listDate < oldestDate) {
-          oldestDate = listDate;
-          oldestList = fullList;
-        }
-      }
-    }
-
-    return oldestList;
-  }
-
-  /**
-   * Elimina automáticamente la lista más antigua para liberar espacio
-   * @returns true si se eliminó una lista
-   */
-  deleteOldestList(): boolean {
-    const oldestList = this.getOldestList();
-    if (oldestList) {
-      this.deleteList(oldestList.id);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Verifica los límites de almacenamiento (igual que el original)
-   * @returns boolean indicando si puede continuar
-   */
-  async checkStorageLimits(): Promise<boolean> {
-    const percentage = this.getStoragePercentage();
-
-    // Si está al 100% o más, ofrecer eliminar automáticamente la más antigua
-    if (percentage >= 100) {
-      const savedLists = this.getSavedLists();
-      if (savedLists.length === 0) {
-        this.toastService.showAlert('No hay espacio disponible', 'danger');
-        return false;
-      }
-
-      // Encontrar la lista más antigua (por fecha de actualización)
-      let oldestList = savedLists[0];
-      for (const list of savedLists) {
-        const oldestDate = new Date(oldestList.date);
-        const currentDate = new Date(list.date);
-        if (currentDate < oldestDate) {
-          oldestList = list;
-        }
-      }
-
-      // En lugar de usar confirm(), retornar false y dejar que el componente maneje la confirmación
-      // El componente deberá implementar showCustomConfirm como en el original
-      this.toastService.showAlert(
-        `¡Almacenamiento lleno! (${percentage.toFixed(
-          1
-        )}%) Elimina listas antiguas para continuar.`,
-        'danger',
-        5000
-      );
-      return false;
-    }
-
-    // Si está entre 90-99%, advertir fuertemente
-    if (percentage >= 90) {
-      this.toastService.showAlert(
-        `¡Almacenamiento casi lleno! (${percentage.toFixed(1)}%)`,
-        'danger',
-        4000
-      );
-    }
-    // Si está entre 70-89%, advertir
-    else if (percentage >= 70) {
-      this.toastService.showAlert(
-        `Almacenamiento alto (${percentage.toFixed(1)}%)`,
-        'warning',
-        3000
-      );
-    }
-
-    return true;
-  }
-
-  /**
    * Verifica automáticamente los límites de almacenamiento y muestra alertas si es necesario
    * Solo para uso interno del sistema de almacenamiento
    */
   checkAndAlertStorageLimits(): void {
     const currentPercentage = this.getStoragePercentage();
 
-    // Si está al 100% o más, eliminar automáticamente la más antigua
+    // Si está al 100% o más, mostrar alerta
     if (currentPercentage >= 100) {
-      const oldestList = this.getOldestList();
-      if (oldestList) {
-        this.toastService.showAlert(
-          `¡Almacenamiento lleno! (${currentPercentage.toFixed(
-            1
-          )}%) Elimina listas antiguas para continuar.`,
-          'danger',
-          5000
-        );
-      } else {
-        this.toastService.showAlert(
-          'No hay espacio disponible y no hay listas para eliminar.',
-          'danger'
-        );
-      }
+      this.toastService.showAlert(
+        `¡Almacenamiento lleno! (${currentPercentage.toFixed(
+          1
+        )}%) Elimina listas antiguas para continuar.`,
+        'danger',
+        5000
+      );
       return;
     }
 

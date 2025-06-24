@@ -332,6 +332,7 @@ export class ChecklistStateService implements OnDestroy {
     this.toastService.showAlert('Lista guardada exitosamente', 'success');
 
     if (this.pendingAction === 'go-home') {
+      this.pendingAction = null; // Limpiar la acción pendiente
       setTimeout(() => {
         this.router.navigate(['/home']);
       }, 1000);
@@ -346,7 +347,7 @@ export class ChecklistStateService implements OnDestroy {
     });
   }
 
-  /** Guarda directamente sin pedir nombre */
+  /** Guarda directamente o pide nombre si no lo tiene */
   saveProgressDirectly(): void {
     const currentState = this.stateSubject.value;
 
@@ -355,10 +356,17 @@ export class ChecklistStateService implements OnDestroy {
       return;
     }
 
-    const currentName =
-      currentState.currentList.name ||
-      `Lista ${new Date().toLocaleDateString()}`;
-    const saved = this.checklistService.saveList(currentName);
+    // Si la lista no tiene nombre, mostrar modal para pedirlo
+    if (
+      !currentState.currentList.name ||
+      currentState.currentList.name.trim() === ''
+    ) {
+      this.showSaveModal();
+      return;
+    }
+
+    // Si ya tiene nombre, guardar directamente
+    const saved = this.checklistService.saveList(currentState.currentList.name);
 
     if (saved) {
       this.updateState({ hasUnsavedChanges: false });
@@ -413,7 +421,34 @@ export class ChecklistStateService implements OnDestroy {
         }
       }
     } else if (this.pendingAction === 'go-home') {
-      this.showSaveModal();
+      // Guardar y ir a home
+      const currentState = this.stateSubject.value;
+      if (currentState.currentList) {
+        // Si la lista ya tiene nombre, guardar directamente
+        if (
+          currentState.currentList.name &&
+          currentState.currentList.name.trim() !== ''
+        ) {
+          const saved = this.checklistService.saveList(
+            currentState.currentList.name
+          );
+          if (saved) {
+            this.toastService.showAlert('Lista guardada', 'success', 1000);
+            setTimeout(() => {
+              this.router.navigate(['/home']);
+            }, 1000);
+          }
+        } else {
+          // Si no tiene nombre, mostrar modal para pedirlo
+          // Mantener la acción pendiente para que después navegue a home
+          this.updateState({
+            showConfirmModal: false,
+            confirmModalData: null,
+          });
+          this.showSaveModal();
+          return; // Salir temprano para no limpiar pendingAction
+        }
+      }
     } else if (this.pendingDeleteTaskId !== null) {
       const currentState = this.stateSubject.value;
       const task = currentState.currentList?.tasks.find(
@@ -425,6 +460,8 @@ export class ChecklistStateService implements OnDestroy {
       this.toastService.showAlert(`Tarea "${taskName}" eliminada`, 'info');
       this.pendingDeleteTaskId = null;
     }
+
+    // Limpiar estado y cerrar modal
     this.pendingAction = null;
     this.closeConfirmModal();
   }

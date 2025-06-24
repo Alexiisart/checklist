@@ -57,7 +57,7 @@ import { ModalComponent } from '../modal/modal.component';
       @if (task.subtasks.length > 0) {
       <div class="subtasks-container">
         <div class="subtasks-label">Subtareas:</div>
-        @for (subtask of task.subtasks; track subtask) {
+        @for (subtask of task.subtasks; track subtask.id) {
         <div class="subtask-item">
           <input
             type="checkbox"
@@ -89,7 +89,7 @@ import { ModalComponent } from '../modal/modal.component';
       <!-- Errores -->
       @if (task.errors.length > 0) {
       <div class="errors-container">
-        @for (error of task.errors; track error) {
+        @for (error of task.errors; track error.id) {
         <div class="error-item">
           <span class="error-text">{{ error.name }}</span>
           <button

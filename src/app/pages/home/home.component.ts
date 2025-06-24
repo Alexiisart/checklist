@@ -209,12 +209,6 @@ export class HomeComponent implements OnInit {
    * Navega a la pantalla de creación de nueva lista (como goToNewList del original)
    */
   async goToNewList(): Promise<void> {
-    // Verificar límites de almacenamiento antes de continuar
-    const hasStorageSpace = this.storageService.checkStorageLimits();
-    if (!hasStorageSpace) {
-      return;
-    }
-
     // TODO: Verificar si hay cambios sin guardar cuando implementemos el estado global
     // Por ahora navegar directamente
     this.router.navigate(['/new-list']);

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { ToastService } from '../../services/toast.service';
@@ -22,6 +23,7 @@ import { ExportImportDropdownComponent } from '../../shared/components/export-im
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ConfirmModalComponent,
     AlertModalComponent,
     ModalComponent,
@@ -60,6 +62,11 @@ export class HomeComponent implements OnInit {
   /** IDs de listas seleccionadas para eliminación masiva */
   selectedListIds = new Set<string>();
 
+  /** Término de búsqueda para filtrar listas */
+  searchTerm = '';
+  /** Listas filtradas por búsqueda */
+  filteredLists: SavedList[] = [];
+
   constructor(
     private router: Router,
     private storageService: StorageService,
@@ -79,6 +86,7 @@ export class HomeComponent implements OnInit {
    */
   loadSavedLists(): void {
     this.savedLists = this.storageService.getSavedLists();
+    this.updateFilteredLists();
   }
 
   /**
@@ -354,5 +362,45 @@ export class HomeComponent implements OnInit {
       console.error('Error eliminando listas:', error);
       this.toastService.showAlert('Error al eliminar las listas', 'danger');
     }
+  }
+
+  /**
+   * Actualiza la lista filtrada basada en el término de búsqueda
+   */
+  private updateFilteredLists(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredLists = [...this.savedLists];
+    } else {
+      const searchTermLower = this.searchTerm.toLowerCase();
+      this.filteredLists = this.savedLists.filter(
+        (list) =>
+          (list.name || 'Lista sin nombre')
+            .toLowerCase()
+            .includes(searchTermLower) ||
+          (list.preview || '').toLowerCase().includes(searchTermLower)
+      );
+    }
+  }
+
+  /**
+   * Obtiene las listas filtradas por búsqueda
+   */
+  getFilteredLists(): SavedList[] {
+    return this.filteredLists;
+  }
+
+  /**
+   * Maneja el cambio en el término de búsqueda
+   */
+  onSearchChange(): void {
+    this.updateFilteredLists();
+  }
+
+  /**
+   * Limpia el término de búsqueda
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.updateFilteredLists();
   }
 }

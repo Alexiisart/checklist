@@ -7,12 +7,11 @@
         <span class="material-icons-outlined">checklist</span>
         Seleccionar
       </button>
-      }
       <app-export-import-dropdown
         [savedLists]="savedLists"
         (listsUpdated)="onListsUpdated()"
       ></app-export-import-dropdown>
-
+      }
       <button class="primary-btn" (click)="goToNewList()">Nueva Lista</button>
       } @else {
       <div class="selection-actions">
@@ -62,67 +61,90 @@
   <!-- Lista de cards guardadas -->
   @if (savedLists.length > 0) {
   <div class="saved-lists-container">
-    @for (list of savedLists; track list.id) {
-    <div
-      class="list-card"
-      [class.selection-mode]="isSelectionMode"
-      [class.selected]="isListSelected(list.id)"
-      (click)="
-        isSelectionMode ? toggleListSelection(list.id) : loadList(list.id)
-      "
-    >
-      @if (isSelectionMode) {
-      <div class="selection-checkbox">
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <span class="material-icons-outlined search-icon">search</span>
         <input
-          type="checkbox"
-          [checked]="isListSelected(list.id)"
-          (click)="$event.stopPropagation()"
-          (change)="toggleListSelection(list.id)"
+          type="text"
+          class="search-input"
+          placeholder="Buscar listas..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
         />
-      </div>
-      }
-      <div class="list-card-header">
-        <div class="title-section">
-          <h3 class="list-card-title">
-            {{ list.name || "Lista sin nombre" }}
-          </h3>
-          @if (!isSelectionMode) {
-          <button
-            class="rename-list-btn"
-            (click)="openRenameModal(list); $event.stopPropagation()"
-            title="Renombrar lista"
-          >
-            <span class="material-icons-outlined">edit</span>
-          </button>
-          }
-        </div>
-        <span class="list-card-date">{{ formatDate(list.date) }}</span>
-      </div>
-      <p class="list-card-preview">{{ list.preview }}</p>
-      <div class="list-card-stats">
-        <span
-          >{{ list.completedCount }} de {{ list.tasksCount }} completadas</span
-        >
-      </div>
-      <div class="list-card-progress">
-        <div
-          class="list-card-progress-bar"
-          [style.width.%]="getProgressPercentage(list)"
-        ></div>
-      </div>
-      @if (!isSelectionMode) {
-      <div class="list-card-actions" (click)="$event.stopPropagation()">
-        <button
-          class="delete-list-btn"
-          (click)="confirmDeleteList(list)"
-          title="Eliminar lista"
-        >
-          <span class="material-icons-outlined">delete</span>
+        @if (searchTerm) {
+        <button class="clear-search-btn" (click)="clearSearch()">
+          <span class="material-icons-outlined">close</span>
         </button>
+        }
+      </div>
+    </div>
+
+    <!-- Grid de listas -->
+    <div class="lists-grid">
+      @for (list of getFilteredLists(); track list.id) {
+      <div
+        class="list-card"
+        [class.selection-mode]="isSelectionMode"
+        [class.selected]="isListSelected(list.id)"
+        (click)="
+          isSelectionMode ? toggleListSelection(list.id) : loadList(list.id)
+        "
+      >
+        @if (isSelectionMode) {
+        <div class="selection-checkbox">
+          <input
+            type="checkbox"
+            [checked]="isListSelected(list.id)"
+            (click)="$event.stopPropagation()"
+            (change)="toggleListSelection(list.id)"
+          />
+        </div>
+        }
+        <div class="list-card-header">
+          <div class="title-section">
+            <h3 class="list-card-title">
+              {{ list.name || "Lista sin nombre" }}
+            </h3>
+            @if (!isSelectionMode) {
+            <button
+              class="rename-list-btn"
+              (click)="openRenameModal(list); $event.stopPropagation()"
+              title="Renombrar lista"
+            >
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            }
+          </div>
+          <span class="list-card-date">{{ formatDate(list.date) }}</span>
+        </div>
+        <p class="list-card-preview">{{ list.preview }}</p>
+        <div class="list-card-stats">
+          <span
+            >{{ list.completedCount }} de
+            {{ list.tasksCount }} completadas</span
+          >
+        </div>
+        <div class="list-card-progress">
+          <div
+            class="list-card-progress-bar"
+            [style.width.%]="getProgressPercentage(list)"
+          ></div>
+        </div>
+        @if (!isSelectionMode) {
+        <div class="list-card-actions" (click)="$event.stopPropagation()">
+          <button
+            class="delete-list-btn"
+            (click)="confirmDeleteList(list)"
+            title="Eliminar lista"
+          >
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+        }
       </div>
       }
     </div>
-    }
   </div>
   }
 

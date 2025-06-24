@@ -5,11 +5,15 @@ import {
   Output,
   HostListener,
   ElementRef,
+  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
 import { ExportImportService } from '../../../services/export-import.service';
+import { ExportImportStateService } from './export-import-state.service';
 import { ToastService } from '../../../services/toast.service';
-import { SavedList, ConfirmData } from '../../../models/task.interface';
+import { SavedList } from '../../../models/task.interface';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 
 /**
@@ -19,201 +23,56 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
   selector: 'app-export-import-dropdown',
   standalone: true,
   imports: [CommonModule, ConfirmModalComponent],
-  template: `
-    <div class="dropdown-container">
-      <button
-        class="dropdown-toggle"
-        (click)="toggleDropdown()"
-        [class.active]="isOpen"
-        title="Opciones de exportar/importar"
-      >
-        <span class="material-icons-outlined">import_export</span>
-        <span class="dropdown-text">Exportar/Importar</span>
-        <span
-          class="material-icons-outlined dropdown-icon"
-          [class.rotated]="isOpen"
-          >expand_more</span
-        >
-      </button>
-
-      @if (isOpen) {
-      <div class="dropdown-menu" (click)="$event.stopPropagation()">
-        <!-- Sección de Exportar -->
-        <div class="dropdown-section">
-          <div class="section-title">Exportar</div>
-
-          <button class="dropdown-item" (click)="exportAll()">
-            <span class="material-icons-outlined">download</span>
-            <span>Exportar todas las listas</span>
-          </button>
-
-          <button class="dropdown-item" (click)="toggleSelectionMode()">
-            <span class="material-icons-outlined">checklist</span>
-            <span>Exportar listas seleccionadas</span>
-          </button>
-        </div>
-
-        <div class="dropdown-divider"></div>
-
-        <!-- Sección de Importar -->
-        <div class="dropdown-section">
-          <div class="section-title">Importar</div>
-
-          <button class="dropdown-item" (click)="triggerFileInput()">
-            <span class="material-icons-outlined">upload</span>
-            <span>Importar listas desde archivo</span>
-          </button>
-        </div>
-
-        <!-- Input de archivo oculto -->
-        <input
-          #fileInput
-          type="file"
-          accept=".json"
-          style="display: none"
-          (change)="onFileSelected($event)"
-        />
-      </div>
-      }
-    </div>
-
-    <!-- Modal de selección múltiple -->
-    @if (selectionMode) {
-    <div class="modal" (click)="onModalOverlayClick($event)">
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Seleccionar listas para exportar</h3>
-          <button class="close-modal-btn" (click)="cancelSelection()">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="selection-actions">
-            <button class="action-btn secondary" (click)="selectAll()">
-              Seleccionar todas
-            </button>
-            <button class="action-btn secondary" (click)="selectNone()">
-              Deseleccionar todas
-            </button>
-          </div>
-
-          <div class="selection-list">
-            @for (list of savedLists; track list.id) {
-            <label class="selection-item">
-              <input
-                type="checkbox"
-                [checked]="selectedLists.has(list.id)"
-                (change)="toggleListSelection(list.id, $event)"
-              />
-              <span class="list-info">
-                <span class="list-name">{{
-                  list.name || 'Lista sin nombre'
-                }}</span>
-                <span class="list-details"
-                  >{{ list.tasksCount }} tareas •
-                  {{ formatDate(list.date) }}</span
-                >
-              </span>
-            </label>
-            }
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="secondary-btn" (click)="cancelSelection()">
-            Cancelar
-          </button>
-          <button
-            class="primary-btn"
-            (click)="exportSelected()"
-            [disabled]="selectedLists.size === 0"
-          >
-            Exportar {{ selectedLists.size }} lista{{
-              selectedLists.size !== 1 ? 's' : ''
-            }}
-          </button>
-        </div>
-      </div>
-    </div>
-    }
-
-    <!-- Modal de confirmación para importar -->
-    <app-confirm-modal
-      [isVisible]="showConfirmModal"
-      [data]="confirmModalData"
-      (confirmed)="onConfirmImport()"
-      (cancelled)="onCancelImport()"
-    >
-    </app-confirm-modal>
-  `,
+  templateUrl: './export-import-dropdown.component.html',
   styleUrls: ['./export-import-dropdown.component.css'],
 })
-export class ExportImportDropdownComponent {
+export class ExportImportDropdownComponent implements OnInit, OnDestroy {
   /** Listas guardadas disponibles */
   @Input() savedLists: SavedList[] = [];
 
   /** Evento emitido cuando se actualiza la lista */
   @Output() listsUpdated = new EventEmitter<void>();
 
-  /** Controla si el dropdown está abierto */
-  isOpen = false;
-
-  /** Controla si está en modo de selección */
-  selectionMode = false;
-
-  /** Set de IDs de listas seleccionadas */
-  selectedLists = new Set<string>();
-
-  /** Controla la visibilidad del modal de confirmación */
-  showConfirmModal = false;
-
-  /** Datos para el modal de confirmación */
-  confirmModalData: ConfirmData | null = null;
-
-  /** Contenido del archivo pendiente de importar */
-  private pendingImportContent: string | null = null;
+  /** Subject para manejar la destrucción del componente */
+  private destroy$ = new Subject<void>();
 
   constructor(
     private exportImportService: ExportImportService,
+    public stateService: ExportImportStateService,
     private toastService: ToastService,
     private elementRef: ElementRef
   ) {}
 
-  /**
-   * Maneja clics fuera del componente para cerrar el dropdown
-   */
+  ngOnInit(): void {
+    /** Suscribirse a cambios de estado si es necesario */
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /** Maneja clics fuera del componente para cerrar dropdown */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.closeDropdown();
+      this.stateService.closeDropdown();
     }
   }
 
-  /**
-   * Maneja clics en el overlay del modal
-   */
+  /** Previene el cierre del modal al hacer clic en el overlay */
   onModalOverlayClick(event: Event): void {
     if (event.target === event.currentTarget) {
-      this.cancelSelection();
+      event.stopPropagation();
     }
   }
 
-  /**
-   * Alterna la visibilidad del dropdown
-   */
+  /** Alterna la visibilidad del dropdown */
   toggleDropdown(): void {
-    this.isOpen = !this.isOpen;
-    if (!this.isOpen) {
-      this.selectionMode = false;
-      this.selectedLists.clear();
-    }
+    this.stateService.toggleDropdown();
   }
 
-  /**
-   * Exporta todas las listas
-   */
+  /** Exporta todas las listas */
   async exportAll(): Promise<void> {
     try {
       if (this.savedLists.length === 0) {
@@ -231,35 +90,34 @@ export class ExportImportDropdownComponent {
         `${this.savedLists.length} listas exportadas correctamente`,
         'success'
       );
-      this.closeDropdown();
+      this.stateService.closeDropdown();
     } catch (error) {
       console.error('Error exporting all lists:', error);
       this.toastService.showAlert('Error al exportar las listas', 'danger');
     }
   }
 
-  /**
-   * Activa el modo de selección de listas
-   */
+  /** Activa el modo de selección de listas para exportar */
   toggleSelectionMode(): void {
     if (this.savedLists.length === 0) {
       this.toastService.showAlert('No hay listas para exportar', 'warning');
       return;
     }
-    this.selectionMode = true;
+    this.stateService.toggleSelectionMode();
   }
 
-  /**
-   * Exporta las listas seleccionadas
-   */
+  /** Exporta las listas seleccionadas */
   async exportSelected(): Promise<void> {
     try {
-      if (this.selectedLists.size === 0) {
+      const selectedCount = this.stateService.getSelectedExportListsCount();
+      if (selectedCount === 0) {
         this.toastService.showAlert('Selecciona al menos una lista', 'warning');
         return;
       }
 
-      const selectedIds = Array.from(this.selectedLists);
+      const selectedIds = Array.from(
+        this.stateService.getStateSnapshot().selectedExportLists
+      );
       const jsonData =
         this.exportImportService.exportSelectedLists(selectedIds);
       const filename = `listas-seleccionadas-${
@@ -271,7 +129,7 @@ export class ExportImportDropdownComponent {
         `${selectedIds.length} listas exportadas correctamente`,
         'success'
       );
-      this.closeDropdown();
+      this.stateService.closeDropdown();
     } catch (error) {
       console.error('Error exporting selected lists:', error);
       this.toastService.showAlert(
@@ -281,9 +139,7 @@ export class ExportImportDropdownComponent {
     }
   }
 
-  /**
-   * Abre el selector de archivos
-   */
+  /** Abre el selector de archivos */
   triggerFileInput(): void {
     const fileInput = document.querySelector(
       'input[type="file"]'
@@ -291,9 +147,7 @@ export class ExportImportDropdownComponent {
     fileInput?.click();
   }
 
-  /**
-   * Maneja la selección de archivo para importar
-   */
+  /** Maneja la selección de archivo para importar */
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -301,82 +155,151 @@ export class ExportImportDropdownComponent {
     if (!file) return;
 
     try {
-      // Leer el archivo
-      const fileContent = await this.exportImportService.readFileAsText(file);
-
-      // Obtener estadísticas del archivo
-      const stats = this.exportImportService.getImportStats(fileContent);
-      if (!stats) {
-        this.toastService.showAlert('Archivo inválido o corrupto', 'danger');
-        return;
-      }
-
-      // Confirmar importación
-      this.confirmModalData = {
-        title: 'Confirmar Importación',
-        message: `¿Importar ${stats.totalLists} listas con ${stats.totalTasks} tareas?\n\nEsto creará copias de las listas. Las listas existentes no se modificarán.`,
-        confirmText: 'Importar',
-        cancelText: 'Cancelar',
-      };
-      this.showConfirmModal = true;
-      this.pendingImportContent = fileContent;
-    } catch (error) {
-      console.error('Error importing file:', error);
-      this.toastService.showAlert('Error al procesar el archivo', 'danger');
+      await this.stateService.processImportFile(file);
     } finally {
-      // Limpiar el input
       input.value = '';
-      this.closeDropdown();
+      this.stateService.closeDropdown();
     }
   }
 
-  /**
-   * Selecciona todas las listas
-   */
-  selectAll(): void {
-    this.selectedLists.clear();
-    this.savedLists.forEach((list) => this.selectedLists.add(list.id));
+  /** Selecciona todas las listas para exportar */
+  selectAllExport(): void {
+    this.stateService.selectAllExportLists(this.savedLists);
   }
 
-  /**
-   * Deselecciona todas las listas
-   */
-  selectNone(): void {
-    this.selectedLists.clear();
+  /** Deselecciona todas las listas para exportar */
+  selectNoneExport(): void {
+    this.stateService.selectNoneExportLists();
   }
 
-  /**
-   * Alterna la selección de una lista específica
-   */
-  toggleListSelection(listId: string, event: Event): void {
+  /** Alterna la selección de una lista específica para exportar */
+  toggleExportListSelection(listId: string): void {
+    this.stateService.toggleExportList(listId);
+  }
+
+  /** Cancela el modo de selección de exportar */
+  cancelExportSelection(): void {
+    this.stateService.cancelExportSelection();
+  }
+
+  /** Alterna la selección de una lista para importar */
+  toggleListForImport(listId: string, listSize: number, event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.checked) {
-      this.selectedLists.add(listId);
-    } else {
-      this.selectedLists.delete(listId);
+    const success = this.stateService.toggleListForImport(listId, listSize);
+
+    if (!success) {
+      input.checked = !input.checked;
     }
   }
 
-  /**
-   * Cancela el modo de selección
-   */
-  cancelSelection(): void {
-    this.selectionMode = false;
-    this.selectedLists.clear();
+  /** Confirma la selección manual de listas para importar */
+  confirmManualSelection(): void {
+    this.stateService.confirmManualSelection();
   }
 
-  /**
-   * Cierra el dropdown y resetea estados
-   */
-  private closeDropdown(): void {
-    this.isOpen = false;
-    this.selectionMode = false;
-    this.selectedLists.clear();
+  /** Cancela la selección manual de listas */
+  cancelManualSelection(): void {
+    this.stateService.cancelManualSelection();
   }
 
-  /**
-   * Formatea una fecha para mostrar
-   */
+  /** Verifica si se pueden importar todas las listas */
+  canImportAllLists(): boolean {
+    const preview = this.stateService.getImportPreview();
+    return preview ? preview.canImportAll : false;
+  }
+
+  /** Selecciona todas las listas para importar */
+  selectAllImport(): void {
+    this.stateService.selectAllImportLists();
+  }
+
+  /** Deselecciona todas las listas para importar */
+  selectNoneImport(): void {
+    this.stateService.selectNoneImportLists();
+  }
+
+  /** Maneja la confirmación de la importación */
+  onConfirmImport(): void {
+    this.executeImport();
+  }
+
+  /** Maneja la cancelación de la importación */
+  onCancelImport(): void {
+    this.stateService.closeConfirmation();
+    this.stateService.cancelManualSelection();
+  }
+
+  /** Ejecuta la importación de listas */
+  private async executeImport(): Promise<void> {
+    try {
+      const result = await this.stateService.executeImport();
+
+      if (result.success) {
+        this.handleImportSuccess(result);
+        this.listsUpdated.emit();
+      } else {
+        this.toastService.showAlert(
+          `❌ Error en la importación: ${result.errors.join(', ')}`,
+          'danger',
+          8000
+        );
+      }
+    } catch (error) {
+      console.error('Error importing lists:', error);
+      this.toastService.showAlert('❌ Error al importar las listas', 'danger');
+    } finally {
+      this.stateService.closeConfirmation();
+      this.stateService.cleanupAfterImport();
+    }
+  }
+
+  /** Maneja el éxito de la importación con mensajes específicos */
+  private handleImportSuccess(result: any): void {
+    const selectedCount = this.stateService.getSelectedImportListsCount();
+
+    if (selectedCount > 0) {
+      this.toastService.showAlert(
+        `✅ Importación manual exitosa: ${result.imported} listas seleccionadas importadas`,
+        'success',
+        5000
+      );
+    } else if (result.partialImport) {
+      const totalLists = result.imported + (result.skippedDueToSpace || 0);
+      this.toastService.showAlert(
+        `✅ Espacio maximizado: Se importaron ${result.imported} de ${totalLists} listas. ` +
+          `${
+            result.skippedDueToSpace || 0
+          } listas omitidas por ser demasiado grandes.`,
+        'warning',
+        7000
+      );
+    } else {
+      this.toastService.showAlert(
+        `✅ Importación exitosa: ${result.imported} listas importadas`,
+        'success'
+      );
+    }
+  }
+
+  /** Obtiene el tamaño actual de las listas seleccionadas */
+  getCurrentSelectedSize(): number {
+    return this.stateService.getStateSnapshot().listSelection.selectedListsSize;
+  }
+
+  /** Calcula el porcentaje de uso del espacio total máximo */
+  getSpaceUsagePercentage(): number {
+    const preview = this.stateService.getImportPreview();
+    if (!preview) return 0;
+
+    const maxSize = 3.5 * 1024 * 1024; // 3.5 MB = nuestro límite artificial
+    const currentUsed = maxSize - preview.availableSpace; // Espacio ya usado por nuestra app
+    const selectedSize = this.getCurrentSelectedSize(); // Espacio de listas seleccionadas
+    const totalUsed = currentUsed + selectedSize; // Espacio total que se usará
+
+    return Math.min((totalUsed / maxSize) * 100, 100);
+  }
+
+  /** Formatea una fecha para mostrar */
   formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
@@ -390,52 +313,12 @@ export class ExportImportDropdownComponent {
     }
   }
 
-  /**
-   * Maneja la confirmación de la importación
-   */
-  onConfirmImport(): void {
-    if (this.pendingImportContent) {
-      this.importLists(this.pendingImportContent);
-    }
-  }
-
-  /**
-   * Maneja la cancelación de la importación
-   */
-  onCancelImport(): void {
-    this.showConfirmModal = false;
-    this.pendingImportContent = null;
-  }
-
-  /**
-   * Importa las listas desde el contenido del archivo
-   */
-  private async importLists(fileContent: string): Promise<void> {
-    try {
-      // Importar con configuración por defecto (no sobrescribir, crear backup)
-      const result = await this.exportImportService.importLists(fileContent, {
-        overwriteExisting: false,
-        createBackup: true,
-      });
-
-      if (result.success) {
-        this.toastService.showAlert(
-          `Importación exitosa: ${result.imported} listas importadas`,
-          'success'
-        );
-        this.listsUpdated.emit(); // Notificar para actualizar la vista
-      } else {
-        this.toastService.showAlert(
-          `Error en la importación: ${result.errors.join(', ')}`,
-          'danger'
-        );
-      }
-    } catch (error) {
-      console.error('Error importing lists:', error);
-      this.toastService.showAlert('Error al importar las listas', 'danger');
-    } finally {
-      this.showConfirmModal = false;
-      this.pendingImportContent = null;
-    }
+  /** Formatea bytes en texto legible */
+  formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 }

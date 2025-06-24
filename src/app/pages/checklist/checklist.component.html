@@ -8,9 +8,10 @@
       <button
         class="secondary-btn"
         (click)="saveProgress()"
-        title="Guardar progreso automáticamente"
+        [title]="getSaveButtonTooltip()"
       >
-        <span class="material-icons-outlined">save</span> Guardar
+        <span class="material-icons-outlined">save</span>
+        {{ getSaveButtonText() }}
       </button>
       <button class="secondary-btn" (click)="editMode()">
         <span class="material-icons-outlined">edit</span> Editar Lista

@@ -33,7 +33,7 @@ import { Subject, takeUntil, interval } from 'rxjs';
         right: 24px;
         background: var(--color-surface-elevated);
         border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-md);
         padding: 16px;
         z-index: 10;
         min-width: 220px;

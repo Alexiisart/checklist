@@ -1,0 +1,259 @@
+<div class="dropdown-container">
+  <button
+    class="dropdown-toggle"
+    (click)="toggleDropdown()"
+    [class.active]="stateService.isDropdownOpen()"
+    title="Opciones de exportar/importar"
+  >
+    <span class="material-icons-outlined">import_export</span>
+    <span class="dropdown-text">Exportar/Importar</span>
+    <span
+      class="material-icons-outlined dropdown-icon"
+      [class.rotated]="stateService.isDropdownOpen()"
+      >expand_more</span
+    >
+  </button>
+
+  @if (stateService.isDropdownOpen()) {
+  <div class="dropdown-menu" (click)="$event.stopPropagation()">
+    <!-- Sección de Exportar -->
+    <div class="dropdown-section">
+      <div class="section-title">Exportar</div>
+
+      <button class="dropdown-item" (click)="exportAll()">
+        <span class="material-icons-outlined">download</span>
+        <span>Exportar todas las listas</span>
+      </button>
+
+      <button class="dropdown-item" (click)="toggleSelectionMode()">
+        <span class="material-icons-outlined">checklist</span>
+        <span>Exportar listas seleccionadas</span>
+      </button>
+    </div>
+
+    <div class="dropdown-divider"></div>
+
+    <!-- Sección de Importar -->
+    <div class="dropdown-section">
+      <div class="section-title">Importar</div>
+
+      <button class="dropdown-item" (click)="triggerFileInput()">
+        <span class="material-icons-outlined">upload</span>
+        <span>Importar listas desde archivo</span>
+      </button>
+    </div>
+
+    <!-- Input de archivo oculto -->
+    <input
+      #fileInput
+      type="file"
+      accept=".json"
+      style="display: none"
+      (change)="onFileSelected($event)"
+    />
+  </div>
+  }
+</div>
+
+<!-- Modal de selección múltiple -->
+@if (stateService.isInSelectionMode()) {
+<div class="modal" (click)="onModalOverlayClick($event)">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Seleccionar listas para exportar</h3>
+      <button class="close-modal-btn" (click)="cancelExportSelection()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="selection-actions">
+        <button class="action-btn secondary" (click)="selectAllExport()">
+          Seleccionar todas
+        </button>
+        <button class="action-btn secondary" (click)="selectNoneExport()">
+          Deseleccionar todas
+        </button>
+      </div>
+
+      <div class="selection-list">
+        @for (list of savedLists; track list.id) {
+        <label class="selection-item">
+          <input
+            type="checkbox"
+            [checked]="stateService.isListSelectedForExport(list.id)"
+            (change)="toggleExportListSelection(list.id)"
+          />
+          <span class="list-info">
+            <span class="list-name">{{ list.name || "Lista sin nombre" }}</span>
+            <span class="list-details"
+              >{{ list.tasksCount }} tareas • {{ formatDate(list.date) }}</span
+            >
+          </span>
+        </label>
+        }
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="secondary-btn" (click)="cancelExportSelection()">
+        Cancelar
+      </button>
+      <button
+        class="primary-btn"
+        (click)="exportSelected()"
+        [disabled]="stateService.getSelectedExportListsCount() === 0"
+      >
+        Exportar {{ stateService.getSelectedExportListsCount() }} lista{{
+          stateService.getSelectedExportListsCount() !== 1 ? "s" : ""
+        }}
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal de confirmación para importar -->
+<app-confirm-modal
+  [isVisible]="stateService.isConfirmationModalVisible()"
+  [data]="stateService.getConfirmationData()"
+  (confirmed)="onConfirmImport()"
+  (cancelled)="onCancelImport()"
+>
+</app-confirm-modal>
+
+<!-- Modal de selección manual de listas -->
+@if (stateService.isListSelectionModalVisible() &&
+stateService.getImportPreview()) {
+<div class="modal" (click)="onModalOverlayClick($event)">
+  <div class="modal-overlay"></div>
+  <div class="modal-content list-selection-modal">
+    <div class="modal-header">
+      <h3>⚠️ Espacio Insuficiente - Selecciona las Listas a Importar</h3>
+      <button class="close-modal-btn" (click)="cancelManualSelection()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="space-info">
+        <div class="space-summary">
+          <div class="space-item">
+            <strong>Archivo:</strong>
+            {{ stateService.getImportPreview().totalLists }} listas ({{
+              stateService.getImportPreview().formattedEstimatedSize
+            }})
+          </div>
+          <div class="space-item">
+            <strong>Espacio disponible:</strong>
+            {{ stateService.getImportPreview().formattedAvailableSpace }}
+          </div>
+          <div class="space-item">
+            <strong>Espacio seleccionado:</strong>
+            {{ formatBytes(getCurrentSelectedSize()) }}
+          </div>
+          <div class="space-item">
+            <strong>Espacio restante:</strong>
+            {{ stateService.getRemainingSpaceFormatted() }}
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [style.width.%]="getSpaceUsagePercentage()"
+          ></div>
+        </div>
+      </div>
+
+      <div class="lists-container">
+        <div class="lists-header">
+          <h4>Selecciona las listas que deseas importar:</h4>
+          <div class="header-actions">
+            <div class="selection-actions">
+              @if (canImportAllLists()) {
+              <button class="action-btn secondary" (click)="selectAllImport()">
+                Seleccionar todas
+              </button>
+              }
+              <button class="action-btn secondary" (click)="selectNoneImport()">
+                Deseleccionar todas
+              </button>
+            </div>
+            <span class="selection-count"
+              >{{ stateService.getSelectedImportListsCount() }} de
+              {{ stateService.getImportPreview().totalLists }}
+              seleccionadas</span
+            >
+          </div>
+        </div>
+
+        <div class="lists-grid">
+          @for (item of stateService.getListsWithSizes(); track item.list.id) {
+          <label
+            class="list-item"
+            [class.disabled]="
+              !stateService.isListSelectedForImport(item.list.id) &&
+              item.size > stateService.getRemainingSpace()
+            "
+          >
+            <input
+              type="checkbox"
+              [checked]="stateService.isListSelectedForImport(item.list.id)"
+              [disabled]="
+                !stateService.isListSelectedForImport(item.list.id) &&
+                item.size > stateService.getRemainingSpace()
+              "
+              (change)="toggleListForImport(item.list.id, item.size, $event)"
+            />
+            <div class="list-info">
+              <div class="list-main-info">
+                <span class="list-name">{{
+                  item.list.name || "Lista sin nombre"
+                }}</span>
+                <span class="list-size">{{ item.formattedSize }}</span>
+              </div>
+              <div class="list-details">
+                <span class="list-tasks"
+                  >{{ item.list.tasks?.length || 0 }} tareas</span
+                >
+                @if (item.list.modifiedDate) {
+                <span class="list-date"
+                  >• {{ formatDate(item.list.modifiedDate) }}</span
+                >
+                }
+              </div>
+              @if (!stateService.isListSelectedForImport(item.list.id) &&
+              item.size > stateService.getRemainingSpace()) {
+              <div class="size-warning">
+                <span class="material-icons-outlined">warning</span>
+                <span>Demasiado grande para el espacio restante</span>
+              </div>
+              }
+            </div>
+          </label>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="secondary-btn" (click)="cancelManualSelection()">
+        Cancelar
+      </button>
+      <button
+        class="primary-btn"
+        (click)="confirmManualSelection()"
+        [disabled]="stateService.getSelectedImportListsCount() === 0"
+      >
+        Importar {{ stateService.getSelectedImportListsCount() }} lista{{
+          stateService.getSelectedImportListsCount() !== 1 ? "s" : ""
+        }}
+        seleccionada{{
+          stateService.getSelectedImportListsCount() !== 1 ? "s" : ""
+        }}
+      </button>
+    </div>
+  </div>
+</div>
+}

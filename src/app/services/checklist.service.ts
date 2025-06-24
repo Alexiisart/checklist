@@ -30,19 +30,100 @@ export class ChecklistService {
     this.loadCurrentProgress();
   }
 
+  private idCounter = 0;
+
+  /**
+   * Genera un ID único garantizado usando UUID simplificado
+   * @returns ID único garantizado
+   */
+  private generateUniqueId(): number {
+    this.idCounter++;
+    // Crear un ID único usando timestamp + contador + performance.now para máxima precisión
+    const timestamp = Date.now();
+    const performanceTime = Math.floor(performance.now() * 1000);
+    const counter = this.idCounter;
+    const random = Math.floor(Math.random() * 10000);
+
+    // Combinar todos los valores para crear un ID único
+    return parseInt(
+      `${timestamp}${performanceTime}${counter}${random}`.slice(-15)
+    );
+  }
+
+  /**
+   * Verifica y corrige IDs duplicados en una lista
+   * @param listData Lista a verificar
+   */
+  private ensureUniqueIds(listData: ChecklistData): void {
+    const usedIds = new Set<number>();
+
+    // Verificar y corregir IDs de tareas
+    for (const task of listData.tasks) {
+      if (usedIds.has(task.id)) {
+        task.id = this.generateUniqueId();
+        // Asegurar que el nuevo ID sea único
+        while (usedIds.has(task.id)) {
+          task.id = this.generateUniqueId();
+        }
+      }
+      usedIds.add(task.id);
+
+      // Verificar y corregir IDs de subtareas
+      const subtaskIds = new Set<number>();
+      for (const subtask of task.subtasks) {
+        if (subtaskIds.has(subtask.id) || usedIds.has(subtask.id)) {
+          subtask.id = this.generateUniqueId();
+          while (subtaskIds.has(subtask.id) || usedIds.has(subtask.id)) {
+            subtask.id = this.generateUniqueId();
+          }
+        }
+        subtaskIds.add(subtask.id);
+        usedIds.add(subtask.id);
+      }
+
+      // Verificar y corregir IDs de errores
+      const errorIds = new Set<number>();
+      for (const error of task.errors) {
+        if (errorIds.has(error.id) || usedIds.has(error.id)) {
+          error.id = this.generateUniqueId();
+          while (errorIds.has(error.id) || usedIds.has(error.id)) {
+            error.id = this.generateUniqueId();
+          }
+        }
+        errorIds.add(error.id);
+        usedIds.add(error.id);
+      }
+    }
+  }
+
   /**
    * Crea una nueva lista de verificación
    * @param taskNames Array de nombres de tareas
    * @returns Nueva lista de verificación
    */
   createNewList(taskNames: string[]): ChecklistData {
-    const tasks: Task[] = taskNames.map((name, index) => ({
-      id: Date.now() + index,
-      name: name.trim(),
-      completed: false,
-      subtasks: [],
-      errors: [],
-    }));
+    const tasks: Task[] = [];
+    const usedIds = new Set<number>();
+
+    // Crear tareas con IDs únicos garantizados
+    for (const name of taskNames) {
+      let taskId = this.generateUniqueId();
+
+      // Asegurar que el ID sea único (por si acaso)
+      while (usedIds.has(taskId)) {
+        taskId = this.generateUniqueId();
+      }
+
+      usedIds.add(taskId);
+
+      tasks.push({
+        id: taskId,
+        name: name.trim(),
+        completed: false,
+        subtasks: [],
+        errors: [],
+      });
+    }
 
     const newList: ChecklistData = {
       id: this.storageService.generateListId(),
@@ -66,6 +147,8 @@ export class ChecklistService {
   loadList(listId: string): ChecklistData | null {
     const listData = this.storageService.loadList(listId);
     if (listData) {
+      // Verificar y corregir IDs duplicados antes de cargar
+      this.ensureUniqueIds(listData);
       this.currentListSubject.next(listData);
       this.setUnsavedChanges(false);
     }
@@ -147,7 +230,7 @@ export class ChecklistService {
 
       subtasks.forEach((subtaskName, index) => {
         const newSubtask: Subtask = {
-          id: Date.now() + index,
+          id: this.generateUniqueId(),
           name: subtaskName,
           completed: false,
         };
@@ -206,7 +289,7 @@ export class ChecklistService {
     const task = currentList.tasks.find((t) => t.id === taskId);
     if (task) {
       const newError: TaskError = {
-        id: Date.now(),
+        id: this.generateUniqueId(),
         name: description.trim(),
       };
       task.errors.push(newError);
@@ -300,7 +383,7 @@ export class ChecklistService {
         updatedTasks.push(existingTask);
       } else {
         updatedTasks.push({
-          id: Date.now() + index,
+          id: this.generateUniqueId(),
           name,
           completed: false,
           subtasks: [],
@@ -339,12 +422,6 @@ export class ChecklistService {
 
     const currentList = this.getCurrentList();
     if (!currentList) return false;
-
-    // Verificar límites antes de guardar (igual que el original)
-    const canSave = this.storageService.checkStorageLimits();
-    if (!canSave) {
-      return false;
-    }
 
     currentList.name = name.trim();
     currentList.modifiedDate = new Date().toISOString();
@@ -395,6 +472,8 @@ export class ChecklistService {
   private loadCurrentProgress(): void {
     const savedData = this.storageService.loadCurrentProgress();
     if (savedData) {
+      // Verificar y corregir IDs duplicados antes de cargar
+      this.ensureUniqueIds(savedData);
       this.currentListSubject.next(savedData);
       this.setUnsavedChanges(false);
     }

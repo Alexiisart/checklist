@@ -1,0 +1,163 @@
+<div class="home-screen">
+  <div class="home-header">
+    <h2>Mis Listas Guardadas</h2>
+    <div class="header-actions">
+      @if (!isSelectionMode) { @if (savedLists.length > 0) {
+      <button class="secondary-btn" (click)="toggleSelectionMode()">
+        <span class="material-icons-outlined">checklist</span>
+        Seleccionar
+      </button>
+      }
+      <app-export-import-dropdown
+        [savedLists]="savedLists"
+        (listsUpdated)="onListsUpdated()"
+      ></app-export-import-dropdown>
+
+      <button class="primary-btn" (click)="goToNewList()">Nueva Lista</button>
+      } @else {
+      <div class="selection-actions">
+        <button class="action-btn secondary" (click)="selectAllLists()">
+          Seleccionar todas
+        </button>
+        <button class="action-btn secondary" (click)="deselectAllLists()">
+          Deseleccionar todas
+        </button>
+        <button
+          class="danger-btn"
+          (click)="confirmDeleteSelected()"
+          [disabled]="getSelectedCount() === 0"
+        >
+          <span class="material-icons-outlined">delete</span>
+          Eliminar ({{ getSelectedCount() }})
+        </button>
+        <button class="secondary-btn" (click)="toggleSelectionMode()">
+          Cancelar
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Indicador de almacenamiento -->
+  @if (storagePercentage > 60) {
+  <div class="storage-indicator">
+    <div class="storage-header">
+      <span class="material-icons-outlined">storage</span>
+      <span class="storage-text">Espacio usado: {{ storagePercentage }}%</span>
+    </div>
+    <div class="storage-progress">
+      <div
+        class="storage-progress-fill"
+        [style.width.%]="storagePercentage"
+      ></div>
+    </div>
+    @if (storagePercentage > 80) {
+    <p class="storage-warning">
+      ⚠️ Espacio casi lleno. Considera eliminar listas antiguas.
+    </p>
+    }
+  </div>
+  }
+
+  <!-- Lista de cards guardadas -->
+  @if (savedLists.length > 0) {
+  <div class="saved-lists-container">
+    @for (list of savedLists; track list.id) {
+    <div
+      class="list-card"
+      [class.selection-mode]="isSelectionMode"
+      [class.selected]="isListSelected(list.id)"
+      (click)="
+        isSelectionMode ? toggleListSelection(list.id) : loadList(list.id)
+      "
+    >
+      @if (isSelectionMode) {
+      <div class="selection-checkbox">
+        <input
+          type="checkbox"
+          [checked]="isListSelected(list.id)"
+          (click)="$event.stopPropagation()"
+          (change)="toggleListSelection(list.id)"
+        />
+      </div>
+      }
+      <div class="list-card-header">
+        <div class="title-section">
+          <h3 class="list-card-title">
+            {{ list.name || "Lista sin nombre" }}
+          </h3>
+          @if (!isSelectionMode) {
+          <button
+            class="rename-list-btn"
+            (click)="openRenameModal(list); $event.stopPropagation()"
+            title="Renombrar lista"
+          >
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          }
+        </div>
+        <span class="list-card-date">{{ formatDate(list.date) }}</span>
+      </div>
+      <p class="list-card-preview">{{ list.preview }}</p>
+      <div class="list-card-stats">
+        <span
+          >{{ list.completedCount }} de {{ list.tasksCount }} completadas</span
+        >
+      </div>
+      <div class="list-card-progress">
+        <div
+          class="list-card-progress-bar"
+          [style.width.%]="getProgressPercentage(list)"
+        ></div>
+      </div>
+      @if (!isSelectionMode) {
+      <div class="list-card-actions" (click)="$event.stopPropagation()">
+        <button
+          class="delete-list-btn"
+          (click)="confirmDeleteList(list)"
+          title="Eliminar lista"
+        >
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Estado vacío -->
+  @if (savedLists.length === 0) {
+  <div class="empty-state">
+    <span class="material-icons-outlined empty-icon">checklist</span>
+    <h3>No tienes listas guardadas</h3>
+    <p>Crea tu primera lista para comenzar a organizar tus tareas diarias</p>
+    <button class="primary-btn" (click)="goToNewList()">
+      Crear Primera Lista
+    </button>
+  </div>
+  }
+</div>
+
+<app-confirm-modal
+  [isVisible]="showConfirmModal"
+  [data]="confirmModalData"
+  (confirmed)="deleteConfirmedList()"
+  (cancelled)="cancelDelete()"
+>
+</app-confirm-modal>
+
+<app-alert-modal
+  [isVisible]="showAlertModal"
+  [data]="alertModalData"
+  (closed)="closeAlert()"
+>
+</app-alert-modal>
+
+<app-modal
+  [isVisible]="showRenameModal"
+  [data]="renameModalData"
+  (confirmed)="renameList($event)"
+  (closed)="closeRenameModal()"
+>
+</app-modal>

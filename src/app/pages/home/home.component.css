@@ -268,3 +268,92 @@
     align-items: flex-start;
   }
 }
+
+/* ===== ESTILOS PARA SELECCIÓN MASIVA ===== */
+.selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: var(--space-3) var(--space-6);
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  background: var(--color-surface);
+  border-color: var(--color-border-focus);
+  color: var(--color-text-primary);
+}
+
+.action-btn.secondary {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+}
+
+/* Estilos para tarjetas en modo selección */
+.list-card.selection-mode {
+  cursor: pointer;
+  user-select: none;
+}
+
+.list-card.selection-mode:hover {
+  background: var(--color-surface);
+  border-color: var(--primary-300);
+}
+
+.list-card.selected {
+  border-color: var(--primary-500) !important;
+  background: var(--primary-50) !important;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2) !important;
+}
+
+.selection-checkbox {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.selection-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--primary-500);
+}
+
+/* Tema oscuro para selección */
+[data-theme="dark"] .list-card.selected {
+  background: rgba(20, 184, 166, 0.1) !important;
+  border-color: var(--primary-400) !important;
+}
+
+/* Responsive para selección masiva */
+@media (max-width: 768px) {
+  .selection-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

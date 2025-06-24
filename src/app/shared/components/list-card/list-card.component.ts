@@ -67,6 +67,15 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
       <div class="list-card-actions" (click)="$event.stopPropagation()">
         <app-button
           type="icon"
+          iconLeft="content_copy"
+          size="sm"
+          title="Duplicar lista"
+          extraClasses="duplicate-list-btn"
+          (clickEvent)="onDuplicate()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
           iconLeft="delete"
           size="sm"
           title="Eliminar lista"
@@ -91,6 +100,7 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
         box-shadow: var(--shadow-sm);
         display: flex;
         flex-direction: column;
+        height: 100%;
         min-height: 200px;
         box-sizing: border-box;
         max-width: 100%;
@@ -203,24 +213,6 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
         opacity: 1;
       }
 
-      .delete-list-btn {
-        background: none;
-        border: 1px solid transparent;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .delete-list-btn:hover {
-        background: rgba(220, 53, 69, 0.1);
-        color: var(--danger-color);
-      }
-
       /* Estilos para modo selección */
       .list-card.selection-mode {
         cursor: pointer;
@@ -314,6 +306,11 @@ export class ListCardComponent {
   @Output() delete = new EventEmitter<SavedList>();
 
   /**
+   * Evento emitido cuando se quiere duplicar
+   */
+  @Output() duplicate = new EventEmitter<SavedList>();
+
+  /**
    * Maneja el clic en la tarjeta
    */
   onCardClick(): void {
@@ -332,6 +329,13 @@ export class ListCardComponent {
    */
   onRename(): void {
     this.rename.emit(this.list);
+  }
+
+  /**
+   * Maneja el evento de duplicar
+   */
+  onDuplicate(): void {
+    this.duplicate.emit(this.list);
   }
 
   /**

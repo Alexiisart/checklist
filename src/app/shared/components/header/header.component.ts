@@ -18,7 +18,6 @@ import { ButtonComponent } from '../../atomic/buttons';
         <app-button
           type="icon"
           iconLeft="{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}"
-          size="sm"
           title="Cambiar tema"
           extraClasses="theme-toggle"
           (clickEvent)="toggleTheme()"

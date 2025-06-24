@@ -1,8 +1,14 @@
-/* ===================================
-   ARCHIVO CENTRALIZADO DE ANIMACIONES
-   ================================== */
+/**
+ * Archivo centralizado de animaciones CSS
+ * Contiene todas las animaciones reutilizables para la aplicación
+ */
 
-/* Animaciones de entrada */
+/**
+ * Animaciones de entrada
+ * Efectos para cuando los elementos aparecen en pantalla
+ */
+
+/* Desvanecimiento hacia arriba */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -14,6 +20,7 @@
   }
 }
 
+/* Desvanecimiento simple */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -23,6 +30,7 @@
   }
 }
 
+/* Escala con desvanecimiento */
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -34,6 +42,7 @@
   }
 }
 
+/* Deslizamiento desde la derecha */
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -45,7 +54,12 @@
   }
 }
 
-/* Animaciones de modales */
+/**
+ * Animaciones de modales
+ * Efectos específicos para ventanas modales
+ */
+
+/* Entrada de modal con escala y deslizamiento */
 @keyframes modalSlideIn {
   from {
     opacity: 0;
@@ -57,6 +71,7 @@
   }
 }
 
+/* Modal deslizándose hacia arriba */
 @keyframes modalSlideUp {
   from {
     opacity: 0;
@@ -68,7 +83,12 @@
   }
 }
 
-/* Animaciones de dropdowns y menús */
+/**
+ * Animaciones de dropdowns y menús
+ * Efectos para menús desplegables
+ */
+
+/* Menú desplegable deslizándose hacia abajo */
 @keyframes dropdownSlideDown {
   from {
     opacity: 0;
@@ -80,13 +100,19 @@
   }
 }
 
-/* Animaciones de carga y efectos */
+/**
+ * Animaciones de carga y efectos
+ * Efectos para estados de carga y transiciones
+ */
+
+/* Rotación continua */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+/* Efecto de brillo deslizante */
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -97,7 +123,12 @@
   }
 }
 
-/* Animaciones de micro-interacciones */
+/**
+ * Animaciones de micro-interacciones
+ * Efectos sutiles para feedback visual
+ */
+
+/* Pulsación suave */
 @keyframes pulse {
   0%,
   100% {
@@ -108,6 +139,7 @@
   }
 }
 
+/* Rebote suave */
 @keyframes bounce {
   0%,
   20%,
@@ -128,6 +160,7 @@
   }
 }
 
+/* Sacudida horizontal */
 @keyframes shake {
   0%,
   100% {
@@ -148,7 +181,12 @@
   }
 }
 
-/* Animaciones de estado */
+/**
+ * Animaciones de estado
+ * Efectos para cambios de estado y transiciones
+ */
+
+/* Deslizamiento desde la izquierda */
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -160,6 +198,7 @@
   }
 }
 
+/* Deslizamiento hacia la derecha */
 @keyframes slideOutRight {
   from {
     opacity: 1;
@@ -171,6 +210,7 @@
   }
 }
 
+/* Desvanecimiento de salida */
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -180,6 +220,7 @@
   }
 }
 
+/* Zoom de entrada */
 @keyframes zoomIn {
   from {
     opacity: 0;
@@ -191,6 +232,7 @@
   }
 }
 
+/* Zoom de salida */
 @keyframes zoomOut {
   from {
     opacity: 1;
@@ -202,7 +244,10 @@
   }
 }
 
-/* Clases helper para usar las animaciones */
+/**
+ * Clases helper para usar las animaciones
+ * Clases utilitarias para aplicar animaciones fácilmente
+ */
 .animate-fade-in-up {
   animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }

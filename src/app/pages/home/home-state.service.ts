@@ -3,22 +3,7 @@ import { BehaviorSubject, Observable, map, combineLatest } from 'rxjs';
 import { Router } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { ToastService } from '../../services/toast.service';
-import {
-  SavedList,
-  ConfirmData,
-  AlertData,
-  ModalData,
-} from '../../models/task.interface';
-
-// Interface para el estado de los modales
-interface ModalState {
-  showConfirmModal: boolean;
-  confirmModalData: ConfirmData | null;
-  showAlertModal: boolean;
-  alertModalData: AlertData | null;
-  showRenameModal: boolean;
-  renameModalData: ModalData | null;
-}
+import { SavedList, AlertData } from '../../models/task.interface';
 
 // Interface para el estado de selección
 interface SelectionState {
@@ -31,7 +16,13 @@ interface SearchState {
   searchTerm: string;
 }
 
-// Servicio que maneja todo el estado y lógica de negocios del componente Home
+// Interface para el estado de alerta (solo para alertas del state service)
+interface ModalState {
+  showAlertModal: boolean;
+  alertModalData: AlertData | null;
+}
+
+// Servicio que maneja el estado y lógica de negocios del componente Home
 @Injectable({
   providedIn: 'root',
 })
@@ -40,12 +31,8 @@ export class HomeStateService {
   private readonly _savedLists$ = new BehaviorSubject<SavedList[]>([]);
   private readonly _storagePercentage$ = new BehaviorSubject<number>(0);
   private readonly _modalState$ = new BehaviorSubject<ModalState>({
-    showConfirmModal: false,
-    confirmModalData: null,
     showAlertModal: false,
     alertModalData: null,
-    showRenameModal: false,
-    renameModalData: null,
   });
   private readonly _selectionState$ = new BehaviorSubject<SelectionState>({
     isSelectionMode: false,
@@ -54,10 +41,6 @@ export class HomeStateService {
   private readonly _searchState$ = new BehaviorSubject<SearchState>({
     searchTerm: '',
   });
-
-  // Referencias temporales para operaciones
-  private listToDelete: SavedList | null = null;
-  private listToRename: SavedList | null = null;
 
   // Observables públicos
   public readonly savedLists$: Observable<SavedList[]> =
@@ -115,8 +98,6 @@ export class HomeStateService {
 
   // Navega a la pantalla de creación de nueva lista
   async goToNewList(): Promise<void> {
-    // TODO: Verificar si hay cambios sin guardar cuando implementemos el estado global
-    // Por ahora navegar directamente
     this.router.navigate(['/new-list']);
   }
 
@@ -135,157 +116,7 @@ export class HomeStateService {
     this.updateStorageIndicator();
   }
 
-  // ========== OPERACIONES DE ELIMINACIÓN ==========
-
-  // Muestra el modal de confirmación para eliminar una lista
-  confirmDeleteList(list: SavedList): void {
-    this.listToDelete = list;
-    const modalState = this._modalState$.value;
-    this._modalState$.next({
-      ...modalState,
-      showConfirmModal: true,
-      confirmModalData: {
-        title: 'Eliminar lista',
-        message: `¿Estás seguro de que quieres eliminar la lista "${
-          list.name || 'Sin nombre'
-        }"? Esta acción no se puede deshacer.`,
-        confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
-      },
-    });
-  }
-
-  // Confirma la eliminación masiva de listas seleccionadas
-  confirmDeleteSelected(): void {
-    const selectionState = this._selectionState$.value;
-    if (selectionState.selectedListIds.size === 0) {
-      this.toastService.showAlert(
-        'Selecciona al menos una lista para eliminar',
-        'warning'
-      );
-      return;
-    }
-
-    const modalState = this._modalState$.value;
-    this._modalState$.next({
-      ...modalState,
-      showConfirmModal: true,
-      confirmModalData: {
-        title: 'Eliminar Listas Seleccionadas',
-        message: `¿Estás seguro de que deseas eliminar ${
-          selectionState.selectedListIds.size
-        } lista${
-          selectionState.selectedListIds.size > 1 ? 's' : ''
-        }? Esta acción no se puede deshacer.`,
-        confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
-      },
-    });
-  }
-
-  // Elimina la lista confirmada y muestra una alerta con el resultado
-  deleteConfirmedList(): void {
-    const selectionState = this._selectionState$.value;
-
-    if (selectionState.selectedListIds.size > 0) {
-      // Eliminación masiva
-      this.deleteSelectedLists();
-    } else if (this.listToDelete) {
-      // Eliminación individual
-      try {
-        this.storageService.deleteList(this.listToDelete.id);
-        this.loadSavedLists();
-        this.updateStorageIndicator();
-        this.toastService.showAlert('Lista eliminada', 'info');
-      } catch (error) {
-        this.showAlert('Error al eliminar la lista', 'danger');
-      }
-    }
-
-    // Cerrar el modal de confirmación y limpiar datos
-    this.closeConfirmModal();
-  }
-
-  // Ejecuta la eliminación masiva después de confirmación
-  private deleteSelectedLists(): void {
-    try {
-      const selectionState = this._selectionState$.value;
-      const deletedCount = selectionState.selectedListIds.size;
-      const selectedIds = Array.from(selectionState.selectedListIds);
-
-      selectedIds.forEach((listId) => {
-        this.storageService.deleteList(listId);
-      });
-
-      this.loadSavedLists();
-      this.updateStorageIndicator();
-      this.clearSelection();
-
-      this.toastService.showAlert(
-        `${deletedCount} lista${
-          deletedCount > 1 ? 's eliminadas' : ' eliminada'
-        } correctamente`,
-        'success'
-      );
-    } catch (error) {
-      console.error('Error eliminando listas:', error);
-      this.toastService.showAlert('Error al eliminar las listas', 'danger');
-    }
-  }
-
-  // ========== OPERACIONES DE RENOMBRADO ==========
-
-  // Muestra el modal para renombrar una lista
-  openRenameModal(list: SavedList): void {
-    this.listToRename = list;
-    const modalState = this._modalState$.value;
-    this._modalState$.next({
-      ...modalState,
-      showRenameModal: true,
-      renameModalData: {
-        title: 'Renombrar Lista',
-        label: 'Nuevo nombre de la lista:',
-        placeholder: 'Nombre de la lista...',
-        currentValue: list.name || '',
-      },
-    });
-  }
-
-  // Renombra la lista con el nuevo nombre proporcionado
-  renameList(newName: string): void {
-    if (!this.listToRename || !newName.trim()) {
-      this.closeRenameModal();
-      return;
-    }
-
-    try {
-      this.storageService.renameList(this.listToRename.id, newName.trim());
-      this.toastService.showAlert(`Lista renombrada a "${newName}"`, 'success');
-      this.loadSavedLists(); // Recargar las listas para reflejar el cambio
-      this.closeRenameModal();
-    } catch (error) {
-      console.error('Error renaming list:', error);
-      this.toastService.showAlert('Error al renombrar la lista', 'danger');
-    }
-  }
-
   // ========== GESTIÓN DE MODALES ==========
-
-  // Cancela la eliminación de la lista
-  cancelDelete(): void {
-    this.closeConfirmModal();
-  }
-
-  // Cierra el modal de confirmación y limpia los datos relacionados
-  private closeConfirmModal(): void {
-    const modalState = this._modalState$.value;
-    this._modalState$.next({
-      ...modalState,
-      showConfirmModal: false,
-      confirmModalData: null,
-    });
-    this.listToDelete = null;
-  }
 
   // Cierra el modal de alerta
   closeAlert(): void {
@@ -297,7 +128,7 @@ export class HomeStateService {
     });
   }
 
-  // Muestra un modal de alerta
+  // Muestra una alerta
   private showAlert(
     message: string,
     type: 'success' | 'danger' | 'warning' | 'info'
@@ -313,29 +144,14 @@ export class HomeStateService {
     });
   }
 
-  // Cierra el modal de renombrar y limpia los datos relacionados
-  closeRenameModal(): void {
-    const modalState = this._modalState$.value;
-    this._modalState$.next({
-      ...modalState,
-      showRenameModal: false,
-      renameModalData: null,
-    });
-    this.listToRename = null;
-  }
-
-  // ========== GESTIÓN DE SELECCIÓN MASIVA ==========
+  // ========== GESTIÓN DE SELECCIÓN ==========
 
   // Activa o desactiva el modo de selección masiva
   toggleSelectionMode(): void {
     const currentState = this._selectionState$.value;
-    const newSelectionMode = !currentState.isSelectionMode;
-
     this._selectionState$.next({
-      isSelectionMode: newSelectionMode,
-      selectedListIds: newSelectionMode
-        ? currentState.selectedListIds
-        : new Set<string>(),
+      isSelectionMode: !currentState.isSelectionMode,
+      selectedListIds: new Set<string>(),
     });
   }
 
@@ -364,11 +180,10 @@ export class HomeStateService {
   // Selecciona todas las listas
   selectAllLists(): void {
     const currentState = this._selectionState$.value;
-    const allListIds = new Set(this._savedLists$.value.map((list) => list.id));
-
+    const allListIds = this._savedLists$.value.map((list) => list.id);
     this._selectionState$.next({
       ...currentState,
-      selectedListIds: allListIds,
+      selectedListIds: new Set(allListIds),
     });
   }
 
@@ -381,15 +196,16 @@ export class HomeStateService {
     });
   }
 
-  // Limpia la selección y desactiva el modo de selección
+  // Limpia la selección (privado)
   private clearSelection(): void {
+    const currentState = this._selectionState$.value;
     this._selectionState$.next({
-      isSelectionMode: false,
+      ...currentState,
       selectedListIds: new Set<string>(),
     });
   }
 
-  // ========== FUNCIONALIDADES DE BÚSQUEDA ==========
+  // ========== GESTIÓN DE BÚSQUEDA ==========
 
   // Actualiza el término de búsqueda
   updateSearchTerm(searchTerm: string): void {
@@ -401,7 +217,7 @@ export class HomeStateService {
     this._searchState$.next({ searchTerm: '' });
   }
 
-  // Filtra las listas basado en el término de búsqueda
+  // Filtra las listas según el término de búsqueda
   private filterLists(lists: SavedList[], searchTerm: string): SavedList[] {
     if (!searchTerm.trim()) {
       return [...lists];
@@ -423,39 +239,36 @@ export class HomeStateService {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   }
 
   // Calcula el porcentaje de progreso de una lista
   getProgressPercentage(list: SavedList): number {
-    return list.tasksCount > 0
-      ? (list.completedCount / list.tasksCount) * 100
-      : 0;
+    if (list.tasksCount === 0) return 0;
+    return Math.round((list.completedCount / list.tasksCount) * 100);
   }
 
-  // ========== GETTERS PARA VALORES ACTUALES ==========
+  // ========== MÉTODOS SÍNCRONOS PARA ACCESO DIRECTO ==========
 
-  // Obtiene el valor actual de las listas guardadas
+  // Obtiene las listas guardadas actuales de forma síncrona
   getCurrentSavedLists(): SavedList[] {
     return this._savedLists$.value;
   }
 
-  // Obtiene el valor actual del estado de selección
+  // Obtiene el estado de selección actual de forma síncrona
   getCurrentSelectionState(): SelectionState {
     return this._selectionState$.value;
   }
 
-  // Obtiene el valor actual del estado de modales
+  // Obtiene el estado de modal actual de forma síncrona
   getCurrentModalState(): ModalState {
     return this._modalState$.value;
   }
 
-  // Obtiene el valor actual del término de búsqueda
+  // Obtiene el término de búsqueda actual de forma síncrona
   getCurrentSearchTerm(): string {
     return this._searchState$.value.searchTerm;
   }

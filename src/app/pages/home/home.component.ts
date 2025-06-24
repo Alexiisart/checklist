@@ -11,6 +11,9 @@ import { ExportImportDropdownComponent } from '../../shared/components/export-im
 import { StorageProgressIndicatorComponent } from '../../shared/components/storage-progress-indicator/storage-progress-indicator.component';
 import { ButtonComponent } from '../../shared/atomic/buttons';
 import { HomeStateService } from './home-state.service';
+import { DuplicateListService } from '../../services/functions/duplicate-list.service';
+import { RenameListService } from '../../services/functions/rename-list.service';
+import { DeleteListService } from '../../services/functions/delete-list.service';
 import { SavedList } from '../../models/task.interface';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
@@ -43,13 +46,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   public searchState$!: Observable<any>;
   public selectedCount$!: Observable<number>;
 
+  // Observables del servicio de duplicación
+  public duplicateShowConfirmModal$!: Observable<boolean>;
+  public duplicateConfirmModalData$!: Observable<any>;
+
+  // Observables del servicio de renombrar
+  public renameShowModal$!: Observable<boolean>;
+  public renameModalData$!: Observable<any>;
+
+  // Observables del servicio de eliminar
+  public deleteShowConfirmModal$!: Observable<boolean>;
+  public deleteConfirmModalData$!: Observable<any>;
+
   // Subject para limpiar subscripciones
   private readonly destroy$ = new Subject<void>();
 
   // Propiedades para el template (usando async pipe donde sea posible)
   searchTerm = '';
 
-  constructor(private homeStateService: HomeStateService) {
+  constructor(
+    private homeStateService: HomeStateService,
+    private duplicateListService: DuplicateListService,
+    private renameListService: RenameListService,
+    private deleteListService: DeleteListService
+  ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
     this.filteredLists$ = this.homeStateService.filteredLists$;
@@ -58,11 +78,26 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.selectionState$ = this.homeStateService.selectionState$;
     this.searchState$ = this.homeStateService.searchState$;
     this.selectedCount$ = this.homeStateService.selectedCount$;
+
+    // Observables del servicio de duplicación
+    this.duplicateShowConfirmModal$ =
+      this.duplicateListService.showConfirmModal$;
+    this.duplicateConfirmModalData$ =
+      this.duplicateListService.confirmModalData$;
+
+    // Observables del servicio de renombrar
+    this.renameShowModal$ = this.renameListService.showRenameModal$;
+    this.renameModalData$ = this.renameListService.renameModalData$;
+
+    // Observables del servicio de eliminar
+    this.deleteShowConfirmModal$ = this.deleteListService.showConfirmModal$;
+    this.deleteConfirmModalData$ = this.deleteListService.confirmModalData$;
   }
 
   // Inicializa el componente
   ngOnInit(): void {
     this.homeStateService.initialize();
+    this.setupServiceSubscriptions();
 
     // Suscribirse al término de búsqueda para el two-way binding
     this.homeStateService.searchState$
@@ -78,7 +113,42 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ========== DELEGACIÓN DE MÉTODOS AL SERVICE ==========
+  // Configura suscripciones a los servicios para actualizar listas cuando se completen operaciones
+  private setupServiceSubscriptions(): void {
+    // Actualizar cuando se complete duplicación
+    this.duplicateListService.showConfirmModal$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isVisible) => {
+        if (!isVisible) {
+          this.homeStateService.loadSavedLists();
+          this.homeStateService.updateStorageIndicator();
+        }
+      });
+
+    // Actualizar cuando se complete renombrado
+    this.renameListService.showRenameModal$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isVisible) => {
+        if (!isVisible) {
+          this.homeStateService.loadSavedLists();
+          this.homeStateService.updateStorageIndicator();
+        }
+      });
+
+    // Actualizar cuando se complete eliminación
+    this.deleteListService.showConfirmModal$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isVisible) => {
+        if (!isVisible) {
+          this.homeStateService.loadSavedLists();
+          this.homeStateService.updateStorageIndicator();
+          // Limpiar selección después de eliminar listas
+          this.homeStateService.deselectAllLists();
+        }
+      });
+  }
+
+  // ========== DELEGACIÓN DE MÉTODOS AL STATE SERVICE ==========
 
   // Navega a la pantalla de creación de nueva lista
   async goToNewList(): Promise<void> {
@@ -88,41 +158,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Carga una lista específica para su edición
   loadList(listId: string): void {
     this.homeStateService.loadList(listId);
-  }
-
-  // Muestra el modal de confirmación para eliminar una lista
-  confirmDeleteList(list: SavedList): void {
-    this.homeStateService.confirmDeleteList(list);
-  }
-
-  // Elimina la lista confirmada
-  deleteConfirmedList(): void {
-    this.homeStateService.deleteConfirmedList();
-  }
-
-  // Cancela la eliminación de la lista
-  cancelDelete(): void {
-    this.homeStateService.cancelDelete();
-  }
-
-  // Cierra el modal de alerta
-  closeAlert(): void {
-    this.homeStateService.closeAlert();
-  }
-
-  // Muestra el modal para renombrar una lista
-  openRenameModal(list: SavedList): void {
-    this.homeStateService.openRenameModal(list);
-  }
-
-  // Renombra la lista con el nuevo nombre proporcionado
-  renameList(newName: string): void {
-    this.homeStateService.renameList(newName);
-  }
-
-  // Cierra el modal de renombrar
-  closeRenameModal(): void {
-    this.homeStateService.closeRenameModal();
   }
 
   // Maneja la actualización de listas después de importar
@@ -157,7 +192,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Confirma la eliminación masiva de listas seleccionadas
   confirmDeleteSelected(): void {
-    this.homeStateService.confirmDeleteSelected();
+    const selectionState = this.homeStateService.getCurrentSelectionState();
+    if (selectionState.selectedListIds.size > 0) {
+      const allLists = this.homeStateService.getCurrentSavedLists();
+      const selectedLists = allLists.filter((list) =>
+        selectionState.selectedListIds.has(list.id)
+      );
+      this.deleteListService.initiateMassDelete(selectedLists);
+    }
   }
 
   // Maneja el cambio en el término de búsqueda
@@ -184,6 +226,54 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ========== MÉTODOS DE SERVICIOS DE FUNCIONES ==========
+
+  // Duplicar lista
+  duplicateList(list: SavedList): void {
+    this.duplicateListService.initiateDuplication(list);
+  }
+
+  confirmDuplicateList(): void {
+    this.duplicateListService.confirmDuplication();
+  }
+
+  cancelDuplicateList(): void {
+    this.duplicateListService.cancelDuplication();
+  }
+
+  // Renombrar lista
+  openRenameModal(list: SavedList): void {
+    this.renameListService.initiateRename(list);
+  }
+
+  renameList(newName: string): void {
+    this.renameListService.confirmRename(newName);
+  }
+
+  closeRenameModal(): void {
+    this.renameListService.cancelRename();
+  }
+
+  // Eliminar lista
+  confirmDeleteList(list: SavedList): void {
+    this.deleteListService.initiateDelete(list);
+  }
+
+  deleteConfirmedList(): void {
+    this.deleteListService.confirmDelete();
+  }
+
+  cancelDelete(): void {
+    this.deleteListService.cancelDelete();
+  }
+
+  // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========
+
+  // Cierra el modal de alerta (para compatibilidad)
+  closeAlert(): void {
+    this.homeStateService.closeAlert();
+  }
+
   // ========== MÉTODOS UTILITARIOS ==========
 
   // Formatea una fecha en string al formato local español
@@ -197,11 +287,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // ========== MÉTODOS SÍNCRONOS PARA EL TEMPLATE ==========
-  // Estos métodos devuelven valores actuales para uso inmediato en el template
 
   // Obtiene las listas filtradas para uso síncrono en el template
   getFilteredLists(): SavedList[] {
-    // Si necesitas acceso síncrono a las listas filtradas
     const currentLists = this.homeStateService.getCurrentSavedLists();
     const currentSearchTerm = this.homeStateService.getCurrentSearchTerm();
 

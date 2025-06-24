@@ -4,8 +4,13 @@
     <h2>Mis Listas Guardadas</h2>
     <div class="header-actions">
       <!-- Acciones normales -->
-      @if (!(selectionState$ | async)?.isSelectionMode) { @if ((savedLists$ |
-      async)?.length ?? 0 > 0) {
+      @if (!(selectionState$ | async)?.isSelectionMode) {
+      <app-export-import-dropdown
+        [savedLists]="(savedLists$ | async) ?? []"
+        (listsUpdated)="onListsUpdated()"
+      ></app-export-import-dropdown>
+
+      @if ((savedLists$ | async)?.length ?? 0 > 0) {
       <app-button
         type="secondary"
         text="Seleccionar"
@@ -14,11 +19,6 @@
       >
       </app-button>
       }
-      <app-export-import-dropdown
-        [savedLists]="(savedLists$ | async) ?? []"
-        (listsUpdated)="onListsUpdated()"
-      ></app-export-import-dropdown>
-
       <app-button
         type="primary"
         text="Nueva Lista"
@@ -90,6 +90,7 @@
         (cardClick)="onListCardClick($event)"
         (toggleSelection)="toggleListSelection($event)"
         (rename)="openRenameModal($event)"
+        (duplicate)="duplicateList($event)"
         (delete)="confirmDeleteList($event)"
       >
       </app-list-card>
@@ -124,6 +125,33 @@
 >
 </app-confirm-modal>
 
+<!-- Modal de renombrar lista -->
+<app-modal
+  [isVisible]="(renameShowModal$ | async) ?? false"
+  [data]="renameModalData$ | async"
+  (confirmed)="renameList($event)"
+  (closed)="closeRenameModal()"
+>
+</app-modal>
+
+<!-- Modal de confirmación para duplicar -->
+<app-confirm-modal
+  [isVisible]="(duplicateShowConfirmModal$ | async) ?? false"
+  [data]="duplicateConfirmModalData$ | async"
+  (confirmed)="confirmDuplicateList()"
+  (cancelled)="cancelDuplicateList()"
+>
+</app-confirm-modal>
+
+<!-- Modal de confirmación para eliminar -->
+<app-confirm-modal
+  [isVisible]="(deleteShowConfirmModal$ | async) ?? false"
+  [data]="deleteConfirmModalData$ | async"
+  (confirmed)="deleteConfirmedList()"
+  (cancelled)="cancelDelete()"
+>
+</app-confirm-modal>
+
 <!-- Alertas -->
 <app-alert-modal
   [isVisible]="(modalState$ | async)?.showAlertModal ?? false"
@@ -131,12 +159,3 @@
   (closed)="closeAlert()"
 >
 </app-alert-modal>
-
-<!-- Modal de renombrar lista -->
-<app-modal
-  [isVisible]="(modalState$ | async)?.showRenameModal ?? false"
-  [data]="(modalState$ | async)?.renameModalData"
-  (confirmed)="renameList($event)"
-  (closed)="closeRenameModal()"
->
-</app-modal>

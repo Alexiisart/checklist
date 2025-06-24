@@ -31,7 +31,8 @@ import { Subject, takeUntil, interval } from 'rxjs';
         position: fixed;
         top: 24px;
         right: 24px;
-        background: var(--color-surface-elevated);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
         padding: 16px;
@@ -51,7 +52,7 @@ import { Subject, takeUntil, interval } from 'rxjs';
       .storage-header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         margin-bottom: 12px;
       }
 

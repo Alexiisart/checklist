@@ -65,6 +65,15 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
           (clickEvent)="showAddError()"
         >
         </app-button>
+        <app-button
+          type="icon"
+          iconLeft="file_download"
+          size="sm"
+          title="Exportar esta tarea con sus subtareas"
+          extraClasses="export-task-btn"
+          (clickEvent)="exportTask()"
+        >
+        </app-button>
       </div>
 
       <!-- Subtareas -->
@@ -206,6 +215,9 @@ export class TaskItemComponent {
 
   // Evento emitido cuando se elimina la tarea
   @Output() taskDeleted = new EventEmitter<number>();
+
+  // Evento emitido cuando se quiere exportar esta tarea específica
+  @Output() taskExported = new EventEmitter<number>();
 
   // Controla la visibilidad del modal
   showModal = false;
@@ -351,6 +363,11 @@ export class TaskItemComponent {
   // Elimina la tarea principal
   deleteTask(): void {
     this.taskDeleted.emit(this.task.id);
+  }
+
+  // Exporta la tarea actual con sus subtareas
+  exportTask(): void {
+    this.taskExported.emit(this.task.id);
   }
 
   // Maneja la confirmación del modal según la acción actual

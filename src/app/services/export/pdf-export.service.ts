@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChecklistData } from '../models/task.interface';
+import { ChecklistData } from '../../models/task.interface';
 
 /**
  * Servicio para exportar listas de tareas a PDF mediante la funcionalidad de impresión del navegador.

@@ -214,6 +214,11 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.exportToPDF();
   }
 
+  // Exporta la lista actual a TXT
+  exportToTXT(): void {
+    this.stateService.exportToTXT();
+  }
+
   // Cierra el modal de alerta
   closeAlert(): void {
     this.stateService.closeAlert();

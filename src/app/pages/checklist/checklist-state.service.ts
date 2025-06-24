@@ -2,7 +2,8 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subject, first } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChecklistService } from '../../services/checklist.service';
-import { PdfExportService } from '../../services/pdf-export.service';
+import { PdfExportService } from '../../services/export/pdf-export.service';
+import { TxtExportService } from '../../services/export/txt-export.service';
 import { ToastService } from '../../services/toast.service';
 import {
   ChecklistData,
@@ -58,6 +59,7 @@ export class ChecklistStateService implements OnDestroy {
     private router: Router,
     private checklistService: ChecklistService,
     private pdfExportService: PdfExportService,
+    private txtExportService: TxtExportService,
     private toastService: ToastService
   ) {
     this.subscribeToChecklistChanges();
@@ -525,6 +527,27 @@ export class ChecklistStateService implements OnDestroy {
       setTimeout(() => {
         this.pdfExportService.exportToPDF(currentState.currentList!);
       }, 500);
+    }
+  }
+
+  /** Exporta la lista actual a TXT */
+  exportToTXT(): void {
+    const currentState = this.stateSubject.value;
+    if (currentState.currentList) {
+      try {
+        this.txtExportService.exportToTXT(currentState.currentList);
+        this.toastService.showAlert(
+          'Archivo TXT descargado exitosamente',
+          'success',
+          3000
+        );
+      } catch (error) {
+        this.toastService.showAlert(
+          'Error al exportar archivo TXT',
+          'danger',
+          4000
+        );
+      }
     }
   }
 

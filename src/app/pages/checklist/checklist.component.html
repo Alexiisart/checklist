@@ -24,6 +24,13 @@
         (clickEvent)="editMode()"
       >
       </app-button>
+      <app-button
+        type="primary"
+        text="Nueva Lista"
+        iconLeft="add_circle_outline"
+        (clickEvent)="confirmStartNewList()"
+      >
+      </app-button>
     </div>
   </div>
 
@@ -91,11 +98,11 @@
     >
     </app-button>
     <app-button
-      type="outline-primary"
-      text="Comenzar lista nueva"
-      iconLeft="add_circle_outline"
+      type="outline-secondary"
+      text="Exportar TXT"
+      iconLeft="description"
       size="md"
-      (clickEvent)="confirmStartNewList()"
+      (clickEvent)="exportToTXT()"
     >
     </app-button>
   </div>

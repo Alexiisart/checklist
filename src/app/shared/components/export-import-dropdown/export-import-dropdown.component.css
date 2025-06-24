@@ -344,7 +344,7 @@
 .list-selection-modal {
   max-width: 800px;
   width: 90vw;
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
 }
 

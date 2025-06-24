@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { ToastService } from '../../services/toast.service';
@@ -22,134 +23,13 @@ import { ExportImportDropdownComponent } from '../../shared/components/export-im
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ConfirmModalComponent,
     AlertModalComponent,
     ModalComponent,
     ExportImportDropdownComponent,
   ],
-  template: `
-    <div class="home-screen">
-      <div class="home-header">
-        <h2>Mis Listas Guardadas</h2>
-        <div class="header-actions">
-          <app-export-import-dropdown
-            [savedLists]="savedLists"
-            (listsUpdated)="onListsUpdated()"
-          ></app-export-import-dropdown>
-          <button class="primary-btn" (click)="goToNewList()">
-            Nueva Lista
-          </button>
-        </div>
-      </div>
-
-      <!-- Indicador de almacenamiento -->
-      @if (storagePercentage > 60) {
-      <div class="storage-indicator">
-        <div class="storage-header">
-          <span class="material-icons-outlined">storage</span>
-          <span class="storage-text"
-            >Espacio usado: {{ storagePercentage }}%</span
-          >
-        </div>
-        <div class="storage-progress">
-          <div
-            class="storage-progress-fill"
-            [style.width.%]="storagePercentage"
-          ></div>
-        </div>
-        @if (storagePercentage > 80) {
-        <p class="storage-warning">
-          ⚠️ Espacio casi lleno. Considera eliminar listas antiguas.
-        </p>
-        }
-      </div>
-      }
-
-      <!-- Lista de cards guardadas -->
-      @if (savedLists.length > 0) {
-      <div class="saved-lists-container">
-        @for (list of savedLists; track list.id) {
-        <div class="list-card" (click)="loadList(list.id)">
-          <div class="list-card-header">
-            <div class="title-section">
-              <h3 class="list-card-title">
-                {{ list.name || 'Lista sin nombre' }}
-              </h3>
-              <button
-                class="rename-list-btn"
-                (click)="openRenameModal(list); $event.stopPropagation()"
-                title="Renombrar lista"
-              >
-                <span class="material-icons-outlined">edit</span>
-              </button>
-            </div>
-            <span class="list-card-date">{{ formatDate(list.date) }}</span>
-          </div>
-          <p class="list-card-preview">{{ list.preview }}</p>
-          <div class="list-card-stats">
-            <span
-              >{{ list.completedCount }} de
-              {{ list.tasksCount }} completadas</span
-            >
-          </div>
-          <div class="list-card-progress">
-            <div
-              class="list-card-progress-bar"
-              [style.width.%]="getProgressPercentage(list)"
-            ></div>
-          </div>
-          <div class="list-card-actions" (click)="$event.stopPropagation()">
-            <button
-              class="delete-list-btn"
-              (click)="confirmDeleteList(list)"
-              title="Eliminar lista"
-            >
-              <span class="material-icons-outlined">delete</span>
-            </button>
-          </div>
-        </div>
-        }
-      </div>
-      }
-
-      <!-- Estado vacío -->
-      @if (savedLists.length === 0) {
-      <div class="empty-state">
-        <span class="material-icons-outlined empty-icon">checklist</span>
-        <h3>No tienes listas guardadas</h3>
-        <p>
-          Crea tu primera lista para comenzar a organizar tus tareas diarias
-        </p>
-        <button class="primary-btn" (click)="goToNewList()">
-          Crear Primera Lista
-        </button>
-      </div>
-      }
-    </div>
-
-    <app-confirm-modal
-      [isVisible]="showConfirmModal"
-      [data]="confirmModalData"
-      (confirmed)="deleteConfirmedList()"
-      (cancelled)="cancelDelete()"
-    >
-    </app-confirm-modal>
-
-    <app-alert-modal
-      [isVisible]="showAlertModal"
-      [data]="alertModalData"
-      (closed)="closeAlert()"
-    >
-    </app-alert-modal>
-
-    <app-modal
-      [isVisible]="showRenameModal"
-      [data]="renameModalData"
-      (confirmed)="renameList($event)"
-      (closed)="closeRenameModal()"
-    >
-    </app-modal>
-  `,
+  templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
@@ -177,6 +57,16 @@ export class HomeComponent implements OnInit {
   /** Lista que se renombrará */
   listToRename: SavedList | null = null;
 
+  /** Modo de selección masiva activado */
+  isSelectionMode = false;
+  /** IDs de listas seleccionadas para eliminación masiva */
+  selectedListIds = new Set<string>();
+
+  /** Término de búsqueda para filtrar listas */
+  searchTerm = '';
+  /** Listas filtradas por búsqueda */
+  filteredLists: SavedList[] = [];
+
   constructor(
     private router: Router,
     private storageService: StorageService,
@@ -196,6 +86,7 @@ export class HomeComponent implements OnInit {
    */
   loadSavedLists(): void {
     this.savedLists = this.storageService.getSavedLists();
+    this.updateFilteredLists();
   }
 
   /**
@@ -247,7 +138,11 @@ export class HomeComponent implements OnInit {
    * Elimina la lista confirmada y muestra una alerta con el resultado
    */
   deleteConfirmedList(): void {
-    if (this.listToDelete) {
+    if (this.selectedListIds.size > 0) {
+      // Eliminación masiva
+      this.deleteSelectedLists();
+    } else if (this.listToDelete) {
+      // Eliminación individual
       try {
         this.storageService.deleteList(this.listToDelete.id);
         this.loadSavedLists();
@@ -363,5 +258,149 @@ export class HomeComponent implements OnInit {
   onListsUpdated(): void {
     this.loadSavedLists();
     this.updateStorageIndicator();
+  }
+
+  /**
+   * Activa o desactiva el modo de selección masiva
+   */
+  toggleSelectionMode(): void {
+    this.isSelectionMode = !this.isSelectionMode;
+    if (!this.isSelectionMode) {
+      this.selectedListIds.clear();
+    }
+  }
+
+  /**
+   * Selecciona o deselecciona una lista
+   */
+  toggleListSelection(listId: string): void {
+    if (this.selectedListIds.has(listId)) {
+      this.selectedListIds.delete(listId);
+    } else {
+      this.selectedListIds.add(listId);
+    }
+  }
+
+  /**
+   * Verifica si una lista está seleccionada
+   */
+  isListSelected(listId: string): boolean {
+    return this.selectedListIds.has(listId);
+  }
+
+  /**
+   * Selecciona todas las listas
+   */
+  selectAllLists(): void {
+    this.selectedListIds.clear();
+    this.savedLists.forEach((list) => this.selectedListIds.add(list.id));
+  }
+
+  /**
+   * Deselecciona todas las listas
+   */
+  deselectAllLists(): void {
+    this.selectedListIds.clear();
+  }
+
+  /**
+   * Obtiene el número de listas seleccionadas
+   */
+  getSelectedCount(): number {
+    return this.selectedListIds.size;
+  }
+
+  /**
+   * Confirma la eliminación masiva de listas seleccionadas
+   */
+  confirmDeleteSelected(): void {
+    if (this.selectedListIds.size === 0) {
+      this.toastService.showAlert(
+        'Selecciona al menos una lista para eliminar',
+        'warning'
+      );
+      return;
+    }
+
+    this.confirmModalData = {
+      title: 'Eliminar Listas Seleccionadas',
+      message: `¿Estás seguro de que deseas eliminar ${
+        this.selectedListIds.size
+      } lista${
+        this.selectedListIds.size > 1 ? 's' : ''
+      }? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+    };
+    this.showConfirmModal = true;
+  }
+
+  /**
+   * Ejecuta la eliminación masiva después de confirmación
+   */
+  private deleteSelectedLists(): void {
+    try {
+      const deletedCount = this.selectedListIds.size;
+      const selectedIds = Array.from(this.selectedListIds);
+
+      selectedIds.forEach((listId) => {
+        this.storageService.deleteList(listId);
+      });
+
+      this.loadSavedLists();
+      this.updateStorageIndicator();
+      this.selectedListIds.clear();
+      this.isSelectionMode = false;
+
+      this.toastService.showAlert(
+        `${deletedCount} lista${
+          deletedCount > 1 ? 's eliminadas' : ' eliminada'
+        } correctamente`,
+        'success'
+      );
+    } catch (error) {
+      console.error('Error eliminando listas:', error);
+      this.toastService.showAlert('Error al eliminar las listas', 'danger');
+    }
+  }
+
+  /**
+   * Actualiza la lista filtrada basada en el término de búsqueda
+   */
+  private updateFilteredLists(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredLists = [...this.savedLists];
+    } else {
+      const searchTermLower = this.searchTerm.toLowerCase();
+      this.filteredLists = this.savedLists.filter(
+        (list) =>
+          (list.name || 'Lista sin nombre')
+            .toLowerCase()
+            .includes(searchTermLower) ||
+          (list.preview || '').toLowerCase().includes(searchTermLower)
+      );
+    }
+  }
+
+  /**
+   * Obtiene las listas filtradas por búsqueda
+   */
+  getFilteredLists(): SavedList[] {
+    return this.filteredLists;
+  }
+
+  /**
+   * Maneja el cambio en el término de búsqueda
+   */
+  onSearchChange(): void {
+    this.updateFilteredLists();
+  }
+
+  /**
+   * Limpia el término de búsqueda
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.updateFilteredLists();
   }
 }

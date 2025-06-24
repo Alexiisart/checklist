@@ -551,6 +551,30 @@ export class ChecklistStateService implements OnDestroy {
     }
   }
 
+  /** Exporta una tarea específica con sus subtareas a TXT */
+  exportSingleTaskToTXT(taskId: number): void {
+    const currentState = this.stateSubject.value;
+    if (currentState.currentList) {
+      try {
+        this.txtExportService.exportSingleTaskToTXT(
+          currentState.currentList,
+          taskId
+        );
+        this.toastService.showAlert(
+          'Tarea exportada a TXT exitosamente',
+          'success',
+          3000
+        );
+      } catch (error) {
+        this.toastService.showAlert(
+          'Error al exportar tarea a TXT',
+          'danger',
+          4000
+        );
+      }
+    }
+  }
+
   /** Cierra la alerta modal */
   closeAlert(): void {
     this.updateState({

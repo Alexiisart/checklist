@@ -159,6 +159,11 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.stateService.onTaskDeleted(taskId);
   }
 
+  // Exporta una tarea específica a TXT
+  onTaskExported(taskId: number): void {
+    this.stateService.exportSingleTaskToTXT(taskId);
+  }
+
   // Maneja cambios en las observaciones generales
   onObservationsChange(): void {
     this.stateService.onObservationsChange();

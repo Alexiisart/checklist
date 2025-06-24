@@ -56,7 +56,7 @@ export class PdfExportService {
           width: 100%;
           background: white;
           padding: 20px;
-          font-family: 'Poppins', Arial, sans-serif;
+          font-family: 'Inter', sans-serif;
           color: black;
         }
         

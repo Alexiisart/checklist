@@ -18,14 +18,43 @@
 - 📄 **Exportación PDF**: Para imprimir o compartir
 - 🔒 **IDs únicos**: Sistema UUID para máxima estabilidad
 - ⚡ **Tracking optimizado**: Sin errores de duplicación
+- 📋 **Gestión completa de listas**: Duplicar, renombrar y eliminar
+- 🔄 **Numeración automática**: Sistema inteligente para copias
+- ⚠️ **Confirmaciones**: Modales para operaciones críticas
+- 🏗️ **Arquitectura modular**: Servicios independientes para cada función
 
-## 🆕 Novedades v1.1
+## 🆕 Novedades v1.2
 
-- **🔧 UuidService**: Generación de identificadores únicos globalmente
-- **🛠️ Componentes independientes**: Mejor separación de responsabilidades
-- **🚀 Tracking mejorado**: Resolución definitiva de errores NG0955
-- **📋 Gestión de tareas duplicadas**: Manejo correcto de elementos con mismo nombre
-- **🎯 Performance**: Optimización en renderizado de listas grandes
+- **🔧 Servicios de Funciones**: Duplicar, renombrar y eliminar listas con servicios independientes
+- **📋 Duplicación inteligente**: Sistema automático de numeración para copias
+- **✏️ Renombrado robusto**: Validación de nombres únicos y manejo de errores
+- **🗑️ Eliminación múltiple**: Borrado individual y masivo con confirmación
+- **🎯 UI/UX mejorada**: Cards uniformes y botones consistentes
+- **🧩 Arquitectura limpia**: Separación de responsabilidades sin lógica en state services
+
+## 📋 Gestión de Listas
+
+### Duplicar Listas
+
+- **Modal de confirmación** antes de duplicar
+- **Numeración automática**: "Lista (Copia)", "Lista (Copia 2)", etc.
+- **IDs únicos** para todas las tareas y subtareas
+- **Reset de estados**: Tareas sin completar en la copia
+- **Limpieza automática**: Sin errores ni observaciones en copias
+
+### Renombrar Listas
+
+- **Validación en tiempo real** de nombres únicos
+- **Manejo de errores** visual con mensajes específicos
+- **Confirmación automática** al presionar Enter
+- **Cancelación** con Escape o botón cerrar
+
+### Eliminar Listas
+
+- **Eliminación individual** con confirmación
+- **Eliminación múltiple** de listas seleccionadas
+- **Contador dinámico** en botón de eliminar masivo
+- **Confirmación específica** según cantidad de elementos
 
 ## 🚀 Instalación
 
@@ -60,13 +89,28 @@ npm run lint    # Linting
 1. **Nueva Lista**: Escribe tareas separadas por comas
 2. **Gestionar**: Marca completadas, añade subtareas/errores
 3. **Guardar**: Auto-guardado o manual con nombre
-4. **Exportar**: PDF para imprimir o compartir
+4. **Duplicar**: Crea copias con numeración automática
+5. **Renombrar**: Cambia nombres con validación
+6. **Eliminar**: Borra individual o múltiple con confirmación
+7. **Exportar**: PDF para imprimir o compartir
 
 ### Casos Especiales
 
 - **Tareas duplicadas**: Cada instancia se maneja independientemente
 - **Subtareas múltiples**: Usa `+` para separar (ej: "tarea1+tarea2+tarea3")
 - **Edición masiva**: Las tareas existentes mantienen su estado
+- **Nombres únicos**: El sistema previene duplicados en renombrado
+- **Copias automáticas**: Numeración inteligente para evitar conflictos
+
+## 🏗️ Arquitectura de Servicios
+
+La aplicación utiliza una arquitectura modular con servicios independientes:
+
+- **`duplicate-list.service`**: Maneja duplicación con confirmación y numeración
+- **`rename-list.service`**: Gestiona renombrado con validación
+- **`delete-list.service`**: Controla eliminación individual y masiva
+- **State Services**: Solo manejan UI y navegación básica
+- **Servicios principales**: ChecklistService, StorageService, etc.
 
 ## 🤝 Contribuir
 

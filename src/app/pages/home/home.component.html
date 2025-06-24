@@ -7,11 +7,12 @@
         <span class="material-icons-outlined">checklist</span>
         Seleccionar
       </button>
+      }
       <app-export-import-dropdown
         [savedLists]="savedLists"
         (listsUpdated)="onListsUpdated()"
       ></app-export-import-dropdown>
-      }
+
       <button class="primary-btn" (click)="goToNewList()">Nueva Lista</button>
       } @else {
       <div class="selection-actions">

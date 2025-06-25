@@ -108,10 +108,9 @@ export class ChecklistNavigationService {
         if (hasUnsavedChanges) {
           this._confirmModalData$.next({
             title: 'Cambios sin guardar',
-            message:
-              'Tienes cambios sin guardar. ¿Quieres guardar antes de salir?',
-            confirmText: 'Guardar y salir',
-            cancelText: 'Salir sin guardar',
+            message: 'Tienes cambios sin guardar. ¿Quieres salir sin guardar?',
+            confirmText: 'Salir sin guardar',
+            cancelText: 'Cancelar',
           });
           this._showConfirmModal$.next(true);
           this.pendingAction = 'go-home';
@@ -122,9 +121,35 @@ export class ChecklistNavigationService {
   }
 
   /**
-   * Confirma la acción pendiente
+   * Confirma la acción pendiente - ahora es "Salir sin guardar"
    */
   confirmAction(currentList: ChecklistData | null): void {
+    this.exitWithoutSaving();
+  }
+
+  /**
+   * Cancela la acción pendiente - solo cierra el modal
+   */
+  cancelAction(): void {
+    this.closeConfirmModal();
+  }
+
+  /**
+   * Ejecuta la acción sin guardar
+   */
+  exitWithoutSaving(): void {
+    if (this.pendingAction === 'go-home') {
+      this.router.navigate(['/home']);
+    } else if (this.pendingAction === 'start-new-list-with-save') {
+      this.navigateToNewList();
+    }
+    this.closeConfirmModal();
+  }
+
+  /**
+   * Guarda y ejecuta la acción
+   */
+  saveAndExit(currentList: ChecklistData | null): void {
     if (this.pendingAction === 'start-new-list-with-save') {
       // Guardar primero y luego ir a nueva lista
       if (currentList) {
@@ -156,20 +181,6 @@ export class ChecklistNavigationService {
           return; // Retornar para que el componente maneje el modal de guardado
         }
       }
-    }
-
-    this.closeConfirmModal();
-  }
-
-  /**
-   * Cancela la acción pendiente
-   */
-  cancelAction(): void {
-    if (this.pendingAction === 'go-home') {
-      this.router.navigate(['/home']);
-    } else if (this.pendingAction === 'start-new-list-with-save') {
-      // Si cancela "Guardar y nueva lista", significa "Nueva lista sin guardar"
-      this.navigateToNewList();
     }
     this.closeConfirmModal();
   }

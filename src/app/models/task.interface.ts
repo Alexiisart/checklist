@@ -1,10 +1,19 @@
 /**
+ * Interfaz que representa un miembro del equipo
+ */
+export interface TeamMember {
+  id: number; // Identificador único del miembro
+  name: string; // Nombre del miembro del equipo
+}
+
+/**
  * Interfaz que representa una subtarea dentro de una tarea principal
  */
 export interface Subtask {
   id: number; // Identificador único de la subtarea
   name: string; // Nombre o descripción de la subtarea
   completed: boolean; // Estado de completado de la subtarea
+  assignedMember?: TeamMember | null; // Miembro asignado a esta subtarea (opcional)
 }
 
 /**
@@ -24,6 +33,7 @@ export interface Task {
   completed: boolean; // Estado de completado de la tarea
   subtasks: Subtask[]; // Lista de subtareas asociadas
   errors: TaskError[]; // Lista de problemas que ocurrieron al realizar la tarea
+  leader?: TeamMember | null; // Líder asignado a la tarea (del equipo de la lista)
 }
 
 /**
@@ -36,6 +46,7 @@ export interface ChecklistData {
   observations: string; // Observaciones generales
   createdDate: string; // Fecha de creación
   modifiedDate: string; // Fecha de última modificación
+  team: TeamMember[]; // Lista de miembros del equipo
 }
 
 /**

@@ -1,15 +1,22 @@
 <div class="task-item" [class.completed]="task.completed">
   <div class="task-header">
     <div class="task-title-container">
-      <app-checkbox
-        type="success"
-        size="md"
-        [checked]="task.completed"
-        [inputId]="'task-' + task.id"
-        ariaLabel="Marcar tarea como completada"
-        (checkedChange)="onTaskToggle($event)"
-      ></app-checkbox>
-      <span class="task-title">{{ task.name }}</span>
+      <div class="task-title-container-left">
+        <app-checkbox
+          type="success"
+          size="md"
+          [checked]="task.completed"
+          [inputId]="'task-' + task.id"
+          ariaLabel="Marcar tarea como completada"
+          (checkedChange)="onTaskToggle($event)"
+        ></app-checkbox>
+        <span class="task-title">{{ task.name }}</span>
+      </div>
+      <div class="task-title-container-right">
+        @if (task.leader) {
+        <span class="leader-badge">Líder: {{ task.leader.name }}</span>
+        }
+      </div>
     </div>
 
     <div class="task-buttons-container">
@@ -33,7 +40,28 @@
         (clickEvent)="showAddError()"
       >
       </app-button>
+
       <div class="task-actions">
+        @if (listTeam && listTeam.length > 0) {
+        <app-button
+          type="icon"
+          iconLeft="people"
+          size="sm"
+          title="Gestionar asignaciones de equipo"
+          extraClasses="team-dropdown-btn"
+          (clickEvent)="toggleTeamDropdown()"
+        >
+        </app-button>
+        }
+        <app-button
+          type="icon"
+          iconLeft="file_copy"
+          size="sm"
+          title="Copiar esta tarea al portapapeles"
+          extraClasses="copy-task-btn"
+          (clickEvent)="copyTask()"
+        >
+        </app-button>
         <app-button
           type="icon"
           iconLeft="edit"
@@ -43,6 +71,7 @@
           (clickEvent)="editTask()"
         >
         </app-button>
+
         <app-button
           type="icon"
           iconLeft="file_download"
@@ -64,6 +93,16 @@
       </div>
     </div>
   </div>
+
+  <!-- Dropdown de gestión de equipo -->
+  <app-team-dropdown
+    type="leader"
+    [teamMembers]="listTeam"
+    [selectedMember]="task.leader || null"
+    [isVisible]="(teamService.showLeaderDropdown$ | async) ?? false"
+    (memberSelected)="assignLeader($event)"
+    (closed)="teamService.closeLeaderDropdown()"
+  ></app-team-dropdown>
 
   <!-- Subtareas -->
   @if (task.subtasks.length > 0) {
@@ -93,6 +132,17 @@
         }}</span>
 
         <div class="micro-actions-container">
+          @if (listTeam && listTeam.length > 0) {
+          <div class="subtask-assignment">
+            <app-team-dropdown
+              type="member"
+              size="sm"
+              [teamMembers]="listTeam"
+              [selectedMember]="subtask.assignedMember || null"
+              (memberSelected)="assignMemberToSubtask(subtask, $event)"
+            ></app-team-dropdown>
+          </div>
+          }
           <app-button
             type="icon"
             iconLeft="edit"
@@ -157,3 +207,12 @@
   (closed)="closeModal()"
 >
 </app-modal>
+
+<!-- Modal de confirmación para eliminar subtarea -->
+<app-confirm-modal
+  [isVisible]="showConfirmModal"
+  [data]="confirmModalData"
+  (confirmed)="confirmSubtaskDeletion()"
+  (cancelled)="cancelSubtaskDeletion()"
+>
+</app-confirm-modal>

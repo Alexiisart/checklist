@@ -10,10 +10,17 @@ import {
   Subtask,
   TaskError,
   ModalData,
+  TeamMember,
 } from '../../../models/task.interface';
 import { ModalComponent } from '../modal/modal.component';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
+import { TeamDropdownComponent } from '../../atomic/dropdowns';
+import {
+  ChecklistTeamService,
+  ChecklistCopyService,
+} from '../../../services/functions/checklist';
 
 // Componente que representa un elemento de tarea individual. Permite gestionar tareas, subtareas y errores asociados.
 @Component({
@@ -23,8 +30,10 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
     CommonModule,
     DragDropModule,
     ModalComponent,
+    ConfirmModalComponent,
     ButtonComponent,
     CheckboxComponent,
+    TeamDropdownComponent,
   ],
   templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.css'],
@@ -32,6 +41,9 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
 export class TaskItemComponent {
   // Tarea que se mostrará en el componente
   @Input() task!: Task;
+
+  // Equipo de la lista completa
+  @Input() listTeam: TeamMember[] = [];
 
   // Evento emitido cuando se cambia el estado de completado de la tarea
   @Output() taskToggled = new EventEmitter<{
@@ -99,11 +111,25 @@ export class TaskItemComponent {
   // Evento emitido cuando se quiere exportar esta tarea específica
   @Output() taskExported = new EventEmitter<number>();
 
+  // Evento emitido cuando se quiere copiar esta tarea específica
+  @Output() taskCopied = new EventEmitter<number>();
+
+  // Los eventos de gestión de equipo ahora se manejan a través del servicio ChecklistTeamService
+
   // Controla la visibilidad del modal
   showModal = false;
 
   // Datos que se mostrarán en el modal
   modalData: ModalData | null = null;
+
+  // Controla la visibilidad del modal de confirmación
+  showConfirmModal = false;
+
+  // Datos del modal de confirmación
+  confirmModalData: any = null;
+
+  // Subtarea pendiente de eliminación
+  subtaskToDelete: Subtask | null = null;
 
   // Acción actual que se está realizando
   currentAction:
@@ -119,6 +145,11 @@ export class TaskItemComponent {
 
   // Error actual que se está editando
   currentError: TaskError | null = null;
+
+  constructor(
+    public teamService: ChecklistTeamService,
+    public copyService: ChecklistCopyService
+  ) {}
 
   // Funciones de tracking personalizadas para evitar errores de IDs duplicados
   trackBySubtaskId(index: number, subtask: Subtask): string | number {
@@ -193,9 +224,34 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  // Elimina una subtarea
+  // Muestra modal de confirmación para eliminar una subtarea
   removeSubtask(subtask: Subtask): void {
-    this.subtaskRemoved.emit({ taskId: this.task.id, subtaskId: subtask.id });
+    this.subtaskToDelete = subtask;
+    this.confirmModalData = {
+      title: 'Eliminar Subtarea',
+      message: `¿Estás seguro de que quieres eliminar la subtarea "${subtask.name}"?`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+    };
+    this.showConfirmModal = true;
+  }
+
+  // Confirma la eliminación de la subtarea
+  confirmSubtaskDeletion(): void {
+    if (this.subtaskToDelete) {
+      this.subtaskRemoved.emit({
+        taskId: this.task.id,
+        subtaskId: this.subtaskToDelete.id,
+      });
+      this.cancelSubtaskDeletion();
+    }
+  }
+
+  // Cancela la eliminación de la subtarea
+  cancelSubtaskDeletion(): void {
+    this.subtaskToDelete = null;
+    this.showConfirmModal = false;
+    this.confirmModalData = null;
   }
 
   // Muestra el modal para documentar un problema que ocurrió al realizar la tarea
@@ -248,6 +304,41 @@ export class TaskItemComponent {
   // Exporta la tarea actual con sus subtareas
   exportTask(): void {
     this.taskExported.emit(this.task.id);
+  }
+
+  // Copia la tarea actual con sus subtareas al portapapeles
+  copyTask(): void {
+    this.taskCopied.emit(this.task.id);
+  }
+
+  // Muestra el modal para gestionar el equipo (no se usa, se maneja a nivel de lista)
+  showManageTeam(): void {
+    this.teamService.showManageTeamModal();
+  }
+
+  // Alterna la visibilidad del dropdown de equipo
+  toggleTeamDropdown(): void {
+    this.teamService.toggleLeaderDropdown();
+  }
+
+  // Asigna un líder a la tarea
+  assignLeader(member: TeamMember | null): void {
+    this.teamService.updateTaskLeader(this.task.id, member);
+  }
+
+  // Asigna un miembro a una subtarea
+  assignMemberToSubtask(subtask: Subtask, member: TeamMember | null): void {
+    this.teamService.assignMemberToSubtask(this.task.id, subtask.id, member);
+  }
+
+  // Obtiene el nombre del miembro asignado a una subtarea
+  getAssignedMemberName(subtask: Subtask): string {
+    return subtask.assignedMember?.name || 'Sin asignar';
+  }
+
+  // Obtiene el nombre del líder de la tarea
+  getLeaderName(): string {
+    return this.task.leader?.name || 'Sin líder';
   }
 
   // Maneja la confirmación del modal según la acción actual

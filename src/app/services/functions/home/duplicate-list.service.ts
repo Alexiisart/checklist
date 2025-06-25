@@ -116,16 +116,21 @@ export class DuplicateListService {
           id: this.uuidService.generateNumericId(),
           // Resetear estado de completado
           completed: false,
+          // Limpiar líder en la copia
+          leader: null,
           subtasks: task.subtasks.map((subtask) => ({
             ...subtask,
             id: this.uuidService.generateNumericId(),
             completed: false,
+            // Limpiar asignación en la copia
+            assignedMember: null,
           })),
           errors: [], // Limpiar errores de la copia
         })),
         observations: '', // Limpiar observaciones
         createdDate: new Date().toISOString(),
         modifiedDate: new Date().toISOString(),
+        team: [...(originalData.team || [])], // Copiar el equipo
       };
 
       // Primero establecer la lista duplicada como lista actual

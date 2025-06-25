@@ -43,6 +43,15 @@
         </app-button>
         <app-button
           type="secondary"
+          iconLeft="group"
+          text="Equipo"
+          title="Gestionar equipo de la lista"
+          (clickEvent)="showManageTeam()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
           iconLeft="home"
           title="Inicio"
           text="Inicio"
@@ -73,6 +82,7 @@
     @for (task of currentList.tasks; track trackByTaskId($index, task)) {
     <app-task-item
       [task]="task"
+      [listTeam]="currentList.team || []"
       (taskToggled)="onTaskToggled($event)"
       (subtaskToggled)="onSubtaskToggled($event)"
       (subtaskAdded)="onSubtaskAdded($event)"
@@ -85,6 +95,7 @@
       (taskUpdated)="onTaskUpdated($event)"
       (taskDeleted)="onTaskDeleted($event)"
       (taskExported)="onTaskExported($event)"
+      (taskCopied)="onTaskCopied($event)"
     >
     </app-task-item>
     }
@@ -125,6 +136,15 @@
       iconLeft="description"
       size="md"
       (clickEvent)="exportToTXT()"
+    >
+    </app-button>
+    <app-button
+      type="outline-secondary"
+      text="Copiar Lista"
+      iconLeft="file_copy"
+      size="md"
+      title="Copiar toda la lista al portapapeles"
+      (clickEvent)="copyFullList()"
     >
     </app-button>
   </div>
@@ -182,4 +202,13 @@
     (closed)="closeReorderModal()"
   >
   </app-reorder-modal>
+
+  <!-- Modal de gestión de equipo -->
+  <app-modal
+    [isVisible]="(showTeamModal$ | async) ?? false"
+    [data]="teamModalData$ | async"
+    (confirmed)="onTeamConfirm($event)"
+    (closed)="closeTeamModal()"
+  >
+  </app-modal>
 </div>

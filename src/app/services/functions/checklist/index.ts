@@ -6,3 +6,5 @@ export { ChecklistModalsService } from './checklist-modals.service';
 export { ChecklistNavigationService } from './checklist-navigation.service';
 export { ChecklistExportService } from './checklist-export.service';
 export { ChecklistReorderService } from './checklist-reorder.service';
+export { ChecklistTeamService } from './checklist-team.service';
+export { ChecklistCopyService } from './checklist-copy.service';

@@ -19,14 +19,14 @@ export class ChecklistTeamService {
   private _showTeamModal$ = new BehaviorSubject<boolean>(false);
   private _teamModalData$ = new BehaviorSubject<ModalData | null>(null);
 
-  // Subject para manejar la visibilidad del dropdown de líder
-  private _showLeaderDropdown$ = new BehaviorSubject<boolean>(false);
+  // Mapa para manejar la visibilidad del dropdown de líder por tarea
+  private _activeLeaderDropdown$ = new BehaviorSubject<number | null>(null);
 
   // Observables públicos
   public readonly showTeamModal$ = this._showTeamModal$.asObservable();
   public readonly teamModalData$ = this._teamModalData$.asObservable();
-  public readonly showLeaderDropdown$ =
-    this._showLeaderDropdown$.asObservable();
+  public readonly activeLeaderDropdown$ =
+    this._activeLeaderDropdown$.asObservable();
 
   constructor(
     private checklistService: ChecklistService,
@@ -111,18 +111,29 @@ export class ChecklistTeamService {
   }
 
   /**
-   * Alterna la visibilidad del dropdown de líder
+   * Alterna la visibilidad del dropdown de líder para una tarea específica
    */
-  toggleLeaderDropdown(): void {
-    const currentState = this._showLeaderDropdown$.value;
-    this._showLeaderDropdown$.next(!currentState);
+  toggleLeaderDropdown(taskId: number): void {
+    const currentActiveId = this._activeLeaderDropdown$.value;
+    if (currentActiveId === taskId) {
+      this._activeLeaderDropdown$.next(null);
+    } else {
+      this._activeLeaderDropdown$.next(taskId);
+    }
   }
 
   /**
    * Cierra el dropdown de líder
    */
   closeLeaderDropdown(): void {
-    this._showLeaderDropdown$.next(false);
+    this._activeLeaderDropdown$.next(null);
+  }
+
+  /**
+   * Verifica si el dropdown está activo para una tarea específica
+   */
+  isLeaderDropdownActive(taskId: number): boolean {
+    return this._activeLeaderDropdown$.value === taskId;
   }
 
   /**

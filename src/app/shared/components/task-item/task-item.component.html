@@ -99,7 +99,7 @@
     type="leader"
     [teamMembers]="listTeam"
     [selectedMember]="task.leader || null"
-    [isVisible]="(teamService.showLeaderDropdown$ | async) ?? false"
+    [isVisible]="isLeaderDropdownActive()"
     (memberSelected)="assignLeader($event)"
     (closed)="teamService.closeLeaderDropdown()"
   ></app-team-dropdown>

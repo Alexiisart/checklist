@@ -1,12 +1,12 @@
 # 📖 Documentación Técnica
 
-> Arquitectura y APIs de Checklist Diario v2.0
+> Arquitectura y APIs de Checklist Diario v2.1
 
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![Angular CDK](https://img.shields.io/badge/Angular_CDK-19.2+-green.svg)](https://material.angular.io/cdk)
 
-## 🏗️ Arquitectura v2.0
+## 🏗️ Arquitectura v2.1
 
 ### Patrón Clean Architecture con CDK Integration
 
@@ -27,7 +27,7 @@
 │  ├── alert-modal.component (Modales)           │
 │  └── visual-feedback.service (Estados)         │
 ├─────────────────────────────────────────────────┤
-│            FUNCTION SERVICES v2.0               │
+│            FUNCTION SERVICES v2.1               │
 │  ├── duplicate-list.service                    │
 │  ├── rename-list.service                       │
 │  ├── delete-list.service                       │
@@ -55,14 +55,14 @@
 │                  MODELS                         │
 │  └── task.interface (Enhanced)                 │
 ├─────────────────────────────────────────────────┤
-│               STORAGE v2.0                      │
+│               STORAGE v2.1                      │
 │  ├── localStorage (Monitored)                  │
 │  ├── storage-indicator.component (NEW)         │
 │  └── storage-progress-indicator.component      │
 └─────────────────────────────────────────────────┘
 ```
 
-## 📁 Estructura del Proyecto v2.0
+## 📁 Estructura del Proyecto v2.1
 
 ```
 src/app/
@@ -71,7 +71,7 @@ src/app/
 │   ├── new-list/            # Creación con protección
 │   └── checklist/           # Vista + CDK drag-drop
 ├── services/                # Lógica de negocio
-│   ├── functions/           # Servicios modulares v2.0
+│   ├── functions/           # Servicios modulares v2.1
 │   │   ├── checklist/       # Funciones específicas de checklist
 │   │   │   ├── checklist-reorder.service.ts (NEW)
 │   │   │   ├── checklist-export.service.ts (ENHANCED)
@@ -87,7 +87,7 @@ src/app/
 │   │       ├── rename-list.service.ts
 │   │       ├── delete-list.service.ts
 │   │       └── open-new-tab.service.ts
-│   ├── export/              # Servicios de exportación v2.0
+│   ├── export/              # Servicios de exportación v2.1
 │   │   ├── pdf-export.service.ts (ENHANCED)
 │   │   └── txt-export.service.ts (NEW)
 │   ├── uuid.service.ts
@@ -98,14 +98,14 @@ src/app/
 │   └── export-import.service.ts (ENHANCED)
 ├── guards/                  # Protección de navegación (NEW)
 │   └── unsaved-changes.guard.ts
-├── shared/                  # Componentes reutilizables v2.0
+├── shared/                  # Componentes reutilizables v2.1
 │   ├── atomic/             # Componentes atómicos
 │   │   ├── buttons/        # Botones con estados avanzados
 │   │   ├── checkboxes/     # Checkboxes con CDK
 │   │   ├── inputs/         # Inputs con validación
 │   │   ├── dropdown/         # dropdown con validación
 │   │   └── tooltip/        # Tooltips contextuales
-│   ├── components/         # Componentes complejos v2.0
+│   ├── components/         # Componentes complejos v2.1
 │   │   ├── alert-modal/    # Modales de alerta
 │   │   ├── confirm-modal/  # Modales de confirmación
 │   │   ├── reorder-modal/  # Modal de reordenamiento (NEW)
@@ -116,16 +116,16 @@ src/app/
 │   │   ├── header/         # Header con tema (NEW)
 │   │   ├── footer/         # Footer adaptativo (NEW)
 │   │   └── task-item/      # Item con drag & drop (ENHANCED)
-│   └── styles/             # Estilos globales v2.0
+│   └── styles/             # Estilos globales v2.1
 │       ├── animations.css  # Animaciones CDK (NEW)
 │       ├── root.css        # Variables de tema (ENHANCED)
 │       └── scrollbar.css   # Scrollbars personalizados
-├── models/                 # Interfaces TypeScript v2.0
+├── models/                 # Interfaces TypeScript v2.1
 │   └── task.interface.ts   # Interfaces completas (ENHANCED)
 └── main.ts
 ```
 
-### Principios Arquitecturales v2.0
+### Principios Arquitecturales v2.1
 
 - **CDK Integration**: Drag & drop nativo con Angular CDK
 - **Servicios Especializados**: Cada función con su servicio independiente
@@ -137,7 +137,7 @@ src/app/
 - **Reactive Programming**: RxJS + BehaviorSubjects avanzados
 - **TypeScript Estricto**: Tipado completo con interfaces robustas
 
-## 🔧 Servicios de Funciones v2.0
+## 🔧 Servicios de Funciones v2.1
 
 Los servicios siguen un patrón mejorado para operaciones específicas:
 
@@ -166,7 +166,7 @@ export class [Function]Service {
 }
 ```
 
-### Servicios Implementados v2.0
+### Servicios Implementados v2.1
 
 #### **ChecklistReorderService** ⭐ NEW
 
@@ -224,7 +224,7 @@ export class [Function]Service {
 - **Metadatos completos** con fecha y estadísticas
 - **Manejo de errores** con notificaciones específicas
 
-## 🎯 Sistema de Notificaciones v2.0
+## 🎯 Sistema de Notificaciones v2.1
 
 ### Toast Notifications Centralizadas
 
@@ -359,7 +359,7 @@ onSubtaskDrop(event: CdkDragDrop<Subtask[]>): void {
 }
 ```
 
-## 📊 Sistema de Monitoreo v2.0
+## 📊 Sistema de Monitoreo v2.1
 
 ### Storage Service con Monitoreo
 
@@ -425,7 +425,7 @@ export class StorageIndicatorComponent implements OnInit, OnDestroy {
 }
 ```
 
-## 🛡️ Sistema de Protección v2.0
+## 🛡️ Sistema de Protección v2.1
 
 ### Unsaved Changes Guard
 
@@ -485,7 +485,7 @@ export class ChecklistNavigationService {
 }
 ```
 
-## 🎨 Sistema de Temas v2.0
+## 🎨 Sistema de Temas v2.1
 
 ### Theme Service Completo
 
@@ -562,7 +562,7 @@ export class ThemeService {
 }
 ```
 
-## 🔄 Flujo de Datos v2.0
+## 🔄 Flujo de Datos v2.1
 
 ### Arquitectura de Eventos Mejorada
 
@@ -597,7 +597,7 @@ export class Component implements OnInit, OnDestroy {
 }
 ```
 
-## 📊 Modelos de Datos v2.0
+## 📊 Modelos de Datos v2.1
 
 ### Interfaces Principales Mejoradas
 
@@ -630,7 +630,7 @@ interface TaskError {
   name: string; // Cambio: description → name para consistencia
 }
 
-// Nuevas interfaces v2.0
+// Nuevas interfaces v2.1
 interface StorageInfo {
   percentage: number;
   isNearLimit: boolean;
@@ -652,7 +652,7 @@ interface ReorderModalData {
 }
 ```
 
-## 🎨 Componentes y UI v2.0
+## 🎨 Componentes y UI v2.1
 
 ### Componentes Principales Mejorados
 
@@ -713,7 +713,7 @@ interface ReorderModalData {
 - **Estados de error** con mensajes contextuales
 - **Integración** con formularios reactivos
 
-## 🚀 Mejoras de Performance v2.0
+## 🚀 Mejoras de Performance v2.1
 
 ### CDK Optimizations
 
@@ -729,7 +729,7 @@ interface ReorderModalData {
 - **Operaciones Atómicas**: Rollback automático en caso de error
 - **Error Boundaries**: Fallos aislados con notificaciones específicas
 
-### UI Optimizada v2.0
+### UI Optimizada v2.1
 
 - **Cards uniformes**: Altura consistente con contenido dinámico
 - **Modal Management**: Creación/destrucción eficiente de modales
@@ -737,7 +737,7 @@ interface ReorderModalData {
 - **State Minimal**: Solo se actualiza lo estrictamente necesario
 - **CDK Animations**: Transiciones hardware-accelerated
 
-### Algoritmos Eficientes v2.0
+### Algoritmos Eficientes v2.1
 
 - **Numeración inteligente**: Regex optimizado para nombres únicos
 - **UUID Generation**: Optimizado con performance nativa
@@ -745,7 +745,7 @@ interface ReorderModalData {
 - **Validaciones async**: En tiempo real sin bloqueos de UI
 - **Storage Compression**: Optimización de datos en localStorage
 
-## 🔧 Herramientas de Desarrollo v2.0
+## 🔧 Herramientas de Desarrollo v2.1
 
 ### Testing con CDK
 
@@ -794,4 +794,4 @@ export class PerformanceService {
 
 ---
 
-**📖 Documentación Técnica v2.0 - Checklist Diario con Angular 19+, TypeScript 5.7+ y Angular CDK 19+**
+**📖 Documentación Técnica v2.1 - Checklist Diario con Angular 19+, TypeScript 5.7+ y Angular CDK 19+**

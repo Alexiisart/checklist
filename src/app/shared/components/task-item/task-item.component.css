@@ -26,6 +26,7 @@
 .task-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
   flex-wrap: wrap;
@@ -35,6 +36,14 @@
 .task-title-container {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.task-buttons-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
   gap: 12px;
 }
 
@@ -198,7 +207,6 @@
 
 @media (max-width: 768px) {
   .task-header {
-    flex-direction: column;
     gap: 8px;
   }
 

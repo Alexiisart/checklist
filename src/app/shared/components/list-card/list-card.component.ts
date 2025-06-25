@@ -79,11 +79,20 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
         <div class="actions-right">
           <app-button
             type="icon"
-            iconLeft="content_copy"
+            iconLeft="control_point_duplicate"
             size="sm"
             title="Duplicar lista"
             extraClasses="duplicate-list-btn"
             (clickEvent)="onDuplicate()"
+          >
+          </app-button>
+          <app-button
+            type="icon"
+            iconLeft="file_copy"
+            size="sm"
+            title="Copiar lista al portapapeles"
+            extraClasses="copy-list-btn"
+            (clickEvent)="onCopyList()"
           >
           </app-button>
           <app-button
@@ -345,6 +354,11 @@ export class ListCardComponent {
   @Output() openInNewTab = new EventEmitter<string>();
 
   /**
+   * Evento emitido cuando se quiere copiar la lista al portapapeles
+   */
+  @Output() copyList = new EventEmitter<SavedList>();
+
+  /**
    * Maneja el clic en la tarjeta
    */
   onCardClick(): void {
@@ -384,5 +398,12 @@ export class ListCardComponent {
    */
   onOpenInNewTab(): void {
     this.openInNewTab.emit(this.list.id);
+  }
+
+  /**
+   * Maneja el evento de copiar la lista
+   */
+  onCopyList(): void {
+    this.copyList.emit(this.list);
   }
 }

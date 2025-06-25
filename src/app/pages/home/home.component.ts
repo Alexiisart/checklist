@@ -15,6 +15,9 @@ import { DuplicateListService } from '../../services/functions/home/duplicate-li
 import { RenameListService } from '../../services/functions/home/rename-list.service';
 import { DeleteListService } from '../../services/functions/home/delete-list.service';
 import { OpenNewTabService } from '../../services/functions/home/open-new-tab.service';
+import { ChecklistCopyService } from '../../services/functions/checklist/checklist-copy.service';
+import { ToastService } from '../../services/toast.service';
+import { StorageService } from '../../services/storage.service';
 import { SavedList } from '../../models/task.interface';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
@@ -70,7 +73,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private duplicateListService: DuplicateListService,
     private renameListService: RenameListService,
     private deleteListService: DeleteListService,
-    private openNewTabService: OpenNewTabService
+    private openNewTabService: OpenNewTabService,
+    private copyService: ChecklistCopyService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -272,6 +276,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Abrir lista en nueva pestaña
   openListInNewTab(listId: string): void {
     this.openNewTabService.openListInNewTab(listId);
+  }
+
+  // Copiar lista al portapapeles desde el card
+  copyListFromCard(list: SavedList): void {
+    this.copyService.copyListFromCard(list);
   }
 
   // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========

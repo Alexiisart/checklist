@@ -17,7 +17,10 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
 import { TeamDropdownComponent } from '../../atomic/dropdowns';
-import { ChecklistTeamService } from '../../../services/functions/checklist';
+import {
+  ChecklistTeamService,
+  ChecklistCopyService,
+} from '../../../services/functions/checklist';
 
 // Componente que representa un elemento de tarea individual. Permite gestionar tareas, subtareas y errores asociados.
 @Component({
@@ -108,6 +111,9 @@ export class TaskItemComponent {
   // Evento emitido cuando se quiere exportar esta tarea específica
   @Output() taskExported = new EventEmitter<number>();
 
+  // Evento emitido cuando se quiere copiar esta tarea específica
+  @Output() taskCopied = new EventEmitter<number>();
+
   // Los eventos de gestión de equipo ahora se manejan a través del servicio ChecklistTeamService
 
   // Controla la visibilidad del modal
@@ -140,7 +146,10 @@ export class TaskItemComponent {
   // Error actual que se está editando
   currentError: TaskError | null = null;
 
-  constructor(public teamService: ChecklistTeamService) {}
+  constructor(
+    public teamService: ChecklistTeamService,
+    public copyService: ChecklistCopyService
+  ) {}
 
   // Funciones de tracking personalizadas para evitar errores de IDs duplicados
   trackBySubtaskId(index: number, subtask: Subtask): string | number {
@@ -295,6 +304,11 @@ export class TaskItemComponent {
   // Exporta la tarea actual con sus subtareas
   exportTask(): void {
     this.taskExported.emit(this.task.id);
+  }
+
+  // Copia la tarea actual con sus subtareas al portapapeles
+  copyTask(): void {
+    this.taskCopied.emit(this.task.id);
   }
 
   // Muestra el modal para gestionar el equipo (no se usa, se maneja a nivel de lista)

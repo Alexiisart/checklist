@@ -23,6 +23,7 @@ import {
   ChecklistExportService,
   ChecklistReorderService,
   ChecklistTeamService,
+  ChecklistCopyService,
 } from '../../services/functions/checklist';
 import { ChecklistService } from '../../services/checklist.service';
 
@@ -97,7 +98,8 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     private navigationService: ChecklistNavigationService,
     private exportService: ChecklistExportService,
     private reorderService: ChecklistReorderService,
-    private teamService: ChecklistTeamService
+    private teamService: ChecklistTeamService,
+    private copyService: ChecklistCopyService
   ) {
     // Inicializar observable del estado básico
     this.state$ = this.stateService.state$;
@@ -286,6 +288,13 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Copia una tarea específica al portapapeles */
+  onTaskCopied(taskId: number): void {
+    if (this.currentList) {
+      this.copyService.copyTaskToClipboard(this.currentList, taskId);
+    }
+  }
+
   // La gestión de equipo ahora se maneja a través del servicio ChecklistTeamService
 
   /** Exporta la lista actual a PDF */
@@ -299,6 +308,13 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   exportToTXT(): void {
     if (this.currentList) {
       this.exportService.exportToTXT(this.currentList);
+    }
+  }
+
+  /** Copia toda la lista al portapapeles */
+  copyFullList(): void {
+    if (this.currentList) {
+      this.copyService.copyFullListToClipboard(this.currentList);
     }
   }
 

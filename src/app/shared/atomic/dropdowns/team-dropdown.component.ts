@@ -12,6 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { TeamMember } from '../../../models/task.interface';
 import { ButtonComponent } from '../buttons';
+import { TooltipComponent } from '../tooltip';
 
 /**
  * Componente dropdown para gestionar asignaciones de equipo.
@@ -23,7 +24,7 @@ export type TeamDropdownSize = 'sm' | 'md' | 'lg';
 @Component({
   selector: 'app-team-dropdown',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, TooltipComponent],
   template: `
     <div class="team-dropdown" [class]="getSizeClass()">
       @if (type === 'leader' && isVisible) {
@@ -60,18 +61,33 @@ export type TeamDropdownSize = 'sm' | 'md' | 'lg';
         </div>
       </div>
       } @if (type === 'member') {
-      <select
-        #memberSelect
-        class="member-select"
-        [value]="getSelectedMemberId()"
-        (change)="onMemberSelectionChange($event)"
-        [disabled]="!teamMembers || teamMembers.length === 0"
+      <div
+        class="member-select-wrapper"
+        (mouseenter)="onMouseEnter()"
+        (mouseleave)="onMouseLeave()"
       >
-        <option value="">Sin asignar</option>
-        @for (member of teamMembers; track member.id) {
-        <option [value]="member.id.toString()">{{ member.name }}</option>
+        <select
+          #memberSelect
+          class="member-select"
+          [value]="getSelectedMemberId()"
+          (change)="onMemberSelectionChange($event)"
+          [disabled]="!teamMembers || teamMembers.length === 0"
+        >
+          <option value="">Sin asignar</option>
+          @for (member of teamMembers; track member.id) {
+          <option [value]="member.id.toString()">{{ member.name }}</option>
+          }
+        </select>
+        @if (showTooltip) {
+        <app-tooltip
+          text="Asignar miembro"
+          position="top"
+          variant="default"
+          [visible]="showTooltip"
+        >
+        </app-tooltip>
         }
-      </select>
+      </div>
       }
     </div>
   `,
@@ -107,6 +123,9 @@ export class TeamDropdownComponent implements OnChanges {
 
   /** Emite cuando se cierra el dropdown (solo para tipo 'leader') */
   @Output() closed = new EventEmitter<void>();
+
+  /** Estado del tooltip para el dropdown de asignación */
+  showTooltip: boolean = false;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -169,5 +188,17 @@ export class TeamDropdownComponent implements OnChanges {
       const selectedId = this.getSelectedMemberId();
       selectElement.value = selectedId;
     }
+  }
+
+  /** Muestra el tooltip */
+  onMouseEnter(): void {
+    if (this.type === 'member') {
+      this.showTooltip = true;
+    }
+  }
+
+  /** Oculta el tooltip */
+  onMouseLeave(): void {
+    this.showTooltip = false;
   }
 }

@@ -42,6 +42,7 @@ src/app/services/functions/checklist/
 ├── checklist-modals.service.ts     # Gestión de modales
 ├── checklist-reorder.service.ts    # Reordenamiento de tareas
 ├── checklist-team.service.ts       # Gestión del equipo
+├── checklist-copy.service.ts       # Gestión del equipo
 └── checklist-export.service.ts     # Exportación
 ```
 

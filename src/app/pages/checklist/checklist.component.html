@@ -95,6 +95,7 @@
       (taskUpdated)="onTaskUpdated($event)"
       (taskDeleted)="onTaskDeleted($event)"
       (taskExported)="onTaskExported($event)"
+      (taskCopied)="onTaskCopied($event)"
     >
     </app-task-item>
     }
@@ -135,6 +136,15 @@
       iconLeft="description"
       size="md"
       (clickEvent)="exportToTXT()"
+    >
+    </app-button>
+    <app-button
+      type="outline-secondary"
+      text="Copiar Lista"
+      iconLeft="file_copy"
+      size="md"
+      title="Copiar toda la lista al portapapeles"
+      (clickEvent)="copyFullList()"
     >
     </app-button>
   </div>

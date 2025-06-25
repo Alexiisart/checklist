@@ -33,17 +33,21 @@
   min-height: 44px;
 }
 
+.task-buttons-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .task-title-container {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.task-buttons-container {
+.task-title-container-left {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-
   gap: 12px;
 }
 
@@ -93,7 +97,6 @@
   font-weight: 500;
   color: var(--color-text-secondary);
   margin-bottom: 8px;
-  margin-top: 16px;
 }
 
 .subtasks-container,
@@ -143,7 +146,7 @@
 
 /* Estilos para la funcionalidad de equipo */
 .leader-badge {
-  background: var(--color-border-focus);
+  background: var(--primary-700);
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
@@ -240,44 +243,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  .task-header {
-    gap: 8px;
-  }
-
-  .micro-actions-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .task-actions {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .task-title {
-    min-width: auto;
-    order: -1;
-  }
-
-  .subtasks-container,
-  .errors-container {
-    margin-left: 0;
-  }
-
-  .leader-badge {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    margin-left: 4px;
-  }
-
-  .subtask-assignment {
-    margin-left: 4px;
-  }
-}
-
 /* Estilos para drag and drop de subtareas */
 .subtasks-list {
   display: flex;
@@ -328,4 +293,59 @@
 
 .subtasks-list.cdk-drop-list-dragging .subtask-item:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  .task-title-container {
+    display: block;
+    gap: 8px;
+  }
+
+  .task-header {
+    gap: 8px;
+  }
+
+  .micro-actions-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-title {
+    min-width: auto;
+    order: -1;
+  }
+
+  .subtasks-container,
+  .errors-container {
+    margin-left: 0;
+  }
+
+  .leader-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    margin-left: 4px;
+  }
+
+  .subtask-item {
+    position: relative;
+  }
+
+  .subtasks-list {
+    margin-top: 30px;
+    gap: 25px;
+  }
+
+  .subtask-assignment {
+    position: absolute;
+    left: 0;
+    top: -20px;
+    margin-left: 4px;
+  }
 }

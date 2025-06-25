@@ -80,6 +80,7 @@ src/app/
 │   │   │   ├── checklist-errors.service.ts
 │   │   │   ├── checklist-modals.service.ts
 │   │   │   ├── checklist-team.service.ts
+│   │   │   ├── checklist-copy.service.ts
 │   │   │   └── checklist-navigation.service.ts (ENHANCED)
 │   │   └── home/            # Funciones de gestión de listas
 │   │       ├── duplicate-list.service.ts
@@ -102,6 +103,7 @@ src/app/
 │   │   ├── buttons/        # Botones con estados avanzados
 │   │   ├── checkboxes/     # Checkboxes con CDK
 │   │   ├── inputs/         # Inputs con validación
+│   │   ├── dropdown/         # dropdown con validación
 │   │   └── tooltip/        # Tooltips contextuales
 │   ├── components/         # Componentes complejos v2.0
 │   │   ├── alert-modal/    # Modales de alerta

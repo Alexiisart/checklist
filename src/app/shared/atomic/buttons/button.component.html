@@ -1,18 +1,32 @@
-<button
-  [type]="htmlType"
-  [class]="buttonClasses"
-  [disabled]="disabled || loading"
-  (click)="onClick($event)"
-  [attr.aria-label]="ariaLabel"
-  [attr.title]="title || null"
->
-  @if (loading) {
-  <div class="loading-spinner"></div>
-  } @else if (iconLeft) {
-  <span class="material-icons-outlined icon-left">{{ iconLeft }}</span>
-  } @if (text) {
-  <span class="button-text">{{ text }}</span>
-  } @if (iconRight && !loading) {
-  <span class="material-icons-outlined icon-right">{{ iconRight }}</span>
+<div class="button-wrapper" [class.has-tooltip]="shouldShowTooltip">
+  <button
+    [type]="htmlType"
+    [class]="buttonClasses"
+    [disabled]="disabled || loading"
+    (click)="onClick($event)"
+    (mouseenter)="showTooltipOnHover()"
+    (mouseleave)="hideTooltipOnLeave()"
+    [attr.aria-label]="ariaLabel"
+    [attr.title]="type === 'icon' ? '' : title"
+  >
+    @if (loading) {
+    <div class="loading-spinner"></div>
+    } @else if (iconLeft) {
+    <span class="material-icons-outlined icon-left">{{ iconLeft }}</span>
+    } @if (text) {
+    <span class="button-text">{{ text }}</span>
+    } @if (iconRight && !loading) {
+    <span class="material-icons-outlined icon-right">{{ iconRight }}</span>
+    }
+  </button>
+
+  @if (shouldShowTooltip) {
+  <app-tooltip
+    [text]="effectiveTooltipText"
+    [position]="tooltipPosition"
+    [variant]="tooltipVariant"
+    [visible]="showTooltip"
+  >
+  </app-tooltip>
   }
-</button>
+</div>

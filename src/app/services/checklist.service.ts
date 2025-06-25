@@ -294,7 +294,7 @@ export class ChecklistService {
     if (!currentList) return;
 
     const newTaskNames = newTasksString
-      .split(',')
+      .split(/[,\n]/) // Separar por comas O saltos de línea
       .map((task) => task.trim())
       .filter((task) => task);
 

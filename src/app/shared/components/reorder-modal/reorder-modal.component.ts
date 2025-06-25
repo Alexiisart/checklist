@@ -45,10 +45,19 @@ interface ReorderModalData {
             cdkDropList
             [cdkDropListData]="reorderedTasks"
             class="task-list"
+            [cdkDropListSortingDisabled]="false"
+            [cdkDropListAutoScrollDisabled]="false"
+            [cdkDropListLockAxis]="'y'"
             (cdkDropListDropped)="onDrop($event)"
           >
             @for (task of reorderedTasks; track task.id) {
-            <div cdkDrag class="task-item" [class.completed]="task.completed">
+            <div
+              cdkDrag
+              class="task-item"
+              [class.completed]="task.completed"
+              [cdkDragBoundary]="'.modal-body'"
+              [cdkDragLockAxis]="'y'"
+            >
               <div class="drag-handle" cdkDragHandle>
                 <span class="material-icons-outlined">drag_indicator</span>
               </div>

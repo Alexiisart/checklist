@@ -48,21 +48,23 @@ import { ButtonComponent, type ButtonType, type ButtonSize } from "./shared/atom
 
 ## Propiedades
 
-| Propiedad      | Tipo                              | Por defecto | Descripción                         |
-| -------------- | --------------------------------- | ----------- | ----------------------------------- |
-| `type`         | `ButtonType`                      | `'primary'` | Tipo/variante del botón             |
-| `size`         | `ButtonSize`                      | `'md'`      | Tamaño del botón                    |
-| `text`         | `string`                          | `undefined` | Texto del botón                     |
-| `iconLeft`     | `string`                          | `undefined` | Icono Material Icons a la izquierda |
-| `iconRight`    | `string`                          | `undefined` | Icono Material Icons a la derecha   |
-| `disabled`     | `boolean`                         | `false`     | Si el botón está deshabilitado      |
-| `loading`      | `boolean`                         | `false`     | Muestra spinner de carga            |
-| `fullWidth`    | `boolean`                         | `false`     | Ocupa todo el ancho disponible      |
-| `responsive`   | `boolean`                         | `false`     | Full width en móvil                 |
-| `htmlType`     | `'button' \| 'submit' \| 'reset'` | `'button'`  | Tipo HTML del botón                 |
-| `ariaLabel`    | `string`                          | `undefined` | Label para accesibilidad            |
-| `title`        | `string`                          | `undefined` | Tooltip del botón                   |
-| `extraClasses` | `string`                          | `undefined` | Clases CSS adicionales              |
+| Propiedad         | Tipo                                     | Por defecto | Descripción                                                                         |
+| ----------------- | ---------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
+| `type`            | `ButtonType`                             | `'primary'` | Tipo/variante del botón                                                             |
+| `size`            | `ButtonSize`                             | `'md'`      | Tamaño del botón                                                                    |
+| `text`            | `string`                                 | `undefined` | Texto del botón                                                                     |
+| `iconLeft`        | `string`                                 | `undefined` | Icono Material Icons a la izquierda                                                 |
+| `iconRight`       | `string`                                 | `undefined` | Icono Material Icons a la derecha                                                   |
+| `disabled`        | `boolean`                                | `false`     | Si el botón está deshabilitado                                                      |
+| `loading`         | `boolean`                                | `false`     | Muestra spinner de carga                                                            |
+| `fullWidth`       | `boolean`                                | `false`     | Ocupa todo el ancho disponible                                                      |
+| `responsive`      | `boolean`                                | `false`     | Full width en móvil                                                                 |
+| `htmlType`        | `'button' \| 'submit' \| 'reset'`        | `'button'`  | Tipo HTML del botón                                                                 |
+| `ariaLabel`       | `string`                                 | `undefined` | Label para accesibilidad                                                            |
+| `title`           | `string`                                 | `undefined` | Tooltip del botón                                                                   |
+| `extraClasses`    | `string`                                 | `undefined` | Clases CSS adicionales                                                              |
+| `tooltipText`     | `string`                                 | `undefined` | Texto del tooltip (solo para type="icon"). Si está vacío, usa `title` como fallback |
+| `tooltipPosition` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'top'`     | Posición del tooltip                                                                |
 
 ## Eventos
 
@@ -78,10 +80,29 @@ import { ButtonComponent, type ButtonType, type ButtonSize } from "./shared/atom
 <app-button type="primary" text="Crear Lista" iconLeft="add" size="lg" (clickEvent)="createList()"> </app-button>
 ```
 
-### Botón solo icono
+### Botón solo icono con tooltip
 
 ```html
-<app-button type="icon" iconLeft="delete" size="sm" title="Eliminar" (clickEvent)="delete()"> </app-button>
+<app-button type="icon" iconLeft="delete" size="sm" tooltipText="Eliminar elemento" tooltipPosition="top" (clickEvent)="delete()"> </app-button>
+```
+
+### Botón icono con tooltip rojo (delete)
+
+```html
+<app-button type="icon" iconLeft="delete" size="sm" tooltipText="Eliminar permanentemente" tooltipPosition="bottom" (clickEvent)="delete()"> </app-button>
+```
+
+**Notas importantes:**
+
+- El tooltip se muestra automáticamente en botones de tipo `icon` cuando se proporciona `tooltipText` o `title`
+- Si `tooltipText` está vacío pero `title` tiene valor, se usará `title` como texto del tooltip
+- Cuando `iconLeft` o `iconRight` es "delete", el tooltip automáticamente se muestra en color rojo
+- Si no se proporciona ni `tooltipText` ni `title`, no se mostrará el tooltip
+
+### Botón icono usando solo title
+
+```html
+<app-button type="icon" iconLeft="info" size="sm" title="Ver información" (clickEvent)="showInfo()"> </app-button>
 ```
 
 ### Botón de carga

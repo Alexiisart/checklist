@@ -1,5 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  TooltipComponent,
+  TooltipPosition,
+  TooltipVariant,
+} from '../tooltip/tooltip.component';
 
 export type ButtonType =
   | 'primary'
@@ -26,7 +31,7 @@ export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 @Component({
   selector: 'app-button',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipComponent],
   templateUrl: './button.component.html',
   styleUrls: ['./button.component.css'],
 })
@@ -70,8 +75,17 @@ export class ButtonComponent {
   /** Clases CSS adicionales */
   @Input() extraClasses?: string;
 
+  /** Texto del tooltip */
+  @Input() tooltipText?: string;
+
+  /** Posición del tooltip */
+  @Input() tooltipPosition: TooltipPosition = 'top';
+
   /** Evento de clic */
   @Output() clickEvent = new EventEmitter<Event>();
+
+  /** Estado del tooltip */
+  showTooltip: boolean = false;
 
   /** Genera las clases CSS del botón */
   get buttonClasses(): string {
@@ -92,5 +106,42 @@ export class ButtonComponent {
     if (!this.disabled && !this.loading) {
       this.clickEvent.emit(event);
     }
+  }
+
+  /** Determina si debe mostrar el tooltip */
+  get shouldShowTooltip(): boolean {
+    return this.type === 'icon' && !!(this.tooltipText || this.title);
+  }
+
+  /** Determina la variante del tooltip */
+  get tooltipVariant(): TooltipVariant {
+    return this.iconLeft === 'delete' ||
+      this.iconRight === 'delete' ||
+      this.iconLeft === 'close' ||
+      this.iconRight === 'close'
+      ? 'danger'
+      : 'default';
+  }
+
+  /** Muestra el tooltip */
+  showTooltipOnHover(): void {
+    if (this.shouldShowTooltip) {
+      this.showTooltip = true;
+    }
+  }
+
+  /** Oculta el tooltip */
+  hideTooltipOnLeave(): void {
+    this.showTooltip = false;
+  }
+
+  /** Obtiene el texto del tooltip (tooltipText o title como fallback) */
+  get effectiveTooltipText(): string {
+    return this.tooltipText || this.title || '';
+  }
+
+  /** Obtiene el title para el atributo HTML (solo si NO es tipo icon) */
+  get htmlTitle(): string | null {
+    return this.type === 'icon' ? null : this.title || null;
   }
 }

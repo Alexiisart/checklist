@@ -1,3 +1,12 @@
+/* Wrapper del botón para posicionamiento de tooltip */
+.button-wrapper {
+  display: inline-block;
+}
+
+.button-wrapper.has-tooltip {
+  position: relative;
+}
+
 /* Estilos base para todos los botones */
 .btn {
   display: inline-flex;

@@ -1,14 +1,16 @@
 <div class="task-item" [class.completed]="task.completed">
   <div class="task-header">
-    <app-checkbox
-      type="success"
-      size="md"
-      [checked]="task.completed"
-      [inputId]="'task-' + task.id"
-      ariaLabel="Marcar tarea como completada"
-      (checkedChange)="onTaskToggle($event)"
-    ></app-checkbox>
-    <span class="task-title">{{ task.name }}</span>
+    <div class="task-title-container">
+      <app-checkbox
+        type="success"
+        size="md"
+        [checked]="task.completed"
+        [inputId]="'task-' + task.id"
+        ariaLabel="Marcar tarea como completada"
+        (checkedChange)="onTaskToggle($event)"
+      ></app-checkbox>
+      <span class="task-title">{{ task.name }}</span>
+    </div>
 
     <app-button
       type="ghost"
@@ -30,33 +32,35 @@
       (clickEvent)="showAddError()"
     >
     </app-button>
-    <app-button
-      type="icon"
-      iconLeft="edit"
-      size="sm"
-      title="Editar tarea"
-      extraClasses="edit-task-btn"
-      (clickEvent)="editTask()"
-    >
-    </app-button>
-    <app-button
-      type="icon"
-      iconLeft="file_download"
-      size="sm"
-      title="Exportar esta tarea con sus subtareas"
-      extraClasses="export-task-btn"
-      (clickEvent)="exportTask()"
-    >
-    </app-button>
-    <app-button
-      type="icon"
-      iconLeft="delete"
-      size="sm"
-      title="Eliminar tarea"
-      extraClasses="delete-task-btn"
-      (clickEvent)="deleteTask()"
-    >
-    </app-button>
+    <div class="task-actions">
+      <app-button
+        type="icon"
+        iconLeft="edit"
+        size="sm"
+        title="Editar tarea"
+        extraClasses="edit-task-btn"
+        (clickEvent)="editTask()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
+        iconLeft="file_download"
+        size="sm"
+        title="Exportar esta tarea con sus subtareas"
+        extraClasses="export-task-btn"
+        (clickEvent)="exportTask()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
+        iconLeft="delete"
+        size="sm"
+        title="Eliminar tarea"
+        extraClasses="delete-task-btn"
+        (clickEvent)="deleteTask()"
+      >
+      </app-button>
+    </div>
   </div>
 
   <!-- Subtareas -->
@@ -85,24 +89,27 @@
         <span class="subtask-text" [class.completed]="subtask.completed">{{
           subtask.name
         }}</span>
-        <app-button
-          type="icon"
-          iconLeft="edit"
-          size="xs"
-          title="Editar subtarea"
-          extraClasses="edit-subtask-btn"
-          (clickEvent)="editSubtask(subtask)"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="close"
-          size="xs"
-          title="Eliminar subtarea"
-          extraClasses="subtask-btn remove-subtask-btn"
-          (clickEvent)="removeSubtask(subtask)"
-        >
-        </app-button>
+
+        <div class="micro-actions-container">
+          <app-button
+            type="icon"
+            iconLeft="edit"
+            size="xs"
+            title="Editar subtarea"
+            extraClasses="edit-subtask-btn"
+            (clickEvent)="editSubtask(subtask)"
+          >
+          </app-button>
+          <app-button
+            type="icon"
+            iconLeft="close"
+            size="xs"
+            title="Eliminar subtarea"
+            extraClasses="subtask-btn remove-subtask-btn"
+            (clickEvent)="removeSubtask(subtask)"
+          >
+          </app-button>
+        </div>
       </div>
       }
     </div>
@@ -115,23 +122,26 @@
     @for (error of task.errors; track trackByErrorId($index, error)) {
     <div class="error-item">
       <span class="error-text">{{ error.name }}</span>
-      <app-button
-        type="icon"
-        iconLeft="edit"
-        size="xs"
-        title="Editar problema que ocurrió al realizar la tarea"
-        extraClasses="edit-error-btn"
-        (clickEvent)="editError(error)"
-      >
-      </app-button>
-      <app-button
-        type="icon"
-        iconLeft="close"
-        size="xs"
-        extraClasses="remove-error-btn"
-        (clickEvent)="removeError(error)"
-      >
-      </app-button>
+
+      <div class="micro-actions-container">
+        <app-button
+          type="icon"
+          iconLeft="edit"
+          size="xs"
+          title="Editar problema que ocurrió al realizar la tarea"
+          extraClasses="edit-error-btn"
+          (clickEvent)="editError(error)"
+        >
+        </app-button>
+        <app-button
+          type="icon"
+          iconLeft="close"
+          size="xs"
+          extraClasses="remove-error-btn"
+          (clickEvent)="removeError(error)"
+        >
+        </app-button>
+      </div>
     </div>
     }
   </div>

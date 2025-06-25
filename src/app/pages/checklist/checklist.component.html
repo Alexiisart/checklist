@@ -2,6 +2,25 @@
   <div class="section-header">
     <h2>Mi Checklist</h2>
     <div class="header-actions">
+      <!-- Grupo principal: Acciones del contenido -->
+      <div class="action-group primary-actions">
+        <app-button
+          type="icon"
+          iconLeft="save"
+          [title]="getSaveButtonTooltip()"
+          (clickEvent)="saveProgress()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          text="Nueva Lista"
+          iconLeft="add_circle_outline"
+          (clickEvent)="confirmStartNewList()"
+          size="md"
+        >
+        </app-button>
+      </div>
       <!-- Grupo secundario: Herramientas -->
       <div class="action-group secondary-actions">
         <app-button
@@ -28,26 +47,6 @@
           title="Inicio"
           text="Inicio"
           (clickEvent)="goHome()"
-          size="md"
-        >
-        </app-button>
-      </div>
-
-      <!-- Grupo principal: Acciones del contenido -->
-      <div class="action-group primary-actions">
-        <app-button
-          type="icon"
-          iconLeft="save"
-          [title]="getSaveButtonTooltip()"
-          (clickEvent)="saveProgress()"
-          size="md"
-        >
-        </app-button>
-        <app-button
-          type="secondary"
-          text="Nueva Lista"
-          iconLeft="add_circle_outline"
-          (clickEvent)="confirmStartNewList()"
           size="md"
         >
         </app-button>

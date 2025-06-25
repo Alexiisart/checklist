@@ -434,7 +434,6 @@
 
   /* Aumentar el área de toque */
   .checkbox-label {
-    min-height: 44px;
     display: flex;
     align-items: center;
   }

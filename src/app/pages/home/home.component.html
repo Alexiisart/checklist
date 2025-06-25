@@ -9,22 +9,24 @@
         [savedLists]="(savedLists$ | async) ?? []"
         (listsUpdated)="onListsUpdated()"
       ></app-export-import-dropdown>
-
-      @if ((savedLists$ | async)?.length ?? 0 > 0) {
-      <app-button
-        type="secondary"
-        text="Seleccionar"
-        iconLeft="checklist"
-        (clickEvent)="toggleSelectionMode()"
-      >
-      </app-button>
-      }
-      <app-button
-        type="primary"
-        text="Nueva Lista"
-        (clickEvent)="goToNewList()"
-      >
-      </app-button>
+      <div class="selection-actions">
+        <!-- Botón de selección -->
+        @if ((savedLists$ | async)?.length ?? 0 > 0) {
+        <app-button
+          type="secondary"
+          text="Seleccionar"
+          iconLeft="checklist"
+          (clickEvent)="toggleSelectionMode()"
+        >
+        </app-button>
+        }
+        <app-button
+          type="primary"
+          text="Nueva Lista"
+          (clickEvent)="goToNewList()"
+        >
+        </app-button>
+      </div>
       }
       <!-- Acciones de selección -->
       @else {

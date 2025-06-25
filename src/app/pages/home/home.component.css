@@ -40,7 +40,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 .lists-grid {
@@ -72,6 +71,7 @@
     flex-direction: column;
     gap: 16px;
     text-align: center;
+    margin-bottom: var(--space-3);
   }
 
   .home-header h2 {
@@ -79,9 +79,11 @@
   }
 
   .selection-actions {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
+    justify-content: center;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .header-actions {

@@ -17,6 +17,12 @@
   background: var(--color-surface);
 }
 
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .task-header {
   display: flex;
   align-items: center;
@@ -24,6 +30,12 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
   min-height: 44px;
+}
+
+.task-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .task-title {
@@ -38,6 +50,12 @@
 .task-item.completed .task-title {
   text-decoration: line-through;
   color: var(--color-text-muted);
+}
+
+.micro-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .subtask-btn {
@@ -181,7 +199,18 @@
 @media (max-width: 768px) {
   .task-header {
     flex-direction: column;
-    align-items: stretch;
+    gap: 8px;
+  }
+
+  .micro-actions-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-actions {
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
   }
 

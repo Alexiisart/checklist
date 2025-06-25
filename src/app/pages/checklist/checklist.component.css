@@ -161,19 +161,12 @@
   }
 
   .action-group {
-    justify-content: center;
     flex-wrap: wrap;
-    width: 100%;
+    justify-content: center;
   }
 
-  .primary-actions {
-    order: 1;
-    padding: 12px 20px;
-  }
-
-  .secondary-actions {
-    order: 2;
-    padding: 8px 16px;
+  .progress-text {
+    margin-bottom: 0;
   }
 
   .actions {

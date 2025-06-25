@@ -41,7 +41,7 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
           <app-button
             type="icon"
             iconLeft="edit"
-            size="xs"
+            size="sm"
             title="Renombrar lista"
             extraClasses="rename-list-btn"
             (click)="onRename(); $event.stopPropagation()"

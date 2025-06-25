@@ -7,6 +7,10 @@
   position: relative;
 }
 
+.button-text {
+  white-space: break-spaces;
+}
+
 /* Estilos base para todos los botones */
 .btn {
   display: inline-flex;
@@ -405,24 +409,35 @@
   color: var(--color-text-primary);
 }
 
-/* Responsive */
+/* Botones 6% más grandes en móviles */
 @media (max-width: 768px) {
+  /* Aumento del 6% en btn-icon-only */
+  .btn-icon-only.btn-xs {
+    width: calc(24px * 1.06); /* ~25.44px */
+    height: calc(24px * 1.06); /* ~25.44px */
+  }
+
+  .btn-icon-only.btn-sm {
+    width: calc(32px * 1.06); /* ~33.92px */
+    height: calc(32px * 1.06); /* ~33.92px */
+  }
+
   .btn-md {
-    font-size: 0.8rem;
-    padding: 8px 16px;
-    min-height: 36px;
+    font-size: calc(0.875rem * 1.06); /* ~0.928rem */
+    padding: calc(8px * 1.06) calc(16px * 1.06); /* ~8.48px 16.96px */
+    min-height: calc(40px * 1.06); /* ~42.4px */
   }
 
   .btn-lg {
-    font-size: 0.9rem;
-    padding: 10px 20px;
-    min-height: 44px;
+    font-size: calc(1rem * 1.06); /* ~1.06rem */
+    padding: calc(12px * 1.06) calc(24px * 1.06); /* ~12.72px 25.44px */
+    min-height: calc(48px * 1.06); /* ~50.88px */
   }
 
   .btn-xl {
-    font-size: 1rem;
-    padding: 12px 24px;
-    min-height: 48px;
+    font-size: calc(1.125rem * 1.06); /* ~1.192rem */
+    padding: calc(16px * 1.06) calc(32px * 1.06); /* ~16.96px 33.92px */
+    min-height: calc(56px * 1.06); /* ~59.36px */
   }
 }
 
@@ -430,5 +445,28 @@
   .btn-responsive {
     width: 100%;
     justify-content: center;
+  }
+
+  .btn-xs {
+    font-size: calc(0.75rem * 1.06);
+    padding: calc(4px * 1.06) calc(8px * 1.06);
+    min-height: calc(24px * 1.06);
+  }
+
+  .btn-sm {
+    font-size: calc(0.875rem * 1.06);
+    padding: calc(6px * 1.06) calc(12px * 1.06);
+    min-height: calc(32px * 1.06);
+  }
+
+  /* Aumento del 6% en btn-icon-only */
+  .btn-icon-only.btn-xs {
+    width: calc(24px * 1.06); /* ~25.44px */
+    height: calc(24px * 1.06); /* ~25.44px */
+  }
+
+  .btn-icon-only.btn-sm {
+    width: calc(32px * 1.06); /* ~33.92px */
+    height: calc(32px * 1.06); /* ~33.92px */
   }
 }

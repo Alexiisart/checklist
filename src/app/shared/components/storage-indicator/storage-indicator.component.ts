@@ -12,16 +12,29 @@ import { Subject, takeUntil, interval } from 'rxjs';
   imports: [CommonModule],
   template: `
     <div class="storage-indicator" [ngClass]="storageInfo.level">
-      <div class="storage-header">
-        <span class="storage-text">
-          Almacenamiento: {{ storageInfo.percentage.toFixed(1) }}%
-        </span>
+      <!-- Versión para móviles -->
+      <div class="mobile-version">
+        <div class="storage-icon-mobile">
+          <span class="material-icons-outlined">storage</span>
+        </div>
+        <div class="storage-percentage-mobile">
+          {{ storageInfo.percentage.toFixed(1) }}%
+        </div>
       </div>
-      <div class="storage-progress">
-        <div
-          class="storage-progress-fill"
-          [style.width.%]="storageInfo.percentage"
-        ></div>
+
+      <!-- Versión para desktop -->
+      <div class="desktop-version">
+        <div class="storage-header">
+          <span class="storage-text">
+            Almacenamiento: {{ storageInfo.percentage.toFixed(1) }}%
+          </span>
+        </div>
+        <div class="storage-progress">
+          <div
+            class="storage-progress-fill"
+            [style.width.%]="storageInfo.percentage"
+          ></div>
+        </div>
       </div>
     </div>
   `,
@@ -47,6 +60,38 @@ import { Subject, takeUntil, interval } from 'rxjs';
       .storage-indicator:hover {
         transform: translateY(-1px);
         box-shadow: var(--shadow-lg);
+      }
+
+      /* Versión móvil - oculta por defecto */
+      .mobile-version {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .storage-icon-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .storage-icon-mobile .material-icons-outlined {
+        font-size: 1.5rem;
+        color: var(--color-text-secondary);
+        transition: color 0.3s ease;
+      }
+
+      .storage-percentage-mobile {
+        color: var(--color-text-primary);
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: -0.025em;
+        text-align: center;
+      }
+
+      /* Versión desktop - visible por defecto */
+      .desktop-version {
+        display: block;
       }
 
       .storage-header {
@@ -105,7 +150,8 @@ import { Subject, takeUntil, interval } from 'rxjs';
         background: linear-gradient(90deg, #10b981, #059669);
       }
 
-      .storage-indicator.safe .storage-text {
+      .storage-indicator.safe .storage-text,
+      .storage-indicator.safe .storage-percentage-mobile {
         color: var(--color-text-primary);
       }
 
@@ -113,7 +159,8 @@ import { Subject, takeUntil, interval } from 'rxjs';
         background: linear-gradient(90deg, #f59e0b, #d97706);
       }
 
-      .storage-indicator.warning .storage-text {
+      .storage-indicator.warning .storage-text,
+      .storage-indicator.warning .storage-percentage-mobile {
         color: #f59e0b;
       }
 
@@ -126,7 +173,8 @@ import { Subject, takeUntil, interval } from 'rxjs';
         background: linear-gradient(90deg, #ef4444, #dc2626);
       }
 
-      .storage-indicator.danger .storage-text {
+      .storage-indicator.danger .storage-text,
+      .storage-indicator.danger .storage-percentage-mobile {
         color: #ef4444;
       }
 
@@ -140,36 +188,31 @@ import { Subject, takeUntil, interval } from 'rxjs';
         animation: pulse-danger 2s infinite;
       }
 
-      @keyframes pulse-danger {
-        0%,
-        100% {
-          box-shadow: var(--shadow-md);
-        }
-        50% {
-          box-shadow: var(--shadow-md), 0 0 0 4px rgba(239, 68, 68, 0.1);
-        }
-      }
-
       /* Responsivo */
       @media (max-width: 768px) {
         .storage-indicator {
           top: 16px;
           right: 16px;
           padding: 12px;
-          min-width: 180px;
+          min-width: 0;
           font-size: 0.8rem;
         }
 
-        .storage-header {
-          margin-bottom: 8px;
+        /* Mostrar versión móvil y ocultar desktop */
+        .mobile-version {
+          display: flex;
         }
 
-        .storage-text {
-          font-size: 0.8rem;
+        .desktop-version {
+          display: none;
         }
 
-        .storage-progress {
-          height: 5px;
+        .storage-icon-mobile .material-icons-outlined {
+          font-size: 2rem;
+        }
+
+        .storage-percentage-mobile {
+          font-size: 1.25rem;
         }
       }
 
@@ -178,16 +221,16 @@ import { Subject, takeUntil, interval } from 'rxjs';
           top: 12px;
           right: 12px;
           padding: 10px;
-          min-width: 160px;
+          min-width: 0;
           font-size: 0.75rem;
         }
 
-        .storage-text {
-          font-size: 0.75rem;
+        .storage-icon-mobile .material-icons-outlined {
+          font-size: 2rem;
         }
 
-        .storage-progress {
-          height: 4px;
+        .storage-percentage-mobile {
+          font-size: 1.125rem;
         }
       }
     `,

@@ -40,7 +40,8 @@ src/app/services/functions/checklist/
 ├── checklist-subtasks.service.ts   # Gestión de subtareas
 ├── checklist-errors.service.ts     # Gestión de errores
 ├── checklist-modals.service.ts     # Gestión de modales
-├── checklist-navigation.service.ts # Navegación y guardado
+├── checklist-reorder.service.ts    # Reordenamiento de tareas
+├── checklist-team.service.ts       # Gestión del equipo
 └── checklist-export.service.ts     # Exportación
 ```
 

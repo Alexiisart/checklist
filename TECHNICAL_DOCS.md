@@ -79,6 +79,7 @@ src/app/
 │   │   │   ├── checklist-subtasks.service.ts
 │   │   │   ├── checklist-errors.service.ts
 │   │   │   ├── checklist-modals.service.ts
+│   │   │   ├── checklist-team.service.ts
 │   │   │   └── checklist-navigation.service.ts (ENHANCED)
 │   │   └── home/            # Funciones de gestión de listas
 │   │       ├── duplicate-list.service.ts

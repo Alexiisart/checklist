@@ -13,7 +13,7 @@ import {
   ChecklistStateService,
   ChecklistState,
 } from './checklist-state.service';
-import { Task, Subtask } from '../../models/task.interface';
+import { Task, Subtask, TeamMember } from '../../models/task.interface';
 import {
   ChecklistTasksService,
   ChecklistSubtasksService,
@@ -22,6 +22,7 @@ import {
   ChecklistNavigationService,
   ChecklistExportService,
   ChecklistReorderService,
+  ChecklistTeamService,
 } from '../../services/functions/checklist';
 import { ChecklistService } from '../../services/checklist.service';
 
@@ -77,6 +78,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   public showReorderModal$!: Observable<boolean>;
   public reorderModalData$!: Observable<any>;
 
+  // Observables del servicio de equipo
+  public showTeamModal$!: Observable<boolean>;
+  public teamModalData$!: Observable<any>;
+
   // ===== CONTROL DE SUBSCRIPCIONES =====
   private destroy$ = new Subject<void>();
 
@@ -91,7 +96,8 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     private modalsService: ChecklistModalsService,
     private navigationService: ChecklistNavigationService,
     private exportService: ChecklistExportService,
-    private reorderService: ChecklistReorderService
+    private reorderService: ChecklistReorderService,
+    private teamService: ChecklistTeamService
   ) {
     // Inicializar observable del estado básico
     this.state$ = this.stateService.state$;
@@ -121,6 +127,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     // Observables del servicio de reordenamiento
     this.showReorderModal$ = this.reorderService.showReorderModal$;
     this.reorderModalData$ = this.reorderService.reorderModalData$;
+
+    // Observables del servicio de equipo
+    this.showTeamModal$ = this.teamService.showTeamModal$;
+    this.teamModalData$ = this.teamService.teamModalData$;
   }
 
   // Inicializa el componente suscribiéndose a los cambios de ruta y estado
@@ -275,6 +285,8 @@ export class ChecklistComponent implements OnInit, OnDestroy {
       this.exportService.exportSingleTaskToTXT(this.currentList, taskId);
     }
   }
+
+  // La gestión de equipo ahora se maneja a través del servicio ChecklistTeamService
 
   /** Exporta la lista actual a PDF */
   exportToPDF(): void {
@@ -442,5 +454,23 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   /** Cierra el modal de reordenamiento */
   closeReorderModal(): void {
     this.reorderService.closeReorderModal();
+  }
+
+  // ===== GESTIÓN DE EQUIPO =====
+
+  /** Confirma la actualización del equipo */
+  onTeamConfirm(teamNamesString: string): void {
+    this.teamService.confirmTeamUpdate(teamNamesString);
+    this.stateService.markAsChanged();
+  }
+
+  /** Cierra el modal de gestión de equipo */
+  closeTeamModal(): void {
+    this.teamService.closeTeamModal();
+  }
+
+  /** Muestra el modal para gestionar el equipo de la lista */
+  showManageTeam(): void {
+    this.teamService.showManageTeamModal();
   }
 }

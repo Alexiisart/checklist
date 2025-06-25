@@ -141,6 +141,41 @@
   color: var(--color-error);
 }
 
+/* Estilos para la funcionalidad de equipo */
+.leader-badge {
+  background: var(--color-border-focus);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.subtask-assignment {
+  margin-left: 8px;
+}
+
+.team-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+}
+
+.team-btn:hover {
+  background: var(--color-border-focus);
+  color: white;
+  border-color: var(--color-border-focus);
+}
+
 /* Estilos de impresión para task-items */
 @media print {
   .task-item {
@@ -230,6 +265,16 @@
   .subtasks-container,
   .errors-container {
     margin-left: 0;
+  }
+
+  .leader-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    margin-left: 4px;
+  }
+
+  .subtask-assignment {
+    margin-left: 4px;
   }
 }
 

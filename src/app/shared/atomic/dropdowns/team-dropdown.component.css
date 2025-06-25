@@ -1,0 +1,124 @@
+/* Estilos base para el dropdown de equipo */
+.team-dropdown {
+  position: relative;
+}
+
+.team-dropdown-content {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  width: auto;
+  min-width: fit-content;
+  max-width: 500px;
+}
+
+.team-dropdown-header {
+  margin-bottom: 12px;
+}
+
+.team-dropdown-header h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.leader-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.close-dropdown-btn {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+/* Los estilos de botones ahora se manejan con ButtonComponent */
+
+.member-select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  min-width: 100px;
+  width: 100%;
+}
+
+.member-select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.member-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variaciones de tamaño */
+.team-dropdown--sm .member-select {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  min-width: 80px;
+}
+
+.team-dropdown--sm .team-dropdown-content {
+  padding: 12px;
+}
+
+.team-dropdown--lg .member-select {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  min-width: 120px;
+}
+
+.team-dropdown--lg .team-dropdown-content {
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .team-dropdown-content {
+    padding: 12px;
+    left: -20px;
+    right: -20px;
+    width: auto;
+    min-width: auto;
+    max-width: calc(100vw - 40px);
+  }
+
+  .member-select {
+    font-size: 0.75rem;
+    min-width: 80px;
+    width: 100%;
+  }
+
+  .leader-options {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-dropdown-content {
+    left: -30px;
+    right: -30px;
+    max-width: calc(100vw - 20px);
+  }
+
+  .leader-options {
+    justify-content: center;
+  }
+}

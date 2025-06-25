@@ -95,6 +95,7 @@ export class ChecklistService {
         completed: false,
         subtasks: [],
         errors: [],
+        leader: undefined,
       });
     }
 
@@ -105,6 +106,7 @@ export class ChecklistService {
       observations: '',
       createdDate: new Date().toISOString(),
       modifiedDate: new Date().toISOString(),
+      team: [],
     };
 
     this.currentListSubject.next(newList);
@@ -189,6 +191,7 @@ export class ChecklistService {
           id: this.generateUniqueId(),
           name: subtaskName,
           completed: false,
+          assignedMember: null,
         };
         task.subtasks.push(newSubtask);
       });
@@ -320,6 +323,7 @@ export class ChecklistService {
           completed: false,
           subtasks: [],
           errors: [],
+          leader: null,
         });
       }
     });

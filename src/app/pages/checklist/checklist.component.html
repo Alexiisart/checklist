@@ -43,6 +43,15 @@
         </app-button>
         <app-button
           type="secondary"
+          iconLeft="group"
+          text="Equipo"
+          title="Gestionar equipo de la lista"
+          (clickEvent)="showManageTeam()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
           iconLeft="home"
           title="Inicio"
           text="Inicio"
@@ -73,6 +82,7 @@
     @for (task of currentList.tasks; track trackByTaskId($index, task)) {
     <app-task-item
       [task]="task"
+      [listTeam]="currentList.team || []"
       (taskToggled)="onTaskToggled($event)"
       (subtaskToggled)="onSubtaskToggled($event)"
       (subtaskAdded)="onSubtaskAdded($event)"
@@ -182,4 +192,13 @@
     (closed)="closeReorderModal()"
   >
   </app-reorder-modal>
+
+  <!-- Modal de gestión de equipo -->
+  <app-modal
+    [isVisible]="(showTeamModal$ | async) ?? false"
+    [data]="teamModalData$ | async"
+    (confirmed)="onTeamConfirm($event)"
+    (closed)="closeTeamModal()"
+  >
+  </app-modal>
 </div>

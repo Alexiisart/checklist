@@ -221,7 +221,7 @@
 /* Tipo Icon */
 .btn-icon {
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--color-text-primary);
   border-color: transparent;
   box-shadow: none;
   padding: 6px;

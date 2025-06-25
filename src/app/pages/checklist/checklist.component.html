@@ -1,36 +1,57 @@
 <div class="checklist-section">
   <div class="section-header">
     <h2>Mi Checklist</h2>
-    <div class="header-buttons">
-      <app-button
-        type="secondary"
-        text="Inicio"
-        iconLeft="home"
-        (clickEvent)="goHome()"
-      >
-      </app-button>
-      <app-button
-        type="secondary"
-        text="{{ getSaveButtonText() }}"
-        iconLeft="save"
-        [title]="getSaveButtonTooltip()"
-        (clickEvent)="saveProgress()"
-      >
-      </app-button>
-      <app-button
-        type="secondary"
-        text="Editar Lista"
-        iconLeft="edit"
-        (clickEvent)="editMode()"
-      >
-      </app-button>
-      <app-button
-        type="primary"
-        text="Nueva Lista"
-        iconLeft="add_circle_outline"
-        (clickEvent)="confirmStartNewList()"
-      >
-      </app-button>
+    <div class="header-actions">
+      <!-- Grupo secundario: Herramientas -->
+      <div class="action-group secondary-actions">
+        <app-button
+          type="secondary"
+          iconLeft="edit"
+          text="Editar"
+          title="Editar"
+          (clickEvent)="editMode()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          iconLeft="reorder"
+          text="Reordenar"
+          title="Cambiar el orden de las tareas"
+          (clickEvent)="showReorderModal()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          iconLeft="home"
+          title="Inicio"
+          text="Inicio"
+          (clickEvent)="goHome()"
+          size="md"
+        >
+        </app-button>
+      </div>
+
+      <!-- Grupo principal: Acciones del contenido -->
+      <div class="action-group primary-actions">
+        <app-button
+          type="icon"
+          iconLeft="save"
+          [title]="getSaveButtonTooltip()"
+          (clickEvent)="saveProgress()"
+          size="md"
+        >
+        </app-button>
+        <app-button
+          type="secondary"
+          text="Nueva Lista"
+          iconLeft="add_circle_outline"
+          (clickEvent)="confirmStartNewList()"
+          size="md"
+        >
+        </app-button>
+      </div>
     </div>
   </div>
 
@@ -58,6 +79,7 @@
       (subtaskAdded)="onSubtaskAdded($event)"
       (subtaskRemoved)="onSubtaskRemoved($event)"
       (subtaskUpdated)="onSubtaskUpdated($event)"
+      (subtasksReordered)="onSubtasksReordered()"
       (errorAdded)="onErrorAdded($event)"
       (errorRemoved)="onErrorRemoved($event)"
       (errorUpdated)="onErrorUpdated($event)"
@@ -152,4 +174,13 @@
     (closed)="closeAlert()"
   >
   </app-alert-modal>
+
+  <!-- Modal de reordenamiento -->
+  <app-reorder-modal
+    [isVisible]="(showReorderModal$ | async) ?? false"
+    [data]="reorderModalData$ | async"
+    (confirmed)="onReorderConfirm($event)"
+    (closed)="closeReorderModal()"
+  >
+  </app-reorder-modal>
 </div>

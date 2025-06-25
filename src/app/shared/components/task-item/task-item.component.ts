@@ -1,6 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
+import {
   Task,
   Subtask,
   TaskError,
@@ -14,146 +19,14 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
 @Component({
   selector: 'app-task-item',
   standalone: true,
-  imports: [CommonModule, ModalComponent, ButtonComponent, CheckboxComponent],
-  template: `
-    <div class="task-item" [class.completed]="task.completed">
-      <div class="task-header">
-        <app-checkbox
-          type="success"
-          size="md"
-          [checked]="task.completed"
-          [inputId]="'task-' + task.id"
-          ariaLabel="Marcar tarea como completada"
-          (checkedChange)="onTaskToggle($event)"
-        ></app-checkbox>
-        <span class="task-title">{{ task.name }}</span>
-
-        <app-button
-          type="ghost"
-          text="Subtarea"
-          iconLeft="add"
-          size="sm"
-          title="Agregar subtarea"
-          extraClasses="subtask-btn add-subtask-btn"
-          (clickEvent)="showAddSubtask()"
-        >
-        </app-button>
-        <app-button
-          type="ghost"
-          text="Documentar problema"
-          iconLeft="warning"
-          size="sm"
-          title="Documentar problemas que ocurrieron al realizar esta tarea"
-          extraClasses="add-error-btn"
-          (clickEvent)="showAddError()"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="edit"
-          size="sm"
-          title="Editar tarea"
-          extraClasses="edit-task-btn"
-          (clickEvent)="editTask()"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="file_download"
-          size="sm"
-          title="Exportar esta tarea con sus subtareas"
-          extraClasses="export-task-btn"
-          (clickEvent)="exportTask()"
-        >
-        </app-button>
-        <app-button
-          type="icon"
-          iconLeft="delete"
-          size="sm"
-          title="Eliminar tarea"
-          extraClasses="delete-task-btn"
-          (clickEvent)="deleteTask()"
-        >
-        </app-button>
-      </div>
-
-      <!-- Subtareas -->
-      @if (task.subtasks.length > 0) {
-      <div class="subtasks-container">
-        <div class="subtasks-label">Subtareas:</div>
-        @for (subtask of task.subtasks; track trackBySubtaskId($index, subtask))
-        {
-        <div class="subtask-item">
-          <app-checkbox
-            type="default"
-            size="md"
-            [checked]="subtask.completed"
-            [inputId]="'subtask-' + subtask.id"
-            ariaLabel="Marcar subtarea como completada"
-            (checkedChange)="onSubtaskToggle(subtask, $event)"
-          ></app-checkbox>
-          <span class="subtask-text" [class.completed]="subtask.completed">{{
-            subtask.name
-          }}</span>
-          <app-button
-            type="icon"
-            iconLeft="edit"
-            size="xs"
-            title="Editar subtarea"
-            extraClasses="edit-subtask-btn"
-            (clickEvent)="editSubtask(subtask)"
-          >
-          </app-button>
-          <app-button
-            type="icon"
-            iconLeft="close"
-            size="xs"
-            extraClasses="subtask-btn remove-subtask-btn"
-            (clickEvent)="removeSubtask(subtask)"
-          >
-          </app-button>
-        </div>
-        }
-      </div>
-      }
-
-      <!-- Errores -->
-      @if (task.errors.length > 0) {
-      <div class="errors-container">
-        @for (error of task.errors; track trackByErrorId($index, error)) {
-        <div class="error-item">
-          <span class="error-text">{{ error.name }}</span>
-          <app-button
-            type="icon"
-            iconLeft="edit"
-            size="xs"
-            title="Editar problema que ocurrió al realizar la tarea"
-            extraClasses="edit-error-btn"
-            (clickEvent)="editError(error)"
-          >
-          </app-button>
-          <app-button
-            type="icon"
-            iconLeft="close"
-            size="xs"
-            extraClasses="remove-error-btn"
-            (clickEvent)="removeError(error)"
-          >
-          </app-button>
-        </div>
-        }
-      </div>
-      }
-    </div>
-
-    <app-modal
-      [isVisible]="showModal"
-      [data]="modalData"
-      (confirmed)="onModalConfirm($event)"
-      (closed)="closeModal()"
-    >
-    </app-modal>
-  `,
+  imports: [
+    CommonModule,
+    DragDropModule,
+    ModalComponent,
+    ButtonComponent,
+    CheckboxComponent,
+  ],
+  templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.css'],
 })
 export class TaskItemComponent {
@@ -187,6 +60,12 @@ export class TaskItemComponent {
     taskId: number;
     subtaskId: number;
     newName: string;
+  }>();
+
+  // Evento emitido cuando se reordenan las subtareas
+  @Output() subtasksReordered = new EventEmitter<{
+    taskId: number;
+    reorderedSubtasks: Subtask[];
   }>();
 
   // Evento emitido cuando se documenta un problema que ocurrió al realizar la tarea
@@ -411,5 +290,21 @@ export class TaskItemComponent {
     this.currentSubtask = null;
     this.currentError = null;
     this.modalData = null;
+  }
+
+  // Maneja el reordenamiento de subtareas con drag and drop
+  onSubtaskDrop(event: CdkDragDrop<Subtask[]>): void {
+    // Usar directamente moveItemInArray en el array original como en la documentación
+    moveItemInArray(
+      this.task.subtasks,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    // Emitir el evento con las subtareas ya reordenadas
+    this.subtasksReordered.emit({
+      taskId: this.task.id,
+      reorderedSubtasks: [...this.task.subtasks],
+    });
   }
 }

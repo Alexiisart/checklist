@@ -6,12 +6,14 @@ import { TaskItemComponent } from '../../shared/components/task-item/task-item.c
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { AlertModalComponent } from '../../shared/components/alert-modal/alert-modal.component';
+import { ReorderModalComponent } from '../../shared/components/reorder-modal/reorder-modal.component';
 import { ButtonComponent } from '../../shared/atomic/buttons';
 import { InputComponent } from '../../shared/atomic/inputs';
 import {
   ChecklistStateService,
   ChecklistState,
 } from './checklist-state.service';
+import { Task, Subtask } from '../../models/task.interface';
 import {
   ChecklistTasksService,
   ChecklistSubtasksService,
@@ -19,7 +21,9 @@ import {
   ChecklistModalsService,
   ChecklistNavigationService,
   ChecklistExportService,
+  ChecklistReorderService,
 } from '../../services/functions/checklist';
+import { ChecklistService } from '../../services/checklist.service';
 
 /**
  * Componente principal del checklist.
@@ -35,6 +39,7 @@ import {
     ModalComponent,
     ConfirmModalComponent,
     AlertModalComponent,
+    ReorderModalComponent,
     ButtonComponent,
     InputComponent,
   ],
@@ -68,19 +73,25 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   public navigationShowConfirmModal$!: Observable<boolean>;
   public navigationConfirmModalData$!: Observable<any>;
 
+  // Observables de reordenamiento
+  public showReorderModal$!: Observable<boolean>;
+  public reorderModalData$!: Observable<any>;
+
   // ===== CONTROL DE SUBSCRIPCIONES =====
   private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private stateService: ChecklistStateService,
+    private checklistService: ChecklistService,
     // Servicios de funciones
     private tasksService: ChecklistTasksService,
     private subtasksService: ChecklistSubtasksService,
     private errorsService: ChecklistErrorsService,
     private modalsService: ChecklistModalsService,
     private navigationService: ChecklistNavigationService,
-    private exportService: ChecklistExportService
+    private exportService: ChecklistExportService,
+    private reorderService: ChecklistReorderService
   ) {
     // Inicializar observable del estado básico
     this.state$ = this.stateService.state$;
@@ -106,6 +117,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     // Observables del servicio de navegación
     this.navigationShowConfirmModal$ = this.navigationService.showConfirmModal$;
     this.navigationConfirmModalData$ = this.navigationService.confirmModalData$;
+
+    // Observables del servicio de reordenamiento
+    this.showReorderModal$ = this.reorderService.showReorderModal$;
+    this.reorderModalData$ = this.reorderService.reorderModalData$;
   }
 
   // Inicializa el componente suscribiéndose a los cambios de ruta y estado
@@ -213,6 +228,14 @@ export class ChecklistComponent implements OnInit, OnDestroy {
       event.subtaskId,
       event.newName
     );
+    this.stateService.markAsChanged();
+  }
+
+  // Reordena las subtareas de una tarea específica
+  onSubtasksReordered(): void {
+    this.reorderService.reorderSubtasks();
+    // Marcar cambios en el ChecklistService para la detección de navegación
+    this.checklistService.markAsUnsaved();
     this.stateService.markAsChanged();
   }
 
@@ -397,5 +420,27 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     return this.currentList?.name
       ? 'Actualizar la lista guardada'
       : 'Guardar la lista con un nombre';
+  }
+
+  // ===== REORDENAMIENTO =====
+
+  /** Muestra el modal de reordenamiento de tareas */
+  showReorderModal(): void {
+    if (this.currentList) {
+      this.reorderService.showTaskReorderModal(this.currentList);
+    }
+  }
+
+  /** Confirma el reordenamiento de tareas */
+  onReorderConfirm(reorderedTasks: Task[]): void {
+    this.reorderService.confirmTaskReorder(reorderedTasks);
+    // Marcar cambios en el ChecklistService para la detección de navegación
+    this.checklistService.markAsUnsaved();
+    this.stateService.markAsChanged();
+  }
+
+  /** Cierra el modal de reordenamiento */
+  closeReorderModal(): void {
+    this.reorderService.closeReorderModal();
   }
 }

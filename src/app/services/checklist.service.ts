@@ -399,6 +399,11 @@ export class ChecklistService {
     this.hasUnsavedChangesSubject.next(hasChanges);
   }
 
+  // Método público para marcar cambios sin guardar (usado por componentes)
+  markAsUnsaved(): void {
+    this.setUnsavedChanges(true);
+  }
+
   // Obtiene el progreso actual de la lista
   getProgress(): { completed: number; total: number; percentage: number } {
     const currentList = this.getCurrentList();

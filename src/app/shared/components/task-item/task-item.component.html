@@ -12,54 +12,56 @@
       <span class="task-title">{{ task.name }}</span>
     </div>
 
-    <app-button
-      type="ghost"
-      text="Subtarea"
-      iconLeft="add"
-      size="sm"
-      title="Agregar subtarea"
-      extraClasses="subtask-btn add-subtask-btn"
-      (clickEvent)="showAddSubtask()"
-    >
-    </app-button>
-    <app-button
-      type="ghost"
-      text="Documentar problema"
-      iconLeft="warning"
-      size="sm"
-      title="Documentar problemas que ocurrieron al realizar esta tarea"
-      extraClasses="add-error-btn"
-      (clickEvent)="showAddError()"
-    >
-    </app-button>
-    <div class="task-actions">
+    <div class="task-buttons-container">
       <app-button
-        type="icon"
-        iconLeft="edit"
+        type="ghost"
+        text="Subtarea"
+        iconLeft="add"
         size="sm"
-        title="Editar tarea"
-        extraClasses="edit-task-btn"
-        (clickEvent)="editTask()"
+        title="Agregar subtarea"
+        extraClasses="subtask-btn add-subtask-btn"
+        (clickEvent)="showAddSubtask()"
       >
       </app-button>
       <app-button
-        type="icon"
-        iconLeft="file_download"
+        type="ghost"
+        text="Documentar problema"
+        iconLeft="warning"
         size="sm"
-        title="Exportar esta tarea con sus subtareas"
-        extraClasses="export-task-btn"
-        (clickEvent)="exportTask()"
+        title="Documentar problemas que ocurrieron al realizar esta tarea"
+        extraClasses="add-error-btn"
+        (clickEvent)="showAddError()"
       >
       </app-button>
-      <app-button
-        type="icon"
-        iconLeft="delete"
-        size="sm"
-        title="Eliminar tarea"
-        extraClasses="delete-task-btn"
-        (clickEvent)="deleteTask()"
-      >
-      </app-button>
+      <div class="task-actions">
+        <app-button
+          type="icon"
+          iconLeft="edit"
+          size="sm"
+          title="Editar tarea"
+          extraClasses="edit-task-btn"
+          (clickEvent)="editTask()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
+          iconLeft="file_download"
+          size="sm"
+          title="Exportar esta tarea con sus subtareas"
+          extraClasses="export-task-btn"
+          (clickEvent)="exportTask()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
+          iconLeft="delete"
+          size="sm"
+          title="Eliminar tarea"
+          extraClasses="delete-task-btn"
+          (clickEvent)="deleteTask()"
+        >
+        </app-button>
+      </div>
     </div>
   </div>
 

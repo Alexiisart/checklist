@@ -194,3 +194,12 @@
   (closed)="closeModal()"
 >
 </app-modal>
+
+<!-- Modal de confirmación para eliminar subtarea -->
+<app-confirm-modal
+  [isVisible]="showConfirmModal"
+  [data]="confirmModalData"
+  (confirmed)="confirmSubtaskDeletion()"
+  (cancelled)="cancelSubtaskDeletion()"
+>
+</app-confirm-modal>

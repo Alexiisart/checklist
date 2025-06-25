@@ -13,6 +13,7 @@ import {
   TeamMember,
 } from '../../../models/task.interface';
 import { ModalComponent } from '../modal/modal.component';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
 import { TeamDropdownComponent } from '../../atomic/dropdowns';
@@ -26,6 +27,7 @@ import { ChecklistTeamService } from '../../../services/functions/checklist';
     CommonModule,
     DragDropModule,
     ModalComponent,
+    ConfirmModalComponent,
     ButtonComponent,
     CheckboxComponent,
     TeamDropdownComponent,
@@ -113,6 +115,15 @@ export class TaskItemComponent {
 
   // Datos que se mostrarán en el modal
   modalData: ModalData | null = null;
+
+  // Controla la visibilidad del modal de confirmación
+  showConfirmModal = false;
+
+  // Datos del modal de confirmación
+  confirmModalData: any = null;
+
+  // Subtarea pendiente de eliminación
+  subtaskToDelete: Subtask | null = null;
 
   // Acción actual que se está realizando
   currentAction:
@@ -204,9 +215,34 @@ export class TaskItemComponent {
     this.showModal = true;
   }
 
-  // Elimina una subtarea
+  // Muestra modal de confirmación para eliminar una subtarea
   removeSubtask(subtask: Subtask): void {
-    this.subtaskRemoved.emit({ taskId: this.task.id, subtaskId: subtask.id });
+    this.subtaskToDelete = subtask;
+    this.confirmModalData = {
+      title: 'Eliminar Subtarea',
+      message: `¿Estás seguro de que quieres eliminar la subtarea "${subtask.name}"?`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+    };
+    this.showConfirmModal = true;
+  }
+
+  // Confirma la eliminación de la subtarea
+  confirmSubtaskDeletion(): void {
+    if (this.subtaskToDelete) {
+      this.subtaskRemoved.emit({
+        taskId: this.task.id,
+        subtaskId: this.subtaskToDelete.id,
+      });
+      this.cancelSubtaskDeletion();
+    }
+  }
+
+  // Cancela la eliminación de la subtarea
+  cancelSubtaskDeletion(): void {
+    this.subtaskToDelete = null;
+    this.showConfirmModal = false;
+    this.confirmModalData = null;
   }
 
   // Muestra el modal para documentar un problema que ocurrió al realizar la tarea

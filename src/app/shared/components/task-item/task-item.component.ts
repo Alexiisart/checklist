@@ -318,7 +318,12 @@ export class TaskItemComponent {
 
   // Alterna la visibilidad del dropdown de equipo
   toggleTeamDropdown(): void {
-    this.teamService.toggleLeaderDropdown();
+    this.teamService.toggleLeaderDropdown(this.task.id);
+  }
+
+  // Verifica si el dropdown está activo para esta tarea
+  isLeaderDropdownActive(): boolean {
+    return this.teamService.isLeaderDropdownActive(this.task.id);
   }
 
   // Asigna un líder a la tarea

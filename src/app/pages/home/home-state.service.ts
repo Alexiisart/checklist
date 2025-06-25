@@ -217,14 +217,22 @@ export class HomeStateService {
     this._searchState$.next({ searchTerm: '' });
   }
 
-  // Filtra las listas según el término de búsqueda
+  // Filtra las listas según el término de búsqueda y las ordena por fecha (más recientes primero)
   private filterLists(lists: SavedList[], searchTerm: string): SavedList[] {
+    // Primero ordenar por fecha (más recientes primero)
+    const sortedLists = [...lists].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime(); // Orden descendente (más recientes primero)
+    });
+
+    // Luego filtrar por término de búsqueda si existe
     if (!searchTerm.trim()) {
-      return [...lists];
+      return sortedLists;
     }
 
     const searchTermLower = searchTerm.toLowerCase();
-    return lists.filter(
+    return sortedLists.filter(
       (list) =>
         (list.name || 'Lista sin nombre')
           .toLowerCase()

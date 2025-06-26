@@ -159,6 +159,15 @@
 >
 </app-confirm-modal>
 
+<!-- Modal para nombrar descargas -->
+<app-modal
+  [isVisible]="(showNameDownloadModal$ | async) || false"
+  [data]="nameDownloadModalData$ | async"
+  (confirmed)="onDownloadNameConfirmed($event)"
+  (closed)="onDownloadNameCancelled()"
+>
+</app-modal>
+
 <!-- Modal de selección manual de listas -->
 @if (stateService.isListSelectionModalVisible() &&
 stateService.getImportPreview()) {

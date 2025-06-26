@@ -10,13 +10,17 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ExportImportDropdownComponent } from '../../shared/components/export-import-dropdown/export-import-dropdown.component';
 import { StorageProgressIndicatorComponent } from '../../shared/components/storage-progress-indicator/storage-progress-indicator.component';
 import { ButtonComponent } from '../../shared/atomic/buttons';
+import {
+  DropdownComponent,
+  DropdownOption,
+} from '../../shared/atomic/dropdowns';
 import { HomeStateService } from './home-state.service';
 import { DuplicateListService } from '../../services/functions/home/duplicate-list.service';
 import { RenameListService } from '../../services/functions/home/rename-list.service';
 import { DeleteListService } from '../../services/functions/home/delete-list.service';
 import { OpenNewTabService } from '../../services/functions/home/open-new-tab.service';
+import { ShareListService } from '../../services/functions/home/share-list.service';
 import { ChecklistCopyService } from '../../services/functions/checklist/checklist-copy.service';
-import { ToastService } from '../../services/toast.service';
 import { StorageService } from '../../services/storage.service';
 import { SavedList } from '../../models/task.interface';
 
@@ -35,6 +39,7 @@ import { SavedList } from '../../models/task.interface';
     ExportImportDropdownComponent,
     StorageProgressIndicatorComponent,
     ButtonComponent,
+    DropdownComponent,
   ],
   providers: [HomeStateService],
   templateUrl: './home.component.html',
@@ -48,6 +53,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public modalState$!: Observable<any>;
   public selectionState$!: Observable<any>;
   public searchState$!: Observable<any>;
+  public filterState$!: Observable<any>;
   public selectedCount$!: Observable<number>;
 
   // Observables del servicio de duplicación
@@ -68,13 +74,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Propiedades para el template (usando async pipe donde sea posible)
   searchTerm = '';
 
+  // Opciones para el dropdown de filtrado
+  filterOptions: DropdownOption[] = [
+    { value: 'all', label: 'Todas las listas' },
+    { value: 'completed', label: 'Completadas' },
+    { value: 'incomplete', label: 'Incompletas' },
+  ];
+
   constructor(
     private homeStateService: HomeStateService,
     private duplicateListService: DuplicateListService,
     private renameListService: RenameListService,
     private deleteListService: DeleteListService,
     private openNewTabService: OpenNewTabService,
-    private copyService: ChecklistCopyService
+    private shareListService: ShareListService,
+    private copyService: ChecklistCopyService,
+    private storageService: StorageService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -83,6 +98,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.modalState$ = this.homeStateService.modalState$;
     this.selectionState$ = this.homeStateService.selectionState$;
     this.searchState$ = this.homeStateService.searchState$;
+    this.filterState$ = this.homeStateService.filterState$;
     this.selectedCount$ = this.homeStateService.selectedCount$;
 
     // Observables del servicio de duplicación
@@ -148,8 +164,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (!isVisible) {
           this.homeStateService.loadSavedLists();
           this.homeStateService.updateStorageIndicator();
-          // Limpiar selección después de eliminar listas
-          this.homeStateService.deselectAllLists();
+          // No limpiar selección automáticamente - solo se limpia cuando se confirma la eliminación
         }
       });
   }
@@ -222,6 +237,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.homeStateService.clearSearch();
   }
 
+  // Maneja el cambio de filtro
+  onFilterChange(filterValue: string): void {
+    this.homeStateService.updateFilterOption(
+      filterValue as 'all' | 'completed' | 'incomplete'
+    );
+  }
+
   // Maneja el clic en una tarjeta de lista
   onListCardClick(listId: string): void {
     const selectionState = this.homeStateService.getCurrentSelectionState();
@@ -267,6 +289,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   deleteConfirmedList(): void {
     this.deleteListService.confirmDelete();
+    // Limpiar selección solo después de confirmar la eliminación
+    this.homeStateService.deselectAllLists();
   }
 
   cancelDelete(): void {
@@ -281,6 +305,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Copiar lista al portapapeles desde el card
   copyListFromCard(list: SavedList): void {
     this.copyService.copyListFromCard(list);
+  }
+
+  // Compartir lista desde el card
+  shareListFromCard(list: SavedList): void {
+    // Cargar la lista completa y generar enlace compartible
+    const fullList = this.storageService.loadList(list.id);
+    if (fullList) {
+      this.shareListService.generateShareLink(fullList);
+    }
   }
 
   // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========

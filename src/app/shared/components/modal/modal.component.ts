@@ -54,7 +54,7 @@ import { InputComponent } from '../../atomic/inputs';
           </app-button>
           <app-button
             type="primary"
-            text="Agregar"
+            [text]="data?.confirmButtonText || 'Agregar'"
             size="md"
             (clickEvent)="confirm()"
           >

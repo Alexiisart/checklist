@@ -71,14 +71,25 @@
   <!-- Lista de cards guardadas -->
   @if ((savedLists$ | async)?.length ?? 0 > 0) {
   <div class="saved-lists-container">
-    <!-- Barra de búsqueda -->
-    <app-search-input
-      [searchTerm]="searchTerm"
-      placeholder="Buscar listas..."
-      (searchChange)="onSearchChange($event)"
-      (clearSearch)="clearSearch()"
-    >
-    </app-search-input>
+    <!-- Controles de búsqueda y filtrado -->
+    <div class="search-filter-controls">
+      <app-search-input
+        [searchTerm]="searchTerm"
+        placeholder="Buscar listas..."
+        (searchChange)="onSearchChange($event)"
+        (clearSearch)="clearSearch()"
+      >
+      </app-search-input>
+
+      <app-dropdown
+        [options]="filterOptions"
+        [selectedValue]="(filterState$ | async)?.filterOption ?? 'all'"
+        tooltip="Filtrar listas por estado"
+        size="md"
+        (selectionChanged)="onFilterChange($event)"
+      >
+      </app-dropdown>
+    </div>
 
     <!-- Grid de listas -->
     <div class="lists-grid">
@@ -96,6 +107,7 @@
         (delete)="confirmDeleteList($event)"
         (openInNewTab)="openListInNewTab($event)"
         (copyList)="copyListFromCard($event)"
+        (shareList)="shareListFromCard($event)"
       >
       </app-list-card>
       }

@@ -14,6 +14,8 @@ export class StorageService {
   private readonly STORAGE_KEY = 'checklist_data';
   /** Clave para almacenar las listas guardadas */
   private readonly LISTS_KEY = 'saved_lists';
+  /** Clave para almacenar las preferencias del usuario */
+  private readonly PREFERENCES_KEY = 'user_preferences';
   /** Tamaño máximo de almacenamiento permitido (3.5 MB) */
   private readonly MAX_STORAGE_SIZE = 3.5 * 1024 * 1024; // 3.5 MB en bytes
 
@@ -342,6 +344,32 @@ export class StorageService {
       formattedSize: this.formatBytes(currentSize),
       level,
     };
+  }
+
+  /**
+   * Guarda las preferencias del usuario
+   * @param preferences Objeto con las preferencias del usuario
+   */
+  saveUserPreferences(preferences: any): void {
+    try {
+      localStorage.setItem(this.PREFERENCES_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.error('Error saving user preferences:', error);
+    }
+  }
+
+  /**
+   * Carga las preferencias del usuario
+   * @returns Preferencias del usuario o null si no existen
+   */
+  loadUserPreferences(): any {
+    try {
+      const data = localStorage.getItem(this.PREFERENCES_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error loading user preferences:', error);
+      return null;
+    }
   }
 
   /**

@@ -7,6 +7,7 @@
         <app-button
           type="icon"
           iconLeft="save"
+          text="Guardar"
           [title]="getSaveButtonTooltip()"
           (clickEvent)="saveProgress()"
           size="md"
@@ -183,6 +184,7 @@
     [data]="navigationConfirmModalData$ | async"
     (confirmed)="onConfirmAction()"
     (cancelled)="onCancelAction()"
+    (thirdAction)="onThirdAction()"
   >
   </app-confirm-modal>
 
@@ -209,6 +211,15 @@
     [data]="teamModalData$ | async"
     (confirmed)="onTeamConfirm($event)"
     (closed)="closeTeamModal()"
+  >
+  </app-modal>
+
+  <!-- Modal para nombrar descargas -->
+  <app-modal
+    [isVisible]="(showDownloadNamingModal$ | async) ?? false"
+    [data]="downloadNamingModalData$ | async"
+    (confirmed)="onDownloadNameConfirmed($event)"
+    (closed)="onDownloadNameCancelled()"
   >
   </app-modal>
 </div>

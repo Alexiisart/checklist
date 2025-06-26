@@ -87,10 +87,11 @@ export class ChecklistNavigationService {
             message:
               'Tienes cambios sin guardar. ¿Quieres guardar antes de comenzar una nueva lista?',
             confirmText: 'Guardar y nueva lista',
-            cancelText: 'Nueva lista sin guardar',
+            cancelText: 'Cancelar',
+            thirdButtonText: 'Nueva lista sin guardar',
           });
           this._showConfirmModal$.next(true);
-          this.pendingAction = 'start-new-list-with-save';
+          this.pendingAction = 'start-new-list';
         } else {
           // Si no hay cambios, ir directamente a nueva lista
           this.navigateToNewList();
@@ -108,9 +109,10 @@ export class ChecklistNavigationService {
         if (hasUnsavedChanges) {
           this._confirmModalData$.next({
             title: 'Cambios sin guardar',
-            message: 'Tienes cambios sin guardar. ¿Quieres salir sin guardar?',
-            confirmText: 'Salir sin guardar',
+            message: 'Tienes cambios sin guardar. ¿Qué deseas hacer?',
+            confirmText: 'Guardar y salir',
             cancelText: 'Cancelar',
+            thirdButtonText: 'Salir sin guardar',
           });
           this._showConfirmModal$.next(true);
           this.pendingAction = 'go-home';
@@ -121,10 +123,11 @@ export class ChecklistNavigationService {
   }
 
   /**
-   * Confirma la acción pendiente - ahora es "Salir sin guardar"
+   * Confirma la acción pendiente - ahora es "Guardar y salir"
+   * Retorna false si necesita mostrar modal de guardado
    */
-  confirmAction(currentList: ChecklistData | null): void {
-    this.exitWithoutSaving();
+  confirmAction(currentList: ChecklistData | null): boolean {
+    return this.saveAndExit(currentList);
   }
 
   /**
@@ -135,54 +138,62 @@ export class ChecklistNavigationService {
   }
 
   /**
+   * Tercera acción - "Salir sin guardar"
+   */
+  thirdAction(): void {
+    this.exitWithoutSaving();
+  }
+
+  /**
    * Ejecuta la acción sin guardar
    */
   exitWithoutSaving(): void {
     if (this.pendingAction === 'go-home') {
       this.router.navigate(['/home']);
-    } else if (this.pendingAction === 'start-new-list-with-save') {
+    } else if (this.pendingAction === 'start-new-list') {
       this.navigateToNewList();
     }
     this.closeConfirmModal();
   }
 
   /**
-   * Guarda y ejecuta la acción
+   * Guarda y ejecuta la acción. Retorna false si necesita mostrar modal de guardado
    */
-  saveAndExit(currentList: ChecklistData | null): void {
-    if (this.pendingAction === 'start-new-list-with-save') {
-      // Guardar primero y luego ir a nueva lista
-      if (currentList) {
-        const currentName =
-          currentList.name || `Lista ${new Date().toLocaleDateString()}`;
-        const saved = this.checklistService.saveList(currentName);
-        if (saved) {
-          this.toastService.showAlert('Lista guardada', 'success', 1500);
-          setTimeout(() => {
-            this.navigateToNewList();
-          }, 1500);
-        }
-      }
-    } else if (this.pendingAction === 'go-home') {
-      // Guardar y ir a home
-      if (currentList) {
-        // Si la lista ya tiene nombre, guardar directamente
-        if (currentList.name && currentList.name.trim() !== '') {
-          const saved = this.checklistService.saveList(currentList.name);
-          if (saved) {
-            this.toastService.showAlert('Lista guardada', 'success', 1000);
-            setTimeout(() => {
-              this.router.navigate(['/home']);
-            }, 1000);
-          }
-        } else {
-          // Si no tiene nombre, indicar que se necesita mostrar modal de guardado
-          this.closeConfirmModal();
-          return; // Retornar para que el componente maneje el modal de guardado
-        }
-      }
+  saveAndExit(currentList: ChecklistData | null): boolean {
+    if (!currentList) {
+      this.toastService.showAlert('No hay lista para guardar', 'warning');
+      this.closeConfirmModal();
+      return true; // No necesita modal, pero termina la acción
     }
-    this.closeConfirmModal();
+
+    // Si la lista no tiene nombre, retorna false para mostrar modal de guardado
+    if (!currentList.name || currentList.name.trim() === '') {
+      // No cerramos el modal aquí, lo mantenemos abierto hasta que el componente maneje el guardado
+      return false;
+    }
+
+    // Si tiene nombre, guardar y ejecutar la acción
+    const saved = this.checklistService.saveList(currentList.name);
+
+    if (saved) {
+      if (this.pendingAction === 'start-new-list') {
+        this.toastService.showAlert('Lista guardada', 'success', 1500);
+        setTimeout(() => {
+          this.navigateToNewList();
+        }, 1500);
+      } else if (this.pendingAction === 'go-home') {
+        this.toastService.showAlert('Lista guardada', 'success', 1000);
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1000);
+      }
+      this.closeConfirmModal();
+      return true;
+    } else {
+      this.toastService.showAlert('Error al guardar', 'danger');
+      this.closeConfirmModal();
+      return true; // Termina la acción aunque haya error
+    }
   }
 
   /**

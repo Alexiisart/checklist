@@ -69,6 +69,8 @@ export interface ModalData {
   label: string; // Etiqueta del campo de entrada
   placeholder: string; // Texto placeholder del campo
   currentValue?: string; // Valor actual del campo (opcional)
+  isTextarea?: boolean; // Si debe mostrarse como textarea o input normal (opcional, por defecto true)
+  confirmButtonText?: string; // Texto del botón de confirmación (opcional, por defecto "Agregar")
 }
 
 /**
@@ -88,4 +90,6 @@ export interface ConfirmData {
   title: string; // Título del modal
   confirmText: string; // Texto del botón de confirmación
   cancelText: string; // Texto del botón de cancelación
+  // Botón adicional opcional para modales de 3 opciones
+  thirdButtonText?: string; // Texto del tercer botón (opcional)
 }

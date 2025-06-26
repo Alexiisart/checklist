@@ -16,6 +16,11 @@ interface SearchState {
   searchTerm: string;
 }
 
+// Interface para el estado de filtrado
+interface FilterState {
+  filterOption: 'all' | 'completed' | 'incomplete';
+}
+
 // Interface para el estado de alerta (solo para alertas del state service)
 interface ModalState {
   showAlertModal: boolean;
@@ -41,6 +46,9 @@ export class HomeStateService {
   private readonly _searchState$ = new BehaviorSubject<SearchState>({
     searchTerm: '',
   });
+  private readonly _filterState$ = new BehaviorSubject<FilterState>({
+    filterOption: 'all',
+  });
 
   // Observables públicos
   public readonly savedLists$: Observable<SavedList[]> =
@@ -53,14 +61,17 @@ export class HomeStateService {
     this._selectionState$.asObservable();
   public readonly searchState$: Observable<SearchState> =
     this._searchState$.asObservable();
+  public readonly filterState$: Observable<FilterState> =
+    this._filterState$.asObservable();
 
   // Observable derivado para listas filtradas
   public readonly filteredLists$: Observable<SavedList[]> = combineLatest([
     this.savedLists$,
     this.searchState$,
+    this.filterState$,
   ]).pipe(
-    map(([lists, searchState]) =>
-      this.filterLists(lists, searchState.searchTerm)
+    map(([lists, searchState, filterState]) =>
+      this.filterLists(lists, searchState.searchTerm, filterState.filterOption)
     )
   );
 
@@ -80,6 +91,7 @@ export class HomeStateService {
   initialize(): void {
     this.loadSavedLists();
     this.updateStorageIndicator();
+    this.loadFilterPreference();
   }
 
   // ========== GESTIÓN DE LISTAS ==========
@@ -217,8 +229,12 @@ export class HomeStateService {
     this._searchState$.next({ searchTerm: '' });
   }
 
-  // Filtra las listas según el término de búsqueda y las ordena por fecha (más recientes primero)
-  private filterLists(lists: SavedList[], searchTerm: string): SavedList[] {
+  // Filtra las listas según el término de búsqueda, filtro de estado y las ordena por fecha
+  private filterLists(
+    lists: SavedList[],
+    searchTerm: string,
+    filterOption: 'all' | 'completed' | 'incomplete'
+  ): SavedList[] {
     // Primero ordenar por fecha (más recientes primero)
     const sortedLists = [...lists].sort((a, b) => {
       const dateA = new Date(a.date);
@@ -226,13 +242,25 @@ export class HomeStateService {
       return dateB.getTime() - dateA.getTime(); // Orden descendente (más recientes primero)
     });
 
+    // Filtrar por estado de completitud
+    let filteredByStatus = sortedLists;
+    if (filterOption === 'completed') {
+      filteredByStatus = sortedLists.filter(
+        (list) => list.completedCount === list.tasksCount && list.tasksCount > 0
+      );
+    } else if (filterOption === 'incomplete') {
+      filteredByStatus = sortedLists.filter(
+        (list) => list.completedCount < list.tasksCount || list.tasksCount === 0
+      );
+    }
+
     // Luego filtrar por término de búsqueda si existe
     if (!searchTerm.trim()) {
-      return sortedLists;
+      return filteredByStatus;
     }
 
     const searchTermLower = searchTerm.toLowerCase();
-    return sortedLists.filter(
+    return filteredByStatus.filter(
       (list) =>
         (list.name || 'Lista sin nombre')
           .toLowerCase()
@@ -279,5 +307,30 @@ export class HomeStateService {
   // Obtiene el término de búsqueda actual de forma síncrona
   getCurrentSearchTerm(): string {
     return this._searchState$.value.searchTerm;
+  }
+
+  // ========== GESTIÓN DE FILTRADO ==========
+
+  // Actualiza el filtro de estado y guarda la preferencia
+  updateFilterOption(filterOption: 'all' | 'completed' | 'incomplete'): void {
+    this._filterState$.next({ filterOption });
+
+    // Guardar preferencia del usuario
+    const preferences = this.storageService.loadUserPreferences() || {};
+    preferences.filterOption = filterOption;
+    this.storageService.saveUserPreferences(preferences);
+  }
+
+  // Carga la preferencia de filtrado guardada
+  loadFilterPreference(): void {
+    const preferences = this.storageService.loadUserPreferences();
+    if (preferences && preferences.filterOption) {
+      this._filterState$.next({ filterOption: preferences.filterOption });
+    }
+  }
+
+  // Obtiene el filtro actual de forma síncrona
+  getCurrentFilterOption(): 'all' | 'completed' | 'incomplete' {
+    return this._filterState$.value.filterOption;
   }
 }

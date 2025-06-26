@@ -1,19 +1,13 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { urlLoader, suppressUnhandledRejection } from './exceptions';
+
+// Detectar datos compartidos antes del bootstrap
+urlLoader();
 
 // Suprimir errores de extensiones del navegador
-window.addEventListener('unhandledrejection', (event) => {
-  if (
-    event.reason &&
-    event.reason.message &&
-    event.reason.message.includes(
-      'message channel closed before a response was received'
-    )
-  ) {
-    event.preventDefault();
-  }
-});
+suppressUnhandledRejection();
 
 bootstrapApplication(AppComponent, appConfig).catch((err) =>
   console.error(err)

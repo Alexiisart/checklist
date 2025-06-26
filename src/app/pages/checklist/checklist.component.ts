@@ -9,11 +9,12 @@ import { AlertModalComponent } from '../../shared/components/alert-modal/alert-m
 import { ReorderModalComponent } from '../../shared/components/reorder-modal/reorder-modal.component';
 import { ButtonComponent } from '../../shared/atomic/buttons';
 import { InputComponent } from '../../shared/atomic/inputs';
+import { DownloadNamingService } from '../../services/export/download-naming.service';
 import {
   ChecklistStateService,
   ChecklistState,
 } from './checklist-state.service';
-import { Task, Subtask, TeamMember } from '../../models/task.interface';
+import { Task } from '../../models/task.interface';
 import {
   ChecklistTasksService,
   ChecklistSubtasksService,
@@ -83,6 +84,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   public showTeamModal$!: Observable<boolean>;
   public teamModalData$!: Observable<any>;
 
+  // Observables del servicio de nombrado de descargas
+  public showDownloadNamingModal$!: Observable<boolean>;
+  public downloadNamingModalData$!: Observable<any>;
+
   // ===== CONTROL DE SUBSCRIPCIONES =====
   private destroy$ = new Subject<void>();
 
@@ -99,7 +104,8 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     private exportService: ChecklistExportService,
     private reorderService: ChecklistReorderService,
     private teamService: ChecklistTeamService,
-    private copyService: ChecklistCopyService
+    private copyService: ChecklistCopyService,
+    private downloadNamingService: DownloadNamingService
   ) {
     // Inicializar observable del estado básico
     this.state$ = this.stateService.state$;
@@ -133,6 +139,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     // Observables del servicio de equipo
     this.showTeamModal$ = this.teamService.showTeamModal$;
     this.teamModalData$ = this.teamService.teamModalData$;
+
+    // Observables del servicio de nombrado de descargas
+    this.showDownloadNamingModal$ = this.downloadNamingService.showModal$;
+    this.downloadNamingModalData$ = this.downloadNamingService.modalData$;
   }
 
   // Inicializa el componente suscribiéndose a los cambios de ruta y estado
@@ -359,10 +369,15 @@ export class ChecklistComponent implements OnInit, OnDestroy {
       this.stateService.updateState({ hasUnsavedChanges: false });
       this.modalsService.closeSaveModal();
 
-      // Si hay una acción pendiente en navegación, manejarla
-      if (this.navigationService.currentPendingAction === 'go-home') {
+      // Si hay una acción pendiente, ejecutarla después del guardado
+      const pendingAction = this.navigationService.currentPendingAction;
+      if (pendingAction === 'go-home') {
         setTimeout(() => {
-          // El navigationService maneja la navegación
+          this.navigationService.exitWithoutSaving(); // Ahora solo navega, ya guardamos
+        }, 1000);
+      } else if (pendingAction === 'start-new-list') {
+        setTimeout(() => {
+          this.navigationService.exitWithoutSaving(); // Ahora solo navega, ya guardamos
         }, 1000);
       }
     }
@@ -380,14 +395,10 @@ export class ChecklistComponent implements OnInit, OnDestroy {
 
   /** Confirma la acción pendiente (limpiar lista, eliminar tarea, etc) */
   onConfirmAction(): void {
-    this.navigationService.confirmAction(this.currentList);
+    const needsSave = this.navigationService.confirmAction(this.currentList);
 
-    // Si la acción requiere mostrar modal de guardado, hacerlo
-    if (
-      this.navigationService.currentPendingAction === 'go-home' &&
-      (!this.currentList?.name || this.currentList.name.trim() === '')
-    ) {
-      this.navigationService.setPendingAction('go-home');
+    // Si necesita guardar (no tiene nombre), mostrar modal de guardado
+    if (!needsSave) {
       this.showSaveModalDialog();
     }
   }
@@ -395,6 +406,11 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   /** Cancela la acción pendiente */
   onCancelAction(): void {
     this.navigationService.cancelAction();
+  }
+
+  /** Ejecuta la tercera acción (salir sin guardar) */
+  onThirdAction(): void {
+    this.navigationService.thirdAction();
   }
 
   /** Navega a la página principal */
@@ -488,5 +504,17 @@ export class ChecklistComponent implements OnInit, OnDestroy {
   /** Muestra el modal para gestionar el equipo de la lista */
   showManageTeam(): void {
     this.teamService.showManageTeamModal();
+  }
+
+  // ===== MANEJO DE MODAL DE NOMBRADO DE DESCARGAS =====
+
+  /** Maneja la confirmación del nombre de descarga */
+  onDownloadNameConfirmed(fileName: string): void {
+    this.downloadNamingService.onNameConfirmed(fileName);
+  }
+
+  /** Maneja la cancelación del modal de nombrado */
+  onDownloadNameCancelled(): void {
+    this.downloadNamingService.onModalCancelled();
   }
 }

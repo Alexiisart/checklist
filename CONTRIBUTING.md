@@ -1,6 +1,6 @@
 # 🤝 Contribuir
 
-¡Gracias por contribuir a **Checklist Diario**!
+¡Gracias por contribuir a **Checkliist**!
 
 ## 🚀 Proceso Rápido
 

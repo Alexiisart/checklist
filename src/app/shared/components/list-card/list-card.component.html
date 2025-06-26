@@ -1,0 +1,112 @@
+<!-- Contenedor principal -->
+<div
+  class="list-card"
+  [class.selection-mode]="isSelectionMode"
+  [class.selected]="isSelected"
+  (click)="onCardClick()"
+>
+  <!-- Checkbox de selección -->
+  @if (isSelectionMode) {
+  <div class="selection-checkbox">
+    <app-checkbox
+      type="primary"
+      size="md"
+      [checked]="isSelected"
+      [inputId]="'list-select-' + list.id"
+      ariaLabel="Seleccionar lista"
+      (checkedChange)="onToggleSelection()"
+      (clickEvent)="$event.stopPropagation()"
+    ></app-checkbox>
+  </div>
+  }
+
+  <!-- Encabezado con título y fecha -->
+  <div class="list-card-header">
+    <div class="title-section">
+      <h3 class="list-card-title">
+        {{ list.name || "Lista sin nombre" }}
+      </h3>
+      @if (!isSelectionMode) {
+      <app-button
+        type="icon"
+        iconLeft="edit"
+        size="sm"
+        title="Renombrar lista"
+        extraClasses="rename-list-btn"
+        (click)="onRename(); $event.stopPropagation()"
+      >
+      </app-button>
+      }
+    </div>
+    <span class="list-card-date">{{ formattedDate }}</span>
+  </div>
+
+  <!-- Vista previa y estadísticas -->
+  <p class="list-card-preview">{{ list.preview }}</p>
+  <div class="list-card-stats">
+    <span>{{ list.completedCount }} de {{ list.tasksCount }} completadas</span>
+  </div>
+
+  <!-- Barra de progreso -->
+  <div class="list-card-progress">
+    <div
+      class="list-card-progress-bar"
+      [style.width.%]="progressPercentage"
+    ></div>
+  </div>
+
+  <!-- Acciones de la tarjeta -->
+  @if (!isSelectionMode) {
+  <div class="list-card-actions" (click)="$event.stopPropagation()">
+    <div class="actions-left">
+      <app-button
+        type="icon"
+        iconLeft="open_in_new"
+        size="sm"
+        title="Nueva pestaña"
+        extraClasses="open-new-tab-btn"
+        (clickEvent)="onOpenInNewTab()"
+      >
+      </app-button>
+    </div>
+    <div class="actions-right">
+      <app-button
+        type="icon"
+        iconLeft="control_point_duplicate"
+        size="sm"
+        title="Duplicar lista"
+        extraClasses="duplicate-list-btn"
+        (clickEvent)="onDuplicate()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
+        iconLeft="file_copy"
+        size="sm"
+        title="Copiar lista al portapapeles"
+        extraClasses="copy-list-btn"
+        (clickEvent)="onCopyList()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
+        iconLeft="share"
+        size="sm"
+        title="Compartir lista"
+        extraClasses="share-list-btn"
+        (clickEvent)="onShareList()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
+        iconLeft="delete"
+        size="sm"
+        title="Eliminar lista"
+        extraClasses="delete-list-btn"
+        (clickEvent)="onDelete()"
+      >
+      </app-button>
+    </div>
+  </div>
+  }
+</div>

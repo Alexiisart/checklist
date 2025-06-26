@@ -1,6 +1,6 @@
 # 📖 Documentación Técnica
 
-> Arquitectura y APIs de Checklist Diario v2.1
+> Arquitectura y APIs de Checkliist v2.1
 
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
@@ -794,4 +794,4 @@ export class PerformanceService {
 
 ---
 
-**📖 Documentación Técnica v2.1 - Checklist Diario con Angular 19+, TypeScript 5.7+ y Angular CDK 19+**
+**📖 Documentación Técnica v2.1 - Checkliist con Angular 19+, TypeScript 5.7+ y Angular CDK 19+**

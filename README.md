@@ -1,4 +1,4 @@
-# 📝 Checklist Diario
+# 📝 Checkliist
 
 > Aplicación web moderna para gestionar tareas diarias con Angular
 

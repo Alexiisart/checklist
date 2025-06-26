@@ -66,7 +66,7 @@ export class TxtExportService {
     let content = '';
 
     // Encabezado
-    content += '📝 CHECKLIST DIARIO\n';
+    content += '📝 Checkliist\n';
     content += '═'.repeat(50) + '\n\n';
     content += `📅 Fecha: ${currentDate}\n`;
     content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n`;
@@ -115,7 +115,7 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checklist Diario - ${new Date().toLocaleString(
+    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
       'es-ES'
     )}\n`;
 
@@ -145,7 +145,7 @@ export class TxtExportService {
     if (tasksWithSubtasks.length === 0) {
       // Si no hay tareas con subtareas, devolver mensaje informativo
       let content = '';
-      content += '📝 CHECKLIST DIARIO - SUBTAREAS\n';
+      content += '📝 Checkliist - SUBTAREAS\n';
       content += '═'.repeat(50) + '\n\n';
       content += `📅 Fecha: ${currentDate}\n`;
       content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n\n`;
@@ -155,7 +155,7 @@ export class TxtExportService {
       content +=
         'Para exportar la lista completa, usa la opción "Exportar TXT".\n\n';
       content += '═'.repeat(50) + '\n';
-      content += `📄 Exportado desde Checklist Diario - ${new Date().toLocaleString(
+      content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
         'es-ES'
       )}\n`;
       return content;
@@ -175,7 +175,7 @@ export class TxtExportService {
     let content = '';
 
     // Encabezado
-    content += '📝 CHECKLIST DIARIO - SUBTAREAS\n';
+    content += '📝 Checkliist - SUBTAREAS\n';
     content += '═'.repeat(50) + '\n\n';
     content += `📅 Fecha: ${currentDate}\n`;
     content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n`;
@@ -261,7 +261,7 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checklist Diario - ${new Date().toLocaleString(
+    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
       'es-ES'
     )}\n`;
 
@@ -291,14 +291,14 @@ export class TxtExportService {
     if (!task) {
       // Si no se encuentra la tarea, devolver mensaje de error
       let content = '';
-      content += '📝 CHECKLIST DIARIO - TAREA INDIVIDUAL\n';
+      content += '📝 Checkliist - TAREA INDIVIDUAL\n';
       content += '═'.repeat(50) + '\n\n';
       content += `📅 Fecha: ${currentDate}\n`;
       content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n\n`;
       content += '❌ ERROR: TAREA NO ENCONTRADA\n\n';
       content += `La tarea con ID ${taskId} no fue encontrada en la lista.\n\n`;
       content += '═'.repeat(50) + '\n';
-      content += `📄 Exportado desde Checklist Diario - ${new Date().toLocaleString(
+      content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
         'es-ES'
       )}\n`;
       return content;
@@ -307,7 +307,7 @@ export class TxtExportService {
     let content = '';
 
     // Encabezado
-    content += '📝 CHECKLIST DIARIO - TAREA INDIVIDUAL\n';
+    content += '📝 Checkliist - TAREA INDIVIDUAL\n';
     content += '═'.repeat(50) + '\n\n';
     content += `📅 Fecha: ${currentDate}\n`;
     content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n`;
@@ -389,7 +389,7 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checklist Diario - ${new Date().toLocaleString(
+    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
       'es-ES'
     )}\n`;
 

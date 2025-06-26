@@ -294,7 +294,7 @@ export class PdfExportService {
     let printHTML = `
       <div id="print-content">
         <div class="print-header">
-          <div class="print-title">📝 Checklist Diario</div>
+          <div class="print-title">📝 Checkliist</div>
           <div class="print-date">Generado el: ${currentDate}</div>
         </div>
         

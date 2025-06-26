@@ -88,4 +88,6 @@ export interface ConfirmData {
   title: string; // Título del modal
   confirmText: string; // Texto del botón de confirmación
   cancelText: string; // Texto del botón de cancelación
+  // Botón adicional opcional para modales de 3 opciones
+  thirdButtonText?: string; // Texto del tercer botón (opcional)
 }

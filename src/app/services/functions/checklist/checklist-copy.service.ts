@@ -114,7 +114,7 @@ export class ChecklistCopyService {
     let content = '';
 
     // Encabezado
-    content += '📝 CHECKLIST DIARIO - TAREA INDIVIDUAL\n';
+    content += '📝 Checkliist - TAREA INDIVIDUAL\n';
     content += '═'.repeat(50) + '\n\n';
     content += `📅 Fecha: ${currentDate}\n`;
     content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n`;
@@ -202,7 +202,7 @@ export class ChecklistCopyService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Copiado desde Checklist Diario - ${new Date().toLocaleString(
+    content += `📄 Copiado desde Checkliist - ${new Date().toLocaleString(
       'es-ES'
     )}\n`;
 
@@ -231,7 +231,7 @@ export class ChecklistCopyService {
     let content = '';
 
     // Encabezado
-    content += '📝 CHECKLIST DIARIO\n';
+    content += '📝 Checkliist\n';
     content += '═'.repeat(50) + '\n\n';
     content += `📅 Fecha: ${currentDate}\n`;
     content += `📋 Lista: ${checklistData.name || 'Lista sin nombre'}\n`;
@@ -305,7 +305,7 @@ export class ChecklistCopyService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Copiado desde Checklist Diario - ${new Date().toLocaleString(
+    content += `📄 Copiado desde Checkliist - ${new Date().toLocaleString(
       'es-ES'
     )}\n`;
 

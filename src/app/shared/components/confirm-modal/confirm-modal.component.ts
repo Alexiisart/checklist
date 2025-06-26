@@ -36,6 +36,7 @@ import { ButtonComponent } from '../../atomic/buttons';
           </p>
         </div>
         <div class="modal-footer" style="border-top-width: 1px">
+          @if (!data?.thirdButtonText) {
           <app-button
             type="secondary"
             text="{{ data?.cancelText || 'Cancelar' }}"
@@ -43,6 +44,15 @@ import { ButtonComponent } from '../../atomic/buttons';
             (clickEvent)="cancel()"
           >
           </app-button>
+          } @if (data?.thirdButtonText) {
+          <app-button
+            type="secondary"
+            text="{{ data?.thirdButtonText }}"
+            size="md"
+            (clickEvent)="thirdButton()"
+          >
+          </app-button>
+          }
           <app-button
             type="primary"
             text="{{ data?.confirmText || 'Confirmar' }}"
@@ -68,6 +78,9 @@ export class ConfirmModalComponent {
 
   /** Evento emitido cuando se cancela la acción */
   @Output() cancelled = new EventEmitter<void>();
+
+  /** Evento emitido cuando se presiona el tercer botón */
+  @Output() thirdAction = new EventEmitter<void>();
 
   /**
    * Maneja los clics en el overlay del modal.
@@ -95,6 +108,15 @@ export class ConfirmModalComponent {
    */
   cancel(): void {
     this.cancelled.emit();
+    this.close();
+  }
+
+  /**
+   * Ejecuta la tercera acción.
+   * Emite el evento de tercera acción y cierra el modal.
+   */
+  thirdButton(): void {
+    this.thirdAction.emit();
     this.close();
   }
 

@@ -25,11 +25,11 @@ import { ButtonComponent } from '../../atomic/buttons';
         </app-button>
         <div class="header-text">
           <div class="logo-container">
-            <img [src]="logoSrc" alt="CheckList Diario" class="main-logo" />
+            <img [src]="logoSrc" alt="Checkliist" class="main-logo" />
             <div class="logo-text">
-              <h1>Checklist Diario</h1>
-              <p class="subtitle">Organiza tus pendientes del día</p>
+              <h1>Checkliist</h1>
             </div>
+            <p class="subtitle">Organiza tus pendientes</p>
             <img [src]="sublogoSrc" alt="" class="sub-logo" />
           </div>
         </div>

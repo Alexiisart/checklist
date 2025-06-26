@@ -90,6 +90,15 @@
       </app-button>
       <app-button
         type="icon"
+        iconLeft="share"
+        size="sm"
+        title="Compartir lista"
+        extraClasses="share-list-btn"
+        (clickEvent)="onShareList()"
+      >
+      </app-button>
+      <app-button
+        type="icon"
         iconLeft="delete"
         size="sm"
         title="Eliminar lista"

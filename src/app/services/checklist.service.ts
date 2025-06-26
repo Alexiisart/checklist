@@ -421,4 +421,39 @@ export class ChecklistService {
 
     return { completed, total, percentage };
   }
+
+  // Carga una lista compartida y la guarda automáticamente
+  loadSharedList(sharedData: ChecklistData): void {
+    // Agregar sufijo "(Compartida)" al nombre
+    const sharedName = sharedData.name
+      ? `${sharedData.name} (Compartida)`
+      : 'Lista Compartida';
+
+    // Crear una nueva lista con ID permanente
+    const newList: ChecklistData = {
+      ...sharedData,
+      id: this.storageService.generateListId(),
+      name: sharedName,
+      modifiedDate: new Date().toISOString(),
+      createdDate: sharedData.createdDate || new Date().toISOString(),
+    };
+
+    // Verificar y corregir IDs duplicados
+    this.ensureUniqueIds(newList);
+
+    // Guardar la lista automáticamente
+    try {
+      this.storageService.saveList(newList);
+      console.log('Lista compartida guardada automáticamente:', newList.name);
+    } catch (error) {
+      console.error('Error guardando lista compartida:', error);
+    }
+
+    // Cargar la lista como actual
+    this.currentListSubject.next(newList);
+    this.setUnsavedChanges(false);
+
+    // Guardar en progreso actual para navegación
+    this.storageService.saveCurrentProgress(newList);
+  }
 }

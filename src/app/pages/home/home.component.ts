@@ -19,8 +19,8 @@ import { DuplicateListService } from '../../services/functions/home/duplicate-li
 import { RenameListService } from '../../services/functions/home/rename-list.service';
 import { DeleteListService } from '../../services/functions/home/delete-list.service';
 import { OpenNewTabService } from '../../services/functions/home/open-new-tab.service';
+import { ShareListService } from '../../services/functions/home/share-list.service';
 import { ChecklistCopyService } from '../../services/functions/checklist/checklist-copy.service';
-import { ToastService } from '../../services/toast.service';
 import { StorageService } from '../../services/storage.service';
 import { SavedList } from '../../models/task.interface';
 
@@ -87,7 +87,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     private renameListService: RenameListService,
     private deleteListService: DeleteListService,
     private openNewTabService: OpenNewTabService,
-    private copyService: ChecklistCopyService
+    private shareListService: ShareListService,
+    private copyService: ChecklistCopyService,
+    private storageService: StorageService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -303,6 +305,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Copiar lista al portapapeles desde el card
   copyListFromCard(list: SavedList): void {
     this.copyService.copyListFromCard(list);
+  }
+
+  // Compartir lista desde el card
+  shareListFromCard(list: SavedList): void {
+    // Cargar la lista completa y generar enlace compartible
+    const fullList = this.storageService.loadList(list.id);
+    if (fullList) {
+      this.shareListService.generateShareLink(fullList);
+    }
   }
 
   // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========

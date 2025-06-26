@@ -77,6 +77,11 @@ export class ListCardComponent {
   @Output() copyList = new EventEmitter<SavedList>();
 
   /**
+   * Evento emitido cuando se quiere compartir la lista
+   */
+  @Output() shareList = new EventEmitter<SavedList>();
+
+  /**
    * Maneja el clic en la tarjeta
    */
   onCardClick(): void {
@@ -123,5 +128,12 @@ export class ListCardComponent {
    */
   onCopyList(): void {
     this.copyList.emit(this.list);
+  }
+
+  /**
+   * Maneja el evento de compartir la lista
+   */
+  onShareList(): void {
+    this.shareList.emit(this.list);
   }
 }

@@ -95,6 +95,35 @@ export class ExportImportService {
   }
 
   /**
+   * Descarga el archivo JSON con nombre personalizado
+   * @param jsonData Datos en formato JSON
+   * @param customName Nombre personalizado sin extensión
+   */
+  downloadJsonFileWithCustomName(jsonData: string, customName: string): void {
+    try {
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      const cleanName = customName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
+      const dateStr = new Date().toISOString().split('T')[0];
+      const finalFilename = `${cleanName}_${dateStr}.json`;
+
+      link.href = url;
+      link.download = finalFilename;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      throw new Error('Error al descargar el archivo');
+    }
+  }
+
+  /**
    * Valida el formato del archivo de importación
    * @param jsonData Datos en formato JSON string
    * @returns Resultado de la validación

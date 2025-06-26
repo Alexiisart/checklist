@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PdfExportService } from '../../export/pdf-export.service';
 import { TxtExportService } from '../../export/txt-export.service';
+import { DownloadNamingService } from '../../export/download-naming.service';
 import { ToastService } from '../../toast.service';
 import { ChecklistData } from '../../../models/task.interface';
 
@@ -14,6 +15,7 @@ export class ChecklistExportService {
   constructor(
     private pdfExportService: PdfExportService,
     private txtExportService: TxtExportService,
+    private downloadNamingService: DownloadNamingService,
     private toastService: ToastService
   ) {}
 
@@ -38,18 +40,38 @@ export class ChecklistExportService {
   }
 
   /**
-   * Exporta la lista actual a TXT
+   * Exporta la lista actual a TXT con modal de nombrado
    */
   exportToTXT(currentList: ChecklistData): void {
+    this.downloadNamingService.exportListToTXTWithCustomName(currentList);
+  }
+
+  /**
+   * Exporta una tarea específica con sus subtareas a TXT con modal de nombrado
+   */
+  exportSingleTaskToTXT(currentList: ChecklistData, taskId: number): void {
+    this.downloadNamingService.exportTaskToTXTWithCustomName(
+      currentList,
+      taskId
+    );
+  }
+
+  /**
+   * Exporta la lista actual a TXT con nombre personalizado
+   */
+  exportToTXTWithCustomName(
+    currentList: ChecklistData,
+    customName: string
+  ): void {
     if (!currentList) {
       this.toastService.showAlert('No hay lista para exportar', 'warning');
       return;
     }
 
     try {
-      this.txtExportService.exportToTXT(currentList);
+      this.txtExportService.exportToTXTWithCustomName(currentList, customName);
       this.toastService.showAlert(
-        'Archivo TXT descargado exitosamente',
+        `Archivo TXT descargado como "${customName}"`,
         'success',
         3000
       );
@@ -63,18 +85,26 @@ export class ChecklistExportService {
   }
 
   /**
-   * Exporta una tarea específica con sus subtareas a TXT
+   * Exporta una tarea específica con nombre personalizado
    */
-  exportSingleTaskToTXT(currentList: ChecklistData, taskId: number): void {
+  exportSingleTaskToTXTWithCustomName(
+    currentList: ChecklistData,
+    taskId: number,
+    customName: string
+  ): void {
     if (!currentList) {
       this.toastService.showAlert('No hay lista para exportar', 'warning');
       return;
     }
 
     try {
-      this.txtExportService.exportSingleTaskToTXT(currentList, taskId);
+      this.txtExportService.exportSingleTaskToTXTWithCustomName(
+        currentList,
+        taskId,
+        customName
+      );
       this.toastService.showAlert(
-        'Tarea exportada a TXT exitosamente',
+        `Tarea exportada como "${customName}"`,
         'success',
         3000
       );

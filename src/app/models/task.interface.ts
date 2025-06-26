@@ -69,6 +69,8 @@ export interface ModalData {
   label: string; // Etiqueta del campo de entrada
   placeholder: string; // Texto placeholder del campo
   currentValue?: string; // Valor actual del campo (opcional)
+  isTextarea?: boolean; // Si debe mostrarse como textarea o input normal (opcional, por defecto true)
+  confirmButtonText?: string; // Texto del botón de confirmación (opcional, por defecto "Agregar")
 }
 
 /**

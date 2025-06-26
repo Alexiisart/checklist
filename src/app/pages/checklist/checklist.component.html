@@ -213,4 +213,13 @@
     (closed)="closeTeamModal()"
   >
   </app-modal>
+
+  <!-- Modal para nombrar descargas -->
+  <app-modal
+    [isVisible]="(showDownloadNamingModal$ | async) ?? false"
+    [data]="downloadNamingModalData$ | async"
+    (confirmed)="onDownloadNameConfirmed($event)"
+    (closed)="onDownloadNameCancelled()"
+  >
+  </app-modal>
 </div>

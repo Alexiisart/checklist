@@ -20,6 +20,19 @@ export class TxtExportService {
   }
 
   /**
+   * Exporta los datos de una lista de tareas a formato TXT con nombre personalizado.
+   * @param checklistData Datos de la lista de tareas a exportar
+   * @param customFileName Nombre personalizado para el archivo
+   */
+  exportToTXTWithCustomName(
+    checklistData: ChecklistData,
+    customFileName: string
+  ): void {
+    const txtContent = this.generateTxtContent(checklistData);
+    this.downloadTxtFile(txtContent, customFileName);
+  }
+
+  /**
    * Exporta solo las tareas que tienen subtareas a formato TXT.
    * Genera un archivo de texto descargable con formato estructurado solo para tareas con subtareas.
    * @param checklistData Datos de la lista de tareas a exportar
@@ -41,6 +54,21 @@ export class TxtExportService {
     const taskName = task?.name || 'Tarea';
     const fileName = `${taskName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim()}`;
     this.downloadTxtFile(txtContent, fileName);
+  }
+
+  /**
+   * Exporta una tarea específica con sus subtareas a formato TXT con nombre personalizado.
+   * @param checklistData Datos de la lista completa
+   * @param taskId ID de la tarea específica a exportar
+   * @param customFileName Nombre personalizado para el archivo
+   */
+  exportSingleTaskToTXTWithCustomName(
+    checklistData: ChecklistData,
+    taskId: number,
+    customFileName: string
+  ): void {
+    const txtContent = this.generateSingleTaskContent(checklistData, taskId);
+    this.downloadTxtFile(txtContent, customFileName);
   }
 
   /**

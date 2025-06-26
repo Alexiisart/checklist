@@ -8,12 +8,14 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { ExportImportService } from '../../../services/export-import.service';
 import { ExportImportStateService } from './export-import-state.service';
+import { DownloadNamingService } from '../../../services/export/download-naming.service';
 import { ToastService } from '../../../services/toast.service';
-import { SavedList } from '../../../models/task.interface';
+import { SavedList, ModalData } from '../../../models/task.interface';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../modal/modal.component';
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
 
@@ -26,6 +28,7 @@ import { CheckboxComponent } from '../../atomic/checkboxes';
   imports: [
     CommonModule,
     ConfirmModalComponent,
+    ModalComponent,
     ButtonComponent,
     CheckboxComponent,
   ],
@@ -42,12 +45,21 @@ export class ExportImportDropdownComponent implements OnDestroy {
   /** Subject para manejar la destrucción del componente */
   private destroy$ = new Subject<void>();
 
+  /** Observables del servicio de nombrado de descargas */
+  showNameDownloadModal$!: Observable<boolean>;
+  nameDownloadModalData$!: Observable<ModalData | null>;
+
   constructor(
     private exportImportService: ExportImportService,
     public stateService: ExportImportStateService,
+    private downloadNamingService: DownloadNamingService,
     private toastService: ToastService,
     private elementRef: ElementRef
-  ) {}
+  ) {
+    // Inicializar observables después del constructor
+    this.showNameDownloadModal$ = this.downloadNamingService.showModal$;
+    this.nameDownloadModalData$ = this.downloadNamingService.modalData$;
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -76,27 +88,8 @@ export class ExportImportDropdownComponent implements OnDestroy {
 
   /** Exporta todas las listas */
   async exportAll(): Promise<void> {
-    try {
-      if (this.savedLists.length === 0) {
-        this.toastService.showAlert('No hay listas para exportar', 'warning');
-        return;
-      }
-
-      const jsonData = this.exportImportService.exportAllLists();
-      const filename = `todas-las-listas-${
-        new Date().toISOString().split('T')[0]
-      }.json`;
-
-      this.exportImportService.downloadJsonFile(jsonData, filename);
-      this.toastService.showAlert(
-        `${this.savedLists.length} listas exportadas correctamente`,
-        'success'
-      );
-      this.stateService.closeDropdown();
-    } catch (error) {
-      console.error('Error exporting all lists:', error);
-      this.toastService.showAlert('Error al exportar las listas', 'danger');
-    }
+    this.downloadNamingService.exportAllListsWithCustomName(this.savedLists);
+    this.stateService.closeDropdown();
   }
 
   /** Activa el modo de selección de listas para exportar */
@@ -110,35 +103,11 @@ export class ExportImportDropdownComponent implements OnDestroy {
 
   /** Exporta las listas seleccionadas */
   async exportSelected(): Promise<void> {
-    try {
-      const selectedCount = this.stateService.getSelectedExportListsCount();
-      if (selectedCount === 0) {
-        this.toastService.showAlert('Selecciona al menos una lista', 'warning');
-        return;
-      }
-
-      const selectedIds = Array.from(
-        this.stateService.getStateSnapshot().selectedExportLists
-      );
-      const jsonData =
-        this.exportImportService.exportSelectedLists(selectedIds);
-      const filename = `listas-seleccionadas-${
-        new Date().toISOString().split('T')[0]
-      }.json`;
-
-      this.exportImportService.downloadJsonFile(jsonData, filename);
-      this.toastService.showAlert(
-        `${selectedIds.length} listas exportadas correctamente`,
-        'success'
-      );
-      this.stateService.closeDropdown();
-    } catch (error) {
-      console.error('Error exporting selected lists:', error);
-      this.toastService.showAlert(
-        'Error al exportar las listas seleccionadas',
-        'danger'
-      );
-    }
+    const selectedIds = Array.from(
+      this.stateService.getStateSnapshot().selectedExportLists
+    );
+    this.downloadNamingService.exportSelectedListsWithCustomName(selectedIds);
+    this.stateService.closeDropdown();
   }
 
   /** Abre el selector de archivos */
@@ -330,5 +299,15 @@ export class ExportImportDropdownComponent implements OnDestroy {
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  /** Maneja la confirmación del nombre de descarga */
+  onDownloadNameConfirmed(fileName: string): void {
+    this.downloadNamingService.onNameConfirmed(fileName);
+  }
+
+  /** Maneja la cancelación del nombrado de descarga */
+  onDownloadNameCancelled(): void {
+    this.downloadNamingService.onModalCancelled();
   }
 }

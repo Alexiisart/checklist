@@ -148,8 +148,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (!isVisible) {
           this.homeStateService.loadSavedLists();
           this.homeStateService.updateStorageIndicator();
-          // Limpiar selección después de eliminar listas
-          this.homeStateService.deselectAllLists();
+          // No limpiar selección automáticamente - solo se limpia cuando se confirma la eliminación
         }
       });
   }
@@ -267,6 +266,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   deleteConfirmedList(): void {
     this.deleteListService.confirmDelete();
+    // Limpiar selección solo después de confirmar la eliminación
+    this.homeStateService.deselectAllLists();
   }
 
   cancelDelete(): void {

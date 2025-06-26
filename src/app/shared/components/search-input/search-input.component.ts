@@ -29,7 +29,6 @@ import { InputComponent } from '../../atomic/inputs';
   styles: [
     `
       .search-container {
-        margin-bottom: var(--space-6);
         display: flex;
         justify-content: flex-start;
         width: 100%;
@@ -44,7 +43,6 @@ import { InputComponent } from '../../atomic/inputs';
       /* Responsive para barra de búsqueda */
       @media (max-width: 768px) {
         .search-container {
-          margin-bottom: var(--space-4);
           max-width: 100%;
         }
       }

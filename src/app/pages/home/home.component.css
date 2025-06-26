@@ -35,6 +35,22 @@
   box-sizing: border-box;
 }
 
+/* ===== ESTILOS PARA CONTROLES DE BÚSQUEDA Y FILTRADO ===== */
+.search-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.search-filter-controls app-search-input {
+  flex: 1;
+}
+
+.search-filter-controls app-dropdown {
+  flex-shrink: 0;
+}
+
 /* ===== ESTILOS PARA SELECCIÓN MASIVA ===== */
 .selection-actions {
   display: flex;
@@ -60,6 +76,13 @@
   .saved-lists-container {
     padding: var(--space-4);
     margin-bottom: var(--space-4);
+  }
+
+  .search-filter-controls {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: stretch;
+    margin-bottom: var(--space-3);
   }
 
   .lists-grid {

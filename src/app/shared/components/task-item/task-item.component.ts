@@ -114,6 +114,19 @@ export class TaskItemComponent {
   // Evento emitido cuando se quiere copiar esta tarea específica
   @Output() taskCopied = new EventEmitter<number>();
 
+  // Evento emitido cuando se cambia la prioridad de la tarea
+  @Output() taskPriorityToggled = new EventEmitter<{
+    taskId: number;
+    priority: boolean;
+  }>();
+
+  // Evento emitido cuando se cambia la prioridad de una subtarea
+  @Output() subtaskPriorityToggled = new EventEmitter<{
+    taskId: number;
+    subtaskId: number;
+    priority: boolean;
+  }>();
+
   // Los eventos de gestión de equipo ahora se manejan a través del servicio ChecklistTeamService
 
   // Controla la visibilidad del modal
@@ -309,6 +322,33 @@ export class TaskItemComponent {
   // Copia la tarea actual con sus subtareas al portapapeles
   copyTask(): void {
     this.taskCopied.emit(this.task.id);
+  }
+
+  // Maneja el cambio de prioridad de la tarea
+  toggleTaskPriority(): void {
+    const newPriority = !this.task.priority;
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    this.task.priority = newPriority;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.taskPriorityToggled.emit({
+      taskId: this.task.id,
+      priority: newPriority,
+    });
+  }
+
+  // Maneja el cambio de prioridad de una subtarea
+  toggleSubtaskPriority(subtask: Subtask): void {
+    const newPriority = !subtask.priority;
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    subtask.priority = newPriority;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.subtaskPriorityToggled.emit({
+      taskId: this.task.id,
+      subtaskId: subtask.id,
+      priority: newPriority,
+    });
   }
 
   // Muestra el modal para gestionar el equipo (no se usa, se maneja a nivel de lista)

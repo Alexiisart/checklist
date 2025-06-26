@@ -169,6 +169,43 @@
   border-color: var(--primary-400) !important;
 }
 
+/* Estilos para listas prioritarias */
+.list-card.priority {
+  border-left: 2px solid var(--color-success);
+  border-left-width: 2px;
+}
+
+.priority-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--color-success);
+  margin-right: 8px;
+}
+
+.priority-indicator .material-icons-outlined {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Estilos para el botón de prioridad */
+.list-card-actions .priority-btn {
+  transition: all 0.2s ease;
+}
+
+.list-card-actions .priority-btn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-success);
+}
+
+.list-card-actions .priority-btn.priority-active {
+  color: var(--color-success);
+}
+
+.list-card-actions .priority-btn.priority-active:hover {
+  background: rgba(245, 158, 11, 0.2);
+  color: #d97706;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .list-card {

@@ -122,12 +122,14 @@ export class Base64UrlService {
           id: task.id,
           name: task.name,
           completed: task.completed,
+          priority: task.priority || false,
           leader: task.leader,
           subtasks:
             task.subtasks?.map((subtask) => ({
               id: subtask.id,
               name: subtask.name,
               completed: subtask.completed,
+              priority: subtask.priority || false,
               assignedMember: subtask.assignedMember,
             })) || [],
           errors:
@@ -140,7 +142,7 @@ export class Base64UrlService {
       observations: data.observations || '',
       // Agregar metadatos de compartir
       sharedAt: new Date().toISOString(),
-      shareVersion: '1.0',
+      shareVersion: '1.1', // Incrementar versión para incluir prioridades
     };
   }
 

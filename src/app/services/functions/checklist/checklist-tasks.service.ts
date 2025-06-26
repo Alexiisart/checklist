@@ -43,6 +43,17 @@ export class ChecklistTasksService {
   }
 
   /**
+   * Cambia la prioridad de una tarea
+   */
+  toggleTaskPriority(taskId: number, priority: boolean): void {
+    this.checklistService.toggleTaskPriority(taskId, priority);
+    const message = priority
+      ? 'Tarea marcada como prioritaria'
+      : 'Tarea ya no es prioritaria';
+    this.toastService.showAlert(message, 'success');
+  }
+
+  /**
    * Inicia el proceso de eliminación de una tarea mostrando el modal de confirmación
    */
   initiateTaskDeletion(taskId: number): void {

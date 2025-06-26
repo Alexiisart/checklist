@@ -148,6 +148,20 @@ export class PdfExportService {
           text-decoration: line-through;
         }
         
+        .print-priority-indicator {
+          color: #f59e0b;
+          font-weight: bold;
+          margin-right: 8px;
+          font-size: 16px;
+        }
+        
+        .print-subtask-priority-indicator {
+          color: #f59e0b;
+          font-weight: bold;
+          margin-right: 6px;
+          font-size: 14px;
+        }
+        
         .print-subtasks {
           margin-left: 25px;
           margin-top: 8px;
@@ -328,6 +342,11 @@ export class PdfExportService {
                 ? 'print-checkbox checked'
                 : 'print-checkbox-unchecked'
             }">${task.completed ? '✓' : ''}</span>
+            ${
+              task.priority
+                ? '<span class="print-priority-indicator">⭐</span>'
+                : ''
+            }
             <span class="${taskNameClass}">${task.name}</span>
           </div>
       `;
@@ -345,6 +364,11 @@ export class PdfExportService {
                   ? 'print-subtask-checkbox checked'
                   : 'print-subtask-checkbox-unchecked'
               }">${subtask.completed ? '✓' : ''}</span>
+              ${
+                subtask.priority
+                  ? '<span class="print-subtask-priority-indicator">⭐</span>'
+                  : ''
+              }
               <span class="${subtaskTextClass}">${subtask.name}</span>
             </div>
           `;

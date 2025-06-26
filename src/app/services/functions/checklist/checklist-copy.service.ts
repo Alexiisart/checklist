@@ -128,7 +128,8 @@ export class ChecklistCopyService {
     content += '─'.repeat(30) + '\n\n';
 
     const checkmark = task.completed ? '✅' : '⬜';
-    content += `${checkmark} ${task.name}\n`;
+    const priorityIndicator = task.priority ? '⭐ ' : '';
+    content += `${checkmark} ${priorityIndicator}${task.name}\n`;
 
     // Líder de la tarea
     if (task.leader) {
@@ -157,7 +158,8 @@ export class ChecklistCopyService {
           : subtask.name;
         const subNumber = (index + 1).toString().padStart(2, '0');
 
-        content += `${subNumber}. ${subtaskCheck} ${subtaskName}`;
+        const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
+        content += `${subNumber}. ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}`;
 
         // Mostrar miembro asignado si existe
         if (subtask.assignedMember) {
@@ -254,9 +256,10 @@ export class ChecklistCopyService {
     checklistData.tasks.forEach((task, index) => {
       const taskNumber = (index + 1).toString().padStart(2, '0');
       const checkmark = task.completed ? '✅' : '⬜';
+      const priorityIndicator = task.priority ? '⭐ ' : '';
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
-      content += `${taskNumber}. ${checkmark} ${taskName}`;
+      content += `${taskNumber}. ${checkmark} ${priorityIndicator}${taskName}`;
 
       // Mostrar líder si existe
       if (task.leader) {
@@ -274,7 +277,8 @@ export class ChecklistCopyService {
             ? `${subtask.name} (completada)`
             : subtask.name;
 
-          content += `    • ${subtaskCheck} ${subtaskName}`;
+          const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
+          content += `    • ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}`;
 
           // Mostrar miembro asignado si existe
           if (subtask.assignedMember) {

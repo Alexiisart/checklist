@@ -82,6 +82,11 @@ export class ListCardComponent {
   @Output() shareList = new EventEmitter<SavedList>();
 
   /**
+   * Evento emitido cuando se quiere cambiar la prioridad de la lista
+   */
+  @Output() togglePriority = new EventEmitter<SavedList>();
+
+  /**
    * Maneja el clic en la tarjeta
    */
   onCardClick(): void {
@@ -135,5 +140,12 @@ export class ListCardComponent {
    */
   onShareList(): void {
     this.shareList.emit(this.list);
+  }
+
+  /**
+   * Maneja el evento de cambiar prioridad
+   */
+  onTogglePriority(): void {
+    this.togglePriority.emit(this.list);
   }
 }

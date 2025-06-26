@@ -109,8 +109,6 @@ export class ChecklistStateService implements OnDestroy {
     this.updateState({ hasUnsavedChanges: true });
   }
 
-  // ===== MÉTODOS PÚBLICOS PARA EL COMPONENTE =====
-
   // ===== AUTO-GUARDADO =====
 
   /** Inicia el intervalo de autoguardado */

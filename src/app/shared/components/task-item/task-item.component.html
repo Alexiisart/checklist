@@ -1,7 +1,16 @@
-<div class="task-item" [class.completed]="task.completed">
+<div
+  class="task-item"
+  [class.completed]="task.completed"
+  [class.priority]="task.priority"
+>
   <div class="task-header">
     <div class="task-title-container">
       <div class="task-title-container-left">
+        @if (task.priority) {
+        <div class="priority-indicator" title="Tarea prioritaria">
+          <span class="material-icons-outlined">star</span>
+        </div>
+        }
         <app-checkbox
           type="success"
           size="md"
@@ -64,6 +73,19 @@
         </app-button>
         <app-button
           type="icon"
+          [iconLeft]="task.priority ? 'star' : 'star_border'"
+          size="sm"
+          [title]="
+            task.priority ? 'Quitar prioridad' : 'Marcar como prioritaria'
+          "
+          [extraClasses]="
+            task.priority ? 'priority-btn priority-active' : 'priority-btn'
+          "
+          (clickEvent)="toggleTaskPriority()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
           iconLeft="edit"
           size="sm"
           title="Editar tarea"
@@ -115,10 +137,18 @@
       (cdkDropListDropped)="onSubtaskDrop($event)"
     >
       @for (subtask of task.subtasks; track trackBySubtaskId($index, subtask)) {
-      <div cdkDrag class="subtask-item">
+      <div cdkDrag class="subtask-item" [class.priority]="subtask.priority">
         <div class="subtask-drag-handle" cdkDragHandle>
           <span class="material-icons-outlined">drag_indicator</span>
         </div>
+        @if (subtask.priority) {
+        <div
+          class="priority-indicator subtask-priority"
+          title="Subtarea prioritaria"
+        >
+          <span class="material-icons-outlined">star</span>
+        </div>
+        }
         <app-checkbox
           type="default"
           size="md"
@@ -143,6 +173,19 @@
             ></app-team-dropdown>
           </div>
           }
+          <app-button
+            type="icon"
+            [iconLeft]="subtask.priority ? 'star' : 'star_border'"
+            size="xs"
+            [title]="
+              subtask.priority ? 'Quitar prioridad' : 'Marcar como prioritaria'
+            "
+            [extraClasses]="
+              subtask.priority ? 'priority-btn priority-active' : 'priority-btn'
+            "
+            (clickEvent)="toggleSubtaskPriority(subtask)"
+          >
+          </app-button>
           <app-button
             type="icon"
             iconLeft="edit"

@@ -106,6 +106,7 @@ export class StorageService {
           .slice(0, 3)
           .map((task) => task.name)
           .join(', '),
+        priority: listData.priority || false,
       };
 
       if (listIndex >= 0) {

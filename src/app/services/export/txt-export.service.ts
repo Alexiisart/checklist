@@ -107,19 +107,21 @@ export class TxtExportService {
     checklistData.tasks.forEach((task, index) => {
       const taskNumber = (index + 1).toString().padStart(2, '0');
       const checkmark = task.completed ? '✅' : '⬜';
+      const priorityIndicator = task.priority ? '⭐ ' : '';
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
-      content += `${taskNumber}. ${checkmark} ${taskName}\n`;
+      content += `${taskNumber}. ${checkmark} ${priorityIndicator}${taskName}\n`;
 
       // Subtareas
       if (task.subtasks.length > 0) {
         content += '    Subtareas:\n';
         task.subtasks.forEach((subtask) => {
           const subtaskCheck = subtask.completed ? '✅' : '⬜';
+          const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
           const subtaskName = subtask.completed
             ? `${subtask.name} (completada)`
             : subtask.name;
-          content += `    • ${subtaskCheck} ${subtaskName}\n`;
+          content += `    • ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}\n`;
         });
       }
 
@@ -349,7 +351,8 @@ export class TxtExportService {
     content += '─'.repeat(30) + '\n\n';
 
     const checkmark = task.completed ? '✅' : '⬜';
-    content += `${checkmark} ${task.name}\n`;
+    const priorityIndicator = task.priority ? '⭐ ' : '';
+    content += `${checkmark} ${priorityIndicator}${task.name}\n`;
 
     // Subtareas
     if (task.subtasks.length > 0) {
@@ -368,11 +371,12 @@ export class TxtExportService {
 
       task.subtasks.forEach((subtask, index) => {
         const subtaskCheck = subtask.completed ? '✅' : '⬜';
+        const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
         const subtaskName = subtask.completed
           ? `${subtask.name} (completada)`
           : subtask.name;
         const subNumber = (index + 1).toString().padStart(2, '0');
-        content += `${subNumber}. ${subtaskCheck} ${subtaskName}\n`;
+        content += `${subNumber}. ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}\n`;
       });
     } else {
       content += '\n📝 Esta tarea no tiene subtareas definidas.\n';

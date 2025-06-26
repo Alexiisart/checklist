@@ -99,7 +99,9 @@ export class HomeStateService {
   // Carga las listas guardadas desde el servicio de almacenamiento
   loadSavedLists(): void {
     const savedLists = this.storageService.getSavedLists();
-    this._savedLists$.next(savedLists);
+    // Ordenar las listas poniendo las prioritarias primero
+    const sortedLists = this.sortListsByPriority(savedLists);
+    this._savedLists$.next(sortedLists);
   }
 
   // Actualiza el indicador de porcentaje de almacenamiento usado
@@ -229,44 +231,44 @@ export class HomeStateService {
     this._searchState$.next({ searchTerm: '' });
   }
 
-  // Filtra las listas según el término de búsqueda, filtro de estado y las ordena por fecha
+  // Filtra las listas según el término de búsqueda, filtro de estado y mantiene ordenamiento por prioridad
   private filterLists(
     lists: SavedList[],
     searchTerm: string,
     filterOption: 'all' | 'completed' | 'incomplete'
   ): SavedList[] {
-    // Primero ordenar por fecha (más recientes primero)
-    const sortedLists = [...lists].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime(); // Orden descendente (más recientes primero)
-    });
+    // MANTENER el ordenamiento por prioridad que viene de loadSavedLists()
+    // No reordenar aquí para preservar: prioritarias primero, luego por fecha
+    let filteredByStatus = [...lists];
 
     // Filtrar por estado de completitud
-    let filteredByStatus = sortedLists;
     if (filterOption === 'completed') {
-      filteredByStatus = sortedLists.filter(
+      filteredByStatus = lists.filter(
         (list) => list.completedCount === list.tasksCount && list.tasksCount > 0
       );
     } else if (filterOption === 'incomplete') {
-      filteredByStatus = sortedLists.filter(
+      filteredByStatus = lists.filter(
         (list) => list.completedCount < list.tasksCount || list.tasksCount === 0
       );
     }
 
-    // Luego filtrar por término de búsqueda si existe
+    // Filtrar por término de búsqueda si existe
     if (!searchTerm.trim()) {
-      return filteredByStatus;
+      // Aplicar ordenamiento por prioridad al resultado filtrado
+      return this.sortListsByPriority(filteredByStatus);
     }
 
     const searchTermLower = searchTerm.toLowerCase();
-    return filteredByStatus.filter(
+    const searchFiltered = filteredByStatus.filter(
       (list) =>
         (list.name || 'Lista sin nombre')
           .toLowerCase()
           .includes(searchTermLower) ||
         (list.preview || '').toLowerCase().includes(searchTermLower)
     );
+
+    // Aplicar ordenamiento por prioridad al resultado final
+    return this.sortListsByPriority(searchFiltered);
   }
 
   // ========== MÉTODOS UTILITARIOS ==========
@@ -332,5 +334,19 @@ export class HomeStateService {
   // Obtiene el filtro actual de forma síncrona
   getCurrentFilterOption(): 'all' | 'completed' | 'incomplete' {
     return this._filterState$.value.filterOption;
+  }
+
+  // ========== MÉTODOS DE ORDENAMIENTO ==========
+
+  // Ordena las listas poniendo las prioritarias primero
+  public sortListsByPriority(lists: SavedList[]): SavedList[] {
+    return lists.sort((a, b) => {
+      // Las listas prioritarias van primero
+      if (a.priority && !b.priority) return -1;
+      if (!a.priority && b.priority) return 1;
+
+      // Si ambas tienen la misma prioridad, ordenar por fecha (más recientes primero)
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
   }
 }

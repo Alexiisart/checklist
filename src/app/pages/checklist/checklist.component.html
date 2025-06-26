@@ -1,6 +1,13 @@
 <div class="checklist-section">
   <div class="section-header">
-    <h2>Mi Checklist</h2>
+    <div class="header-title">
+      @if (currentList?.priority) {
+      <div class="priority-indicator-header" title="Lista prioritaria">
+        <span class="material-icons-outlined">star</span>
+      </div>
+      }
+      <h2>Mi Checklist</h2>
+    </div>
     <div class="header-actions">
       <!-- Grupo principal: Acciones del contenido -->
       <div class="action-group primary-actions">
@@ -51,6 +58,7 @@
           size="md"
         >
         </app-button>
+
         <app-button
           type="secondary"
           iconLeft="home"
@@ -97,6 +105,8 @@
       (taskDeleted)="onTaskDeleted($event)"
       (taskExported)="onTaskExported($event)"
       (taskCopied)="onTaskCopied($event)"
+      (taskPriorityToggled)="onTaskPriorityToggled($event)"
+      (subtaskPriorityToggled)="onSubtaskPriorityToggled($event)"
     >
     </app-task-item>
     }

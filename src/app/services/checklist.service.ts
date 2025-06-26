@@ -96,6 +96,7 @@ export class ChecklistService {
         subtasks: [],
         errors: [],
         leader: undefined,
+        priority: false,
       });
     }
 
@@ -192,6 +193,7 @@ export class ChecklistService {
           name: subtaskName,
           completed: false,
           assignedMember: null,
+          priority: false,
         };
         task.subtasks.push(newSubtask);
       });
@@ -282,6 +284,37 @@ export class ChecklistService {
     }
   }
 
+  // Cambia la prioridad de una tarea
+  toggleTaskPriority(taskId: number, priority: boolean): void {
+    const currentList = this.getCurrentList();
+    if (!currentList) return;
+
+    const task = currentList.tasks.find((t) => t.id === taskId);
+    if (task) {
+      task.priority = priority;
+      this.updateList(currentList);
+    }
+  }
+
+  // Cambia la prioridad de una subtarea
+  toggleSubtaskPriority(
+    taskId: number,
+    subtaskId: number,
+    priority: boolean
+  ): void {
+    const currentList = this.getCurrentList();
+    if (!currentList) return;
+
+    const task = currentList.tasks.find((t) => t.id === taskId);
+    if (task) {
+      const subtask = task.subtasks.find((s) => s.id === subtaskId);
+      if (subtask) {
+        subtask.priority = priority;
+        this.updateList(currentList);
+      }
+    }
+  }
+
   // Elimina una tarea
   deleteTask(taskId: number): void {
     const currentList = this.getCurrentList();
@@ -324,6 +357,7 @@ export class ChecklistService {
           subtasks: [],
           errors: [],
           leader: null,
+          priority: false,
         });
       }
     });
@@ -380,6 +414,10 @@ export class ChecklistService {
   // Actualiza la lista y marca cambios sin guardar
   private updateList(list: ChecklistData): void {
     list.modifiedDate = new Date().toISOString();
+
+    // Ordenar tareas por prioridad
+    this.sortTasksByPriority(list);
+
     this.currentListSubject.next({ ...list });
     this.setUnsavedChanges(true);
 
@@ -455,5 +493,30 @@ export class ChecklistService {
 
     // Guardar en progreso actual para navegación
     this.storageService.saveCurrentProgress(newList);
+  }
+
+  // Ordena las tareas por prioridad (prioritarias primero) y las subtareas dentro de cada tarea
+  private sortTasksByPriority(list: ChecklistData): void {
+    // Ordenar tareas principales
+    list.tasks.sort((a, b) => {
+      // Las tareas prioritarias van primero
+      if (a.priority && !b.priority) return -1;
+      if (!a.priority && b.priority) return 1;
+
+      // Si ambas tienen la misma prioridad, mantener orden original
+      return 0;
+    });
+
+    // Ordenar subtareas dentro de cada tarea
+    list.tasks.forEach((task) => {
+      task.subtasks.sort((a, b) => {
+        // Las subtareas prioritarias van primero
+        if (a.priority && !b.priority) return -1;
+        if (!a.priority && b.priority) return 1;
+
+        // Si ambas tienen la misma prioridad, mantener orden original
+        return 0;
+      });
+    });
   }
 }

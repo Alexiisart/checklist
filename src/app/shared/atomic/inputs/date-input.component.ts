@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipComponent } from '../tooltip/tooltip.component';
+import { DateManagerService } from '../../../services/date-manager.service';
 
 @Component({
   selector: 'app-date-input',
@@ -87,22 +88,27 @@ export class DateInputComponent implements OnInit, OnChanges {
   /** Controla la visibilidad del tooltip */
   showTooltip = false;
 
+  constructor(private dateManager: DateManagerService) {}
+
   /**
    * Inicializa el componente estableciendo el valor inicial
    * y la fecha mínima por defecto si no se proporciona
    */
   ngOnInit(): void {
-    this.dateValue = this.value ? this.formatDateForInput(this.value) : '';
-    if (!this.minDate) {
-      this.minDate = new Date().toISOString().split('T')[0];
-    }
+    this.dateValue = this.value
+      ? this.dateManager.formatDateForInput(this.value)
+      : '';
+    // No establecer minDate por defecto - permitir fechas pasadas
+    // Si se necesita restricción, debe pasarse explícitamente
   }
 
   /**
    * Actualiza el valor del input cuando cambian las propiedades
    */
   ngOnChanges(): void {
-    this.dateValue = this.value ? this.formatDateForInput(this.value) : '';
+    this.dateValue = this.value
+      ? this.dateManager.formatDateForInput(this.value)
+      : '';
   }
 
   /**
@@ -110,7 +116,7 @@ export class DateInputComponent implements OnInit, OnChanges {
    * @param value Nueva fecha seleccionada
    */
   onDateChange(value: string): void {
-    const isoDate = value ? new Date(value).toISOString() : null;
+    const isoDate = this.dateManager.convertInputToISO(value);
     this.valueChange.emit(isoDate);
   }
 
@@ -123,20 +129,12 @@ export class DateInputComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Formatea una fecha ISO para mostrarla en el input
-   * @param isoDate Fecha en formato ISO string
-   * @returns Fecha formateada YYYY-MM-DD
-   */
-  private formatDateForInput(isoDate: string): string {
-    return isoDate.split('T')[0];
-  }
-
-  /**
-   * Determina si la fecha está vencida
+   * Determina si la fecha está vencida usando el servicio centralizado
    * @returns true si la fecha es anterior a hoy
    */
   get isOverdue(): boolean {
     if (!this.dateValue) return false;
-    return new Date(this.dateValue) < new Date();
+    const isoDate = this.dateManager.convertInputToISO(this.dateValue);
+    return this.dateManager.isOverdue(isoDate);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ChecklistData, Task, SavedList } from '../../../models/task.interface';
 import { ToastService } from '../../toast.service';
 import { StorageService } from '../../storage.service';
+import { DateManagerService } from '../../date-manager.service';
 
 /**
  * Servicio para copiar contenido de tareas y listas al portapapeles
@@ -13,7 +14,8 @@ import { StorageService } from '../../storage.service';
 export class ChecklistCopyService {
   constructor(
     private toastService: ToastService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private dateManager: DateManagerService
   ) {}
 
   /**
@@ -135,14 +137,19 @@ export class ChecklistCopyService {
     if (task.dueDate || task.completedDate) {
       content += '📅 ';
       if (task.dueDate) {
-        const dueDate = new Date(task.dueDate).toLocaleDateString('es-ES');
-        const isOverdue =
-          !task.completed && new Date(task.dueDate) < new Date();
-        content += `Vence: ${dueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+        // Usar servicio centralizado para fechas
+        const formattedDueDate = this.dateManager.formatDateForDisplay(
+          task.dueDate
+        );
+        const isOverdue = this.dateManager.isOverdue(
+          task.dueDate,
+          task.completed
+        );
+        content += `Vence: ${formattedDueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
       }
       if (task.completedDate) {
-        const completedDate = new Date(task.completedDate).toLocaleDateString(
-          'es-ES'
+        const completedDate = this.dateManager.formatDateForDisplay(
+          task.completedDate
         );
         content += task.dueDate
           ? ` | Completada: ${completedDate}`
@@ -292,14 +299,21 @@ export class ChecklistCopyService {
       if (task.dueDate || task.completedDate) {
         content += '    📅 ';
         if (task.dueDate) {
-          const dueDate = new Date(task.dueDate).toLocaleDateString('es-ES');
-          const isOverdue =
-            !task.completed && new Date(task.dueDate) < new Date();
-          content += `Vence: ${dueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+          // Usar servicio centralizado para fechas
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
+          content += `Vence: ${formattedDueDate}${
+            isOverdue ? ' (VENCIDA)' : ''
+          }`;
         }
         if (task.completedDate) {
-          const completedDate = new Date(task.completedDate).toLocaleDateString(
-            'es-ES'
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
           );
           content += task.dueDate
             ? ` | Completada: ${completedDate}`

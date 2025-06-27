@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChecklistData } from '../../models/task.interface';
+import { DateManagerService } from '../date-manager.service';
 
 /**
  * Servicio para convertir listas a formato Base64 y generar URLs
@@ -9,6 +10,8 @@ import { ChecklistData } from '../../models/task.interface';
 })
 export class Base64UrlService {
   private readonly BASE_URL = window.location.origin;
+
+  constructor(private dateManager: DateManagerService) {}
 
   /**
    * Convierte una lista a formato Base64
@@ -142,8 +145,8 @@ export class Base64UrlService {
         })) || [],
       team: data.team || [],
       observations: data.observations || '',
-      // Agregar metadatos de compartir
-      sharedAt: new Date().toISOString(),
+      // Agregar metadatos de compartir usando servicio centralizado
+      sharedAt: this.dateManager.formatDateToISO(new Date()),
       shareVersion: '1.2', // Incrementar versión para incluir fechas de tareas
     };
   }

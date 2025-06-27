@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChecklistData } from '../../models/task.interface';
+import { DateManagerService } from '../date-manager.service';
 
 /**
  * Servicio para exportar listas de tareas a PDF mediante la funcionalidad de impresión del navegador.
@@ -8,6 +9,7 @@ import { ChecklistData } from '../../models/task.interface';
   providedIn: 'root',
 })
 export class PdfExportService {
+  constructor(private dateManager: DateManagerService) {}
   /**
    * Exporta los datos de una lista de tareas a PDF.
    * Crea una vista de impresión y activa el diálogo de impresión del navegador.
@@ -375,9 +377,13 @@ export class PdfExportService {
         let dateClass = 'print-date-info';
 
         if (task.dueDate) {
-          const dueDate = new Date(task.dueDate);
-          const formattedDueDate = dueDate.toLocaleDateString('es-ES');
-          const isOverdue = !task.completed && dueDate < new Date();
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
           if (isOverdue) {
             dateClass += ' print-date-overdue';
             dateInfo = `📅 Vence: ${formattedDueDate} (VENCIDA)`;
@@ -387,8 +393,8 @@ export class PdfExportService {
         }
 
         if (task.completedDate) {
-          const completedDate = new Date(task.completedDate).toLocaleDateString(
-            'es-ES'
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
           );
           if (dateInfo) {
             dateInfo += ` | Completada: ${completedDate}`;

@@ -97,6 +97,8 @@ export class ChecklistService {
         errors: [],
         leader: undefined,
         priority: false,
+        dueDate: null,
+        completedDate: null,
       });
     }
 
@@ -358,6 +360,8 @@ export class ChecklistService {
           errors: [],
           leader: null,
           priority: false,
+          dueDate: null,
+          completedDate: null,
         });
       }
     });

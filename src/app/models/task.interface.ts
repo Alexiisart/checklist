@@ -36,6 +36,8 @@ export interface Task {
   errors: TaskError[]; // Lista de problemas que ocurrieron al realizar la tarea
   leader?: TeamMember | null; // Líder asignado a la tarea (del equipo de la lista)
   priority?: boolean; // Indica si la tarea es prioritaria (opcional)
+  dueDate?: string | null; // Fecha de vencimiento de la tarea (formato ISO string, opcional)
+  completedDate?: string | null; // Fecha en que se completó la tarea (formato ISO string, opcional)
 }
 
 /**

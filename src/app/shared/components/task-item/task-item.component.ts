@@ -17,10 +17,12 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
 import { TeamDropdownComponent } from '../../atomic/dropdowns';
+import { DateInputComponent } from '../../atomic/inputs';
 import {
   ChecklistTeamService,
   ChecklistCopyService,
 } from '../../../services/functions/checklist';
+import { DateManagerService } from '../../../services/date-manager.service';
 
 // Componente que representa un elemento de tarea individual. Permite gestionar tareas, subtareas y errores asociados.
 @Component({
@@ -34,6 +36,7 @@ import {
     ButtonComponent,
     CheckboxComponent,
     TeamDropdownComponent,
+    DateInputComponent,
   ],
   templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.css'],
@@ -161,7 +164,8 @@ export class TaskItemComponent {
 
   constructor(
     public teamService: ChecklistTeamService,
-    public copyService: ChecklistCopyService
+    public copyService: ChecklistCopyService,
+    private dateManagerService: DateManagerService
   ) {}
 
   // Funciones de tracking personalizadas para evitar errores de IDs duplicados
@@ -191,6 +195,9 @@ export class TaskItemComponent {
   onTaskToggle(checked: boolean): void {
     // Actualizar inmediatamente el estado local para respuesta visual rápida
     this.task.completed = checked;
+
+    // Actualizar fecha de completado automáticamente
+    this.dateManagerService.setTaskCompletedDate(this.task.id, checked);
 
     // Emitir el evento para que el padre también actualice su estado
     this.taskToggled.emit({
@@ -442,5 +449,14 @@ export class TaskItemComponent {
       taskId: this.task.id,
       reorderedSubtasks: [...this.task.subtasks],
     });
+  }
+
+  // ===== GESTIÓN DE FECHAS =====
+
+  /**
+   * Maneja el cambio de fecha de vencimiento de la tarea principal
+   */
+  onTaskDueDateChanged(dueDate: string | null): void {
+    this.dateManagerService.updateTaskDueDate(this.task.id, dueDate);
   }
 }

@@ -123,6 +123,8 @@ export class Base64UrlService {
           name: task.name,
           completed: task.completed,
           priority: task.priority || false,
+          dueDate: task.dueDate || null,
+          completedDate: task.completedDate || null,
           leader: task.leader,
           subtasks:
             task.subtasks?.map((subtask) => ({
@@ -142,7 +144,7 @@ export class Base64UrlService {
       observations: data.observations || '',
       // Agregar metadatos de compartir
       sharedAt: new Date().toISOString(),
-      shareVersion: '1.1', // Incrementar versión para incluir prioridades
+      shareVersion: '1.2', // Incrementar versión para incluir fechas de tareas
     };
   }
 

@@ -250,6 +250,24 @@ export class PdfExportService {
           white-space: pre-wrap;
         }
         
+        .print-date-info {
+          margin-top: 5px;
+          margin-left: 30px;
+          font-size: 12px;
+          color: #666;
+        }
+        
+        .print-date-overdue {
+          color: #dc3545;
+          font-weight: bold;
+        }
+        
+
+        
+        .print-date-completed {
+          color: #10b981;
+        }
+        
         .print-progress {
           margin: 20px 0;
           padding: 15px;
@@ -350,6 +368,38 @@ export class PdfExportService {
             <span class="${taskNameClass}">${task.name}</span>
           </div>
       `;
+
+      // Agregar información de fechas
+      if (task.dueDate || task.completedDate) {
+        let dateInfo = '';
+        let dateClass = 'print-date-info';
+
+        if (task.dueDate) {
+          const dueDate = new Date(task.dueDate);
+          const formattedDueDate = dueDate.toLocaleDateString('es-ES');
+          const isOverdue = !task.completed && dueDate < new Date();
+          if (isOverdue) {
+            dateClass += ' print-date-overdue';
+            dateInfo = `📅 Vence: ${formattedDueDate} (VENCIDA)`;
+          } else {
+            dateInfo = `📅 Vence: ${formattedDueDate}`;
+          }
+        }
+
+        if (task.completedDate) {
+          const completedDate = new Date(task.completedDate).toLocaleDateString(
+            'es-ES'
+          );
+          if (dateInfo) {
+            dateInfo += ` | Completada: ${completedDate}`;
+          } else {
+            dateInfo = `📅 Completada: ${completedDate}`;
+          }
+          dateClass += ' print-date-completed';
+        }
+
+        printHTML += `<div class="${dateClass}">${dateInfo}</div>`;
+      }
 
       if (task.subtasks.length > 0) {
         printHTML += '<div class="print-subtasks">';

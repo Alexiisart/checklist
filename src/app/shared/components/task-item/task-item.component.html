@@ -6,11 +6,6 @@
   <div class="task-header">
     <div class="task-title-container">
       <div class="task-title-container-left">
-        @if (task.priority) {
-        <div class="priority-indicator" title="Tarea prioritaria">
-          <span class="material-icons-outlined">star</span>
-        </div>
-        }
         <app-checkbox
           type="success"
           size="md"
@@ -27,6 +22,16 @@
         }
       </div>
     </div>
+
+    <!-- Gestión de fechas de la tarea -->
+    <app-date-input
+      inputId="task-date-{{ task.id }}"
+      label="Fecha límite:"
+      [value]="task.dueDate || null"
+      [title]="task.dueDate ? 'Fecha límite' : 'No hay fecha límite'"
+      size="md"
+      (valueChange)="onTaskDueDateChanged($event)"
+    />
 
     <div class="task-buttons-container">
       <app-button
@@ -64,6 +69,17 @@
         }
         <app-button
           type="icon"
+          [iconLeft]="task.priority ? 'star' : 'star_border'"
+          size="sm"
+          [title]="
+            task.priority ? 'Quitar prioridad' : 'Marcar como prioritaria'
+          "
+          [extraClasses]="task.priority ? 'star-btn priority' : 'star-btn'"
+          (clickEvent)="toggleTaskPriority()"
+        >
+        </app-button>
+        <app-button
+          type="icon"
           iconLeft="file_copy"
           size="sm"
           title="Copiar esta tarea al portapapeles"
@@ -71,19 +87,7 @@
           (clickEvent)="copyTask()"
         >
         </app-button>
-        <app-button
-          type="icon"
-          [iconLeft]="task.priority ? 'star' : 'star_border'"
-          size="sm"
-          [title]="
-            task.priority ? 'Quitar prioridad' : 'Marcar como prioritaria'
-          "
-          [extraClasses]="
-            task.priority ? 'priority-btn priority-active' : 'priority-btn'
-          "
-          (clickEvent)="toggleTaskPriority()"
-        >
-        </app-button>
+
         <app-button
           type="icon"
           iconLeft="edit"
@@ -141,14 +145,7 @@
         <div class="subtask-drag-handle" cdkDragHandle>
           <span class="material-icons-outlined">drag_indicator</span>
         </div>
-        @if (subtask.priority) {
-        <div
-          class="priority-indicator subtask-priority"
-          title="Subtarea prioritaria"
-        >
-          <span class="material-icons-outlined">star</span>
-        </div>
-        }
+
         <app-checkbox
           type="default"
           size="md"

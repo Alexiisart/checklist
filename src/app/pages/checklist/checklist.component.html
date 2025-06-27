@@ -219,6 +219,7 @@
   <app-modal
     [isVisible]="(showTeamModal$ | async) ?? false"
     [data]="teamModalData$ | async"
+    [minLength]="true"
     (confirmed)="onTeamConfirm($event)"
     (closed)="closeTeamModal()"
   >

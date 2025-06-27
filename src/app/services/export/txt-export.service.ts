@@ -112,6 +112,26 @@ export class TxtExportService {
 
       content += `${taskNumber}. ${checkmark} ${priorityIndicator}${taskName}\n`;
 
+      // Información de fechas
+      if (task.dueDate || task.completedDate) {
+        content += '    📅 ';
+        if (task.dueDate) {
+          const dueDate = new Date(task.dueDate).toLocaleDateString('es-ES');
+          const isOverdue =
+            !task.completed && new Date(task.dueDate) < new Date();
+          content += `Vence: ${dueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+        }
+        if (task.completedDate) {
+          const completedDate = new Date(task.completedDate).toLocaleDateString(
+            'es-ES'
+          );
+          content += task.dueDate
+            ? ` | Completada: ${completedDate}`
+            : `Completada: ${completedDate}`;
+        }
+        content += '\n';
+      }
+
       // Subtareas
       if (task.subtasks.length > 0) {
         content += '    Subtareas:\n';
@@ -222,6 +242,26 @@ export class TxtExportService {
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
       content += `${taskNumber}. ${checkmark} ${taskName}\n`;
+
+      // Información de fechas
+      if (task.dueDate || task.completedDate) {
+        content += '    📅 ';
+        if (task.dueDate) {
+          const dueDate = new Date(task.dueDate).toLocaleDateString('es-ES');
+          const isOverdue =
+            !task.completed && new Date(task.dueDate) < new Date();
+          content += `Vence: ${dueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+        }
+        if (task.completedDate) {
+          const completedDate = new Date(task.completedDate).toLocaleDateString(
+            'es-ES'
+          );
+          content += task.dueDate
+            ? ` | Completada: ${completedDate}`
+            : `Completada: ${completedDate}`;
+        }
+        content += '\n';
+      }
 
       // Estadísticas de subtareas
       const completedSubtasks = task.subtasks.filter(
@@ -353,6 +393,31 @@ export class TxtExportService {
     const checkmark = task.completed ? '✅' : '⬜';
     const priorityIndicator = task.priority ? '⭐ ' : '';
     content += `${checkmark} ${priorityIndicator}${task.name}\n`;
+
+    // Información de fechas de la tarea
+    if (task.dueDate || task.completedDate) {
+      content += '📅 ';
+      if (task.dueDate) {
+        const dueDate = new Date(task.dueDate).toLocaleDateString('es-ES');
+        const isOverdue =
+          !task.completed && new Date(task.dueDate) < new Date();
+        content += `Vence: ${dueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+      }
+      if (task.completedDate) {
+        const completedDate = new Date(task.completedDate).toLocaleDateString(
+          'es-ES'
+        );
+        content += task.dueDate
+          ? ` | Completada: ${completedDate}`
+          : `Completada: ${completedDate}`;
+      }
+      content += '\n';
+    }
+
+    // Líder de la tarea
+    if (task.leader) {
+      content += `👤 Líder: ${task.leader.name}\n`;
+    }
 
     // Subtareas
     if (task.subtasks.length > 0) {

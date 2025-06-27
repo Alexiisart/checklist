@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 import { ChecklistData } from '../models/task.interface';
+import { DateManagerService } from './date-manager.service';
 
 /**
  * Servicio para manejar la exportación e importación de listas de checklists
@@ -9,7 +10,10 @@ import { ChecklistData } from '../models/task.interface';
   providedIn: 'root',
 })
 export class ExportImportService {
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private dateManager: DateManagerService
+  ) {}
 
   /**
    * Exporta todas las listas guardadas a un archivo JSON
@@ -20,7 +24,7 @@ export class ExportImportService {
       const savedLists = this.storageService.getSavedLists();
       const exportData = {
         version: '1.0',
-        exportDate: new Date().toISOString(),
+        exportDate: this.dateManager.formatDateToISO(new Date()),
         lists: [] as ChecklistData[],
       };
 
@@ -48,7 +52,7 @@ export class ExportImportService {
     try {
       const exportData = {
         version: '1.0',
-        exportDate: new Date().toISOString(),
+        exportDate: this.dateManager.formatDateToISO(new Date()),
         lists: [] as ChecklistData[],
       };
 
@@ -81,7 +85,9 @@ export class ExportImportService {
       link.href = url;
       link.download =
         filename ||
-        `checklist-backup-${new Date().toISOString().split('T')[0]}.json`;
+        `checklist-backup-${this.dateManager.formatDateForInput(
+          new Date()
+        )}.json`;
       document.body.appendChild(link);
       link.click();
 
@@ -106,7 +112,7 @@ export class ExportImportService {
       const link = document.createElement('a');
 
       const cleanName = customName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
-      const dateStr = new Date().toISOString().split('T')[0];
+      const dateStr = this.dateManager.formatDateForInput(new Date());
       const finalFilename = `${cleanName}_${dateStr}.json`;
 
       link.href = url;
@@ -390,7 +396,7 @@ export class ExportImportService {
           }
 
           // Actualizar fechas
-          listData.modifiedDate = new Date().toISOString();
+          listData.modifiedDate = this.dateManager.formatDateToISO(new Date());
           if (!listData.createdDate) {
             listData.createdDate = listData.modifiedDate;
           }
@@ -644,7 +650,7 @@ export class ExportImportService {
           }
 
           // Actualizar fechas
-          listData.modifiedDate = new Date().toISOString();
+          listData.modifiedDate = this.dateManager.formatDateToISO(new Date());
           if (!listData.createdDate) {
             listData.createdDate = listData.modifiedDate;
           }

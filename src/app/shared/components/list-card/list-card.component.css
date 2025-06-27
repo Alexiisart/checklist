@@ -169,6 +169,19 @@
   border-color: var(--primary-400) !important;
 }
 
+/* Estilos para listas prioritarias */
+.list-card.priority {
+  border-left: 3px solid var(--color-success);
+  border-left-width: 3px;
+}
+
+.priority-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--color-success);
+  margin-right: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .list-card {

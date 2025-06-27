@@ -57,4 +57,19 @@ export class ChecklistSubtasksService {
       'success'
     );
   }
+
+  /**
+   * Cambia la prioridad de una subtarea
+   */
+  toggleSubtaskPriority(
+    taskId: number,
+    subtaskId: number,
+    priority: boolean
+  ): void {
+    this.checklistService.toggleSubtaskPriority(taskId, subtaskId, priority);
+    const message = priority
+      ? 'Subtarea marcada como prioritaria'
+      : 'Subtarea ya no es prioritaria';
+    this.toastService.showAlert(message, 'success');
+  }
 }

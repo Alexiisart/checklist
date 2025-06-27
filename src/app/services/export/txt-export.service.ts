@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChecklistData } from '../../models/task.interface';
+import { DateManagerService } from '../date-manager.service';
 
 /**
  * Servicio para exportar listas de tareas a formato TXT.
@@ -9,6 +10,8 @@ import { ChecklistData } from '../../models/task.interface';
   providedIn: 'root',
 })
 export class TxtExportService {
+  constructor(private dateManager: DateManagerService) {}
+
   /**
    * Exporta los datos de una lista de tareas a formato TXT.
    * Genera un archivo de texto descargable con formato estructurado.
@@ -77,12 +80,8 @@ export class TxtExportService {
    * @returns Contenido del archivo TXT formateado
    */
   private generateTxtContent(checklistData: ChecklistData): string {
-    const currentDate = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    // Usar servicio centralizado para fecha de encabezado
+    const currentDate = this.dateManager.formatDateForDisplay(new Date());
 
     const completedTasks = checklistData.tasks.filter(
       (task) => task.completed
@@ -107,19 +106,48 @@ export class TxtExportService {
     checklistData.tasks.forEach((task, index) => {
       const taskNumber = (index + 1).toString().padStart(2, '0');
       const checkmark = task.completed ? '✅' : '⬜';
+      const priorityIndicator = task.priority ? '⭐ ' : '';
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
-      content += `${taskNumber}. ${checkmark} ${taskName}\n`;
+      content += `${taskNumber}. ${checkmark} ${priorityIndicator}${taskName}\n`;
+
+      // Información de fechas
+      if (task.dueDate || task.completedDate) {
+        content += '    📅 ';
+        if (task.dueDate) {
+          // Usar servicio centralizado para fechas
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
+          content += `Vence: ${formattedDueDate}${
+            isOverdue ? ' (VENCIDA)' : ''
+          }`;
+        }
+        if (task.completedDate) {
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
+          );
+          content += task.dueDate
+            ? ` | Completada: ${completedDate}`
+            : `Completada: ${completedDate}`;
+        }
+        content += '\n';
+      }
 
       // Subtareas
       if (task.subtasks.length > 0) {
         content += '    Subtareas:\n';
         task.subtasks.forEach((subtask) => {
           const subtaskCheck = subtask.completed ? '✅' : '⬜';
+          const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
           const subtaskName = subtask.completed
             ? `${subtask.name} (completada)`
             : subtask.name;
-          content += `    • ${subtaskCheck} ${subtaskName}\n`;
+          content += `    • ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}\n`;
         });
       }
 
@@ -143,8 +171,8 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
-      'es-ES'
+    content += `📄 Exportado desde Checkliist - ${this.dateManager.formatDateForDisplay(
+      new Date()
     )}\n`;
 
     return content;
@@ -158,12 +186,8 @@ export class TxtExportService {
   private generateTasksWithSubtasksContent(
     checklistData: ChecklistData
   ): string {
-    const currentDate = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    // Usar servicio centralizado para fecha de encabezado
+    const currentDate = this.dateManager.formatDateForDisplay(new Date());
 
     // Filtrar solo tareas que tienen subtareas
     const tasksWithSubtasks = checklistData.tasks.filter(
@@ -183,8 +207,8 @@ export class TxtExportService {
       content +=
         'Para exportar la lista completa, usa la opción "Exportar TXT".\n\n';
       content += '═'.repeat(50) + '\n';
-      content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
-        'es-ES'
+      content += `📄 Exportado desde Checkliist - ${this.dateManager.formatDateForDisplay(
+        new Date()
       )}\n`;
       return content;
     }
@@ -220,6 +244,33 @@ export class TxtExportService {
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
       content += `${taskNumber}. ${checkmark} ${taskName}\n`;
+
+      // Información de fechas
+      if (task.dueDate || task.completedDate) {
+        content += '    📅 ';
+        if (task.dueDate) {
+          // Usar servicio centralizado para fechas
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
+          content += `Vence: ${formattedDueDate}${
+            isOverdue ? ' (VENCIDA)' : ''
+          }`;
+        }
+        if (task.completedDate) {
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
+          );
+          content += task.dueDate
+            ? ` | Completada: ${completedDate}`
+            : `Completada: ${completedDate}`;
+        }
+        content += '\n';
+      }
 
       // Estadísticas de subtareas
       const completedSubtasks = task.subtasks.filter(
@@ -289,8 +340,8 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
-      'es-ES'
+    content += `📄 Exportado desde Checkliist - ${this.dateManager.formatDateForDisplay(
+      new Date()
     )}\n`;
 
     return content;
@@ -306,12 +357,8 @@ export class TxtExportService {
     checklistData: ChecklistData,
     taskId: number
   ): string {
-    const currentDate = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    // Usar servicio centralizado para fecha de encabezado
+    const currentDate = this.dateManager.formatDateForDisplay(new Date());
 
     // Buscar la tarea específica
     const task = checklistData.tasks.find((t) => t.id === taskId);
@@ -326,8 +373,8 @@ export class TxtExportService {
       content += '❌ ERROR: TAREA NO ENCONTRADA\n\n';
       content += `La tarea con ID ${taskId} no fue encontrada en la lista.\n\n`;
       content += '═'.repeat(50) + '\n';
-      content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
-        'es-ES'
+      content += `📄 Exportado desde Checkliist - ${this.dateManager.formatDateForDisplay(
+        new Date()
       )}\n`;
       return content;
     }
@@ -349,7 +396,38 @@ export class TxtExportService {
     content += '─'.repeat(30) + '\n\n';
 
     const checkmark = task.completed ? '✅' : '⬜';
-    content += `${checkmark} ${task.name}\n`;
+    const priorityIndicator = task.priority ? '⭐ ' : '';
+    content += `${checkmark} ${priorityIndicator}${task.name}\n`;
+
+    // Información de fechas de la tarea
+    if (task.dueDate || task.completedDate) {
+      content += '📅 ';
+      if (task.dueDate) {
+        // Usar servicio centralizado para fechas
+        const formattedDueDate = this.dateManager.formatDateForDisplay(
+          task.dueDate
+        );
+        const isOverdue = this.dateManager.isOverdue(
+          task.dueDate,
+          task.completed
+        );
+        content += `Vence: ${formattedDueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+      }
+      if (task.completedDate) {
+        const completedDate = this.dateManager.formatDateForDisplay(
+          task.completedDate
+        );
+        content += task.dueDate
+          ? ` | Completada: ${completedDate}`
+          : `Completada: ${completedDate}`;
+      }
+      content += '\n';
+    }
+
+    // Líder de la tarea
+    if (task.leader) {
+      content += `👤 Líder: ${task.leader.name}\n`;
+    }
 
     // Subtareas
     if (task.subtasks.length > 0) {
@@ -368,11 +446,12 @@ export class TxtExportService {
 
       task.subtasks.forEach((subtask, index) => {
         const subtaskCheck = subtask.completed ? '✅' : '⬜';
+        const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
         const subtaskName = subtask.completed
           ? `${subtask.name} (completada)`
           : subtask.name;
         const subNumber = (index + 1).toString().padStart(2, '0');
-        content += `${subNumber}. ${subtaskCheck} ${subtaskName}\n`;
+        content += `${subNumber}. ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}\n`;
       });
     } else {
       content += '\n📝 Esta tarea no tiene subtareas definidas.\n';
@@ -417,8 +496,8 @@ export class TxtExportService {
 
     // Pie de página
     content += '═'.repeat(50) + '\n';
-    content += `📄 Exportado desde Checkliist - ${new Date().toLocaleString(
-      'es-ES'
+    content += `📄 Exportado desde Checkliist - ${this.dateManager.formatDateForDisplay(
+      new Date()
     )}\n`;
 
     return content;
@@ -441,8 +520,8 @@ export class TxtExportService {
       const link = document.createElement('a');
       link.href = url;
 
-      // Generar nombre de archivo con fecha
-      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      // Generar nombre de archivo con fecha usando servicio centralizado
+      const dateStr = this.dateManager.formatDateForInput(new Date()); // YYYY-MM-DD
       const sanitizedFileName = fileName
         .replace(/[^a-zA-Z0-9\s-_]/g, '')
         .trim();

@@ -22,6 +22,7 @@ import { OpenNewTabService } from '../../services/functions/home/open-new-tab.se
 import { ShareListService } from '../../services/functions/home/share-list.service';
 import { ChecklistCopyService } from '../../services/functions/checklist/checklist-copy.service';
 import { StorageService } from '../../services/storage.service';
+import { TogglePriorityService } from '../../services/functions/home/toggle-priority.service';
 import { SavedList } from '../../models/task.interface';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
@@ -89,7 +90,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private openNewTabService: OpenNewTabService,
     private shareListService: ShareListService,
     private copyService: ChecklistCopyService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private togglePriorityService: TogglePriorityService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -314,6 +316,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (fullList) {
       this.shareListService.generateShareLink(fullList);
     }
+  }
+
+  // Cambia la prioridad de una lista
+  async toggleListPriority(list: SavedList): Promise<void> {
+    await this.togglePriorityService.toggleListPriority(list);
+    // Recargar las listas para reflejar el cambio
+    this.homeStateService.loadSavedLists();
   }
 
   // ========== MÉTODOS DE COMPATIBILIDAD CON STATE SERVICE ==========

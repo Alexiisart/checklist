@@ -100,7 +100,6 @@ input[type="text"]::placeholder {
 
 @media (max-width: 768px) {
   body {
-    padding: var(--space-2);
     font-size: 13px;
   }
 

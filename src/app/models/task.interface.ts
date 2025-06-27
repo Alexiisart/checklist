@@ -14,6 +14,7 @@ export interface Subtask {
   name: string; // Nombre o descripción de la subtarea
   completed: boolean; // Estado de completado de la subtarea
   assignedMember?: TeamMember | null; // Miembro asignado a esta subtarea (opcional)
+  priority?: boolean; // Indica si la subtarea es prioritaria (opcional)
 }
 
 /**
@@ -34,6 +35,9 @@ export interface Task {
   subtasks: Subtask[]; // Lista de subtareas asociadas
   errors: TaskError[]; // Lista de problemas que ocurrieron al realizar la tarea
   leader?: TeamMember | null; // Líder asignado a la tarea (del equipo de la lista)
+  priority?: boolean; // Indica si la tarea es prioritaria (opcional)
+  dueDate?: string | null; // Fecha de vencimiento de la tarea (formato ISO string, opcional)
+  completedDate?: string | null; // Fecha en que se completó la tarea (formato ISO string, opcional)
 }
 
 /**
@@ -47,6 +51,7 @@ export interface ChecklistData {
   createdDate: string; // Fecha de creación
   modifiedDate: string; // Fecha de última modificación
   team: TeamMember[]; // Lista de miembros del equipo
+  priority?: boolean; // Indica si la lista es prioritaria (opcional)
 }
 
 /**
@@ -59,6 +64,7 @@ export interface SavedList {
   completedCount: number; // Número de tareas completadas
   date: string; // Fecha de la lista
   preview: string; // Vista previa del contenido
+  priority?: boolean; // Indica si la lista es prioritaria (opcional)
 }
 
 /**

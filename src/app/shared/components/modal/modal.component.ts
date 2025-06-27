@@ -68,6 +68,7 @@ import { InputComponent } from '../../atomic/inputs';
 export class ModalComponent {
   @Input() isVisible = false;
   @Input() data: ModalData | null = null;
+  @Input() minLength = false;
   @Output() confirmed = new EventEmitter<string>();
   @Output() closed = new EventEmitter<void>();
 
@@ -116,7 +117,14 @@ export class ModalComponent {
    * Emite el valor del input si no está vacío y cierra el modal.
    */
   confirm(): void {
-    if (this.inputValue.trim()) {
+    // Si el modal no tiene un mínimo de caracteres,
+    // se confirma si el input no está vacío
+    if (!this.minLength) {
+      if (this.inputValue.trim()) {
+        this.confirmed.emit(this.inputValue.trim());
+        this.close();
+      }
+    } else {
       this.confirmed.emit(this.inputValue.trim());
       this.close();
     }

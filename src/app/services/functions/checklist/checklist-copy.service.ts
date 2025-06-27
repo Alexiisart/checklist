@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ChecklistData, Task, SavedList } from '../../../models/task.interface';
 import { ToastService } from '../../toast.service';
 import { StorageService } from '../../storage.service';
+import { DateManagerService } from '../../date-manager.service';
 
 /**
  * Servicio para copiar contenido de tareas y listas al portapapeles
@@ -13,7 +14,8 @@ import { StorageService } from '../../storage.service';
 export class ChecklistCopyService {
   constructor(
     private toastService: ToastService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private dateManager: DateManagerService
   ) {}
 
   /**
@@ -128,7 +130,33 @@ export class ChecklistCopyService {
     content += '─'.repeat(30) + '\n\n';
 
     const checkmark = task.completed ? '✅' : '⬜';
-    content += `${checkmark} ${task.name}\n`;
+    const priorityIndicator = task.priority ? '⭐ ' : '';
+    content += `${checkmark} ${priorityIndicator}${task.name}\n`;
+
+    // Información de fechas de la tarea
+    if (task.dueDate || task.completedDate) {
+      content += '📅 ';
+      if (task.dueDate) {
+        // Usar servicio centralizado para fechas
+        const formattedDueDate = this.dateManager.formatDateForDisplay(
+          task.dueDate
+        );
+        const isOverdue = this.dateManager.isOverdue(
+          task.dueDate,
+          task.completed
+        );
+        content += `Vence: ${formattedDueDate}${isOverdue ? ' (VENCIDA)' : ''}`;
+      }
+      if (task.completedDate) {
+        const completedDate = this.dateManager.formatDateForDisplay(
+          task.completedDate
+        );
+        content += task.dueDate
+          ? ` | Completada: ${completedDate}`
+          : `Completada: ${completedDate}`;
+      }
+      content += '\n';
+    }
 
     // Líder de la tarea
     if (task.leader) {
@@ -157,7 +185,8 @@ export class ChecklistCopyService {
           : subtask.name;
         const subNumber = (index + 1).toString().padStart(2, '0');
 
-        content += `${subNumber}. ${subtaskCheck} ${subtaskName}`;
+        const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
+        content += `${subNumber}. ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}`;
 
         // Mostrar miembro asignado si existe
         if (subtask.assignedMember) {
@@ -254,9 +283,10 @@ export class ChecklistCopyService {
     checklistData.tasks.forEach((task, index) => {
       const taskNumber = (index + 1).toString().padStart(2, '0');
       const checkmark = task.completed ? '✅' : '⬜';
+      const priorityIndicator = task.priority ? '⭐ ' : '';
       const taskName = task.completed ? `${task.name} (COMPLETADA)` : task.name;
 
-      content += `${taskNumber}. ${checkmark} ${taskName}`;
+      content += `${taskNumber}. ${checkmark} ${priorityIndicator}${taskName}`;
 
       // Mostrar líder si existe
       if (task.leader) {
@@ -264,6 +294,33 @@ export class ChecklistCopyService {
       }
 
       content += '\n';
+
+      // Información de fechas de la tarea
+      if (task.dueDate || task.completedDate) {
+        content += '    📅 ';
+        if (task.dueDate) {
+          // Usar servicio centralizado para fechas
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
+          content += `Vence: ${formattedDueDate}${
+            isOverdue ? ' (VENCIDA)' : ''
+          }`;
+        }
+        if (task.completedDate) {
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
+          );
+          content += task.dueDate
+            ? ` | Completada: ${completedDate}`
+            : `Completada: ${completedDate}`;
+        }
+        content += '\n';
+      }
 
       // Subtareas
       if (task.subtasks.length > 0) {
@@ -274,7 +331,8 @@ export class ChecklistCopyService {
             ? `${subtask.name} (completada)`
             : subtask.name;
 
-          content += `    • ${subtaskCheck} ${subtaskName}`;
+          const subtaskPriorityIndicator = subtask.priority ? '⭐ ' : '';
+          content += `    • ${subtaskCheck} ${subtaskPriorityIndicator}${subtaskName}`;
 
           // Mostrar miembro asignado si existe
           if (subtask.assignedMember) {

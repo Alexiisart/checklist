@@ -17,10 +17,12 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
 import { TeamDropdownComponent } from '../../atomic/dropdowns';
+import { DateInputComponent } from '../../atomic/inputs';
 import {
   ChecklistTeamService,
   ChecklistCopyService,
 } from '../../../services/functions/checklist';
+import { DateManagerService } from '../../../services/date-manager.service';
 
 // Componente que representa un elemento de tarea individual. Permite gestionar tareas, subtareas y errores asociados.
 @Component({
@@ -34,6 +36,7 @@ import {
     ButtonComponent,
     CheckboxComponent,
     TeamDropdownComponent,
+    DateInputComponent,
   ],
   templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.css'],
@@ -114,6 +117,19 @@ export class TaskItemComponent {
   // Evento emitido cuando se quiere copiar esta tarea específica
   @Output() taskCopied = new EventEmitter<number>();
 
+  // Evento emitido cuando se cambia la prioridad de la tarea
+  @Output() taskPriorityToggled = new EventEmitter<{
+    taskId: number;
+    priority: boolean;
+  }>();
+
+  // Evento emitido cuando se cambia la prioridad de una subtarea
+  @Output() subtaskPriorityToggled = new EventEmitter<{
+    taskId: number;
+    subtaskId: number;
+    priority: boolean;
+  }>();
+
   // Los eventos de gestión de equipo ahora se manejan a través del servicio ChecklistTeamService
 
   // Controla la visibilidad del modal
@@ -148,7 +164,8 @@ export class TaskItemComponent {
 
   constructor(
     public teamService: ChecklistTeamService,
-    public copyService: ChecklistCopyService
+    public copyService: ChecklistCopyService,
+    private dateManagerService: DateManagerService
   ) {}
 
   // Funciones de tracking personalizadas para evitar errores de IDs duplicados
@@ -178,6 +195,9 @@ export class TaskItemComponent {
   onTaskToggle(checked: boolean): void {
     // Actualizar inmediatamente el estado local para respuesta visual rápida
     this.task.completed = checked;
+
+    // Actualizar fecha de completado automáticamente
+    this.dateManagerService.setTaskCompletedDate(this.task.id, checked);
 
     // Emitir el evento para que el padre también actualice su estado
     this.taskToggled.emit({
@@ -311,6 +331,33 @@ export class TaskItemComponent {
     this.taskCopied.emit(this.task.id);
   }
 
+  // Maneja el cambio de prioridad de la tarea
+  toggleTaskPriority(): void {
+    const newPriority = !this.task.priority;
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    this.task.priority = newPriority;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.taskPriorityToggled.emit({
+      taskId: this.task.id,
+      priority: newPriority,
+    });
+  }
+
+  // Maneja el cambio de prioridad de una subtarea
+  toggleSubtaskPriority(subtask: Subtask): void {
+    const newPriority = !subtask.priority;
+    // Actualizar inmediatamente el estado local para respuesta visual rápida
+    subtask.priority = newPriority;
+
+    // Emitir el evento para que el padre también actualice su estado
+    this.subtaskPriorityToggled.emit({
+      taskId: this.task.id,
+      subtaskId: subtask.id,
+      priority: newPriority,
+    });
+  }
+
   // Muestra el modal para gestionar el equipo (no se usa, se maneja a nivel de lista)
   showManageTeam(): void {
     this.teamService.showManageTeamModal();
@@ -402,5 +449,14 @@ export class TaskItemComponent {
       taskId: this.task.id,
       reorderedSubtasks: [...this.task.subtasks],
     });
+  }
+
+  // ===== GESTIÓN DE FECHAS =====
+
+  /**
+   * Maneja el cambio de fecha de vencimiento de la tarea principal
+   */
+  onTaskDueDateChanged(dueDate: string | null): void {
+    this.dateManagerService.updateTaskDueDate(this.task.id, dueDate);
   }
 }

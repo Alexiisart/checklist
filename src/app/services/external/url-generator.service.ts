@@ -97,7 +97,8 @@ export class UrlGeneratorService {
       `No se puede generar la URL porque la lista es muy extensa. ` +
         `Excede el límite por ${exceeded.toLocaleString()} caracteres. ` +
         `Considera reducir el número de tareas o subtareas.`,
-      'danger'
+      'danger',
+      10000
     );
   }
 

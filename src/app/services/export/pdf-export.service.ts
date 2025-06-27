@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChecklistData } from '../../models/task.interface';
+import { DateManagerService } from '../date-manager.service';
 
 /**
  * Servicio para exportar listas de tareas a PDF mediante la funcionalidad de impresión del navegador.
@@ -8,6 +9,7 @@ import { ChecklistData } from '../../models/task.interface';
   providedIn: 'root',
 })
 export class PdfExportService {
+  constructor(private dateManager: DateManagerService) {}
   /**
    * Exporta los datos de una lista de tareas a PDF.
    * Crea una vista de impresión y activa el diálogo de impresión del navegador.
@@ -148,6 +150,20 @@ export class PdfExportService {
           text-decoration: line-through;
         }
         
+        .print-priority-indicator {
+          color: #f59e0b;
+          font-weight: bold;
+          margin-right: 8px;
+          font-size: 16px;
+        }
+        
+        .print-subtask-priority-indicator {
+          color: #f59e0b;
+          font-weight: bold;
+          margin-right: 6px;
+          font-size: 14px;
+        }
+        
         .print-subtasks {
           margin-left: 25px;
           margin-top: 8px;
@@ -234,6 +250,24 @@ export class PdfExportService {
         .print-observations-text {
           line-height: 1.6;
           white-space: pre-wrap;
+        }
+        
+        .print-date-info {
+          margin-top: 5px;
+          margin-left: 30px;
+          font-size: 12px;
+          color: #666;
+        }
+        
+        .print-date-overdue {
+          color: #dc3545;
+          font-weight: bold;
+        }
+        
+
+        
+        .print-date-completed {
+          color: #10b981;
         }
         
         .print-progress {
@@ -328,9 +362,50 @@ export class PdfExportService {
                 ? 'print-checkbox checked'
                 : 'print-checkbox-unchecked'
             }">${task.completed ? '✓' : ''}</span>
+            ${
+              task.priority
+                ? '<span class="print-priority-indicator">⭐</span>'
+                : ''
+            }
             <span class="${taskNameClass}">${task.name}</span>
           </div>
       `;
+
+      // Agregar información de fechas
+      if (task.dueDate || task.completedDate) {
+        let dateInfo = '';
+        let dateClass = 'print-date-info';
+
+        if (task.dueDate) {
+          const formattedDueDate = this.dateManager.formatDateForDisplay(
+            task.dueDate
+          );
+          const isOverdue = this.dateManager.isOverdue(
+            task.dueDate,
+            task.completed
+          );
+          if (isOverdue) {
+            dateClass += ' print-date-overdue';
+            dateInfo = `📅 Vence: ${formattedDueDate} (VENCIDA)`;
+          } else {
+            dateInfo = `📅 Vence: ${formattedDueDate}`;
+          }
+        }
+
+        if (task.completedDate) {
+          const completedDate = this.dateManager.formatDateForDisplay(
+            task.completedDate
+          );
+          if (dateInfo) {
+            dateInfo += ` | Completada: ${completedDate}`;
+          } else {
+            dateInfo = `📅 Completada: ${completedDate}`;
+          }
+          dateClass += ' print-date-completed';
+        }
+
+        printHTML += `<div class="${dateClass}">${dateInfo}</div>`;
+      }
 
       if (task.subtasks.length > 0) {
         printHTML += '<div class="print-subtasks">';
@@ -345,6 +420,11 @@ export class PdfExportService {
                   ? 'print-subtask-checkbox checked'
                   : 'print-subtask-checkbox-unchecked'
               }">${subtask.completed ? '✓' : ''}</span>
+              ${
+                subtask.priority
+                  ? '<span class="print-subtask-priority-indicator">⭐</span>'
+                  : ''
+              }
               <span class="${subtaskTextClass}">${subtask.name}</span>
             </div>
           `;

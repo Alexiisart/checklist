@@ -1,20 +1,27 @@
 # 📖 Documentación Técnica
 
-> Arquitectura y APIs de Checkliist v2.1
+> Arquitectura y APIs de Checkliist v3.0
 
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![Angular CDK](https://img.shields.io/badge/Angular_CDK-19.2+-green.svg)](https://material.angular.io/cdk)
 
-## 🏗️ Arquitectura v2.1
+## 🏗️ Arquitectura v3.0
 
-### Patrón Clean Architecture con CDK Integration
+### Patrón Clean Architecture con CDK Integration + Date Management System
 
 ```
 ┌─────────────────────────────────────────────────┐
 │                 COMPONENTS                      │
-│  ├── pages/ (UI + Navigation + CDK)             │
+│  ├── pages/ (UI + Navigation + CDK + Dates)     │
 │  └── shared/ (Reusable Components + CDK)        │
+├─────────────────────────────────────────────────┤
+│            DATE MANAGEMENT SYSTEM v3.0          │ ⭐ NEW
+│  ├── DateManagerService (Centralized)          │
+│  ├── DateInputComponent (Visual)               │
+│  ├── Due Date Logic (Business)                 │
+│  ├── Local Timezone (Consistency)              │
+│  └── Format Standardization (Display)          │
 ├─────────────────────────────────────────────────┤
 │              CDK INTEGRATION                    │
 │  ├── DragDropModule (Reordenamiento)           │
@@ -27,156 +34,248 @@
 │  ├── alert-modal.component (Modales)           │
 │  └── visual-feedback.service (Estados)         │
 ├─────────────────────────────────────────────────┤
-│            FUNCTION SERVICES v2.1               │
+│            FUNCTION SERVICES v3.0               │
 │  ├── duplicate-list.service                    │
 │  ├── rename-list.service                       │
 │  ├── delete-list.service                       │
-│  ├── checklist-reorder.service (NEW)           │
+│  ├── checklist-reorder.service                 │
 │  ├── open-new-tab.service                      │
-│  └── checklist-export.service (ENHANCED)       │
+│  ├── checklist-export.service (Date Enhanced)  │
+│  └── date-manager.service (NEW)                │ ⭐ NEW
 ├─────────────────────────────────────────────────┤
 │               CORE SERVICES                     │
-│  ├── checklist.service (Enhanced)              │
+│  ├── checklist.service (Date Enhanced)         │
 │  ├── storage.service (Monitoring)              │
 │  ├── uuid.service                              │
-│  ├── theme.service (NEW)                       │
-│  ├── toast.service (NEW)                       │
-│  └── export-import.service (Enhanced)          │
+│  ├── theme.service                             │
+│  ├── toast.service                             │
+│  └── export-import.service (Date Enhanced)     │
 ├─────────────────────────────────────────────────┤
 │               GUARDS & PROTECTION               │
-│  ├── unsaved-changes.guard (NEW)               │
-│  └── navigation-protection.service (NEW)       │
+│  ├── unsaved-changes.guard                     │
+│  └── navigation-protection.service             │
 ├─────────────────────────────────────────────────┤
 │              STATE SERVICES                     │
 │  ├── home-state.service (UI + Indicators)      │
-│  ├── checklist-state.service (Enhanced)        │
+│  ├── checklist-state.service (Date Enhanced)   │
 │  └── new-list-state.service                    │
 ├─────────────────────────────────────────────────┤
 │                  MODELS                         │
-│  └── task.interface (Enhanced)                 │
+│  └── task.interface (Date Enhanced)            │
 ├─────────────────────────────────────────────────┤
-│               STORAGE v2.1                      │
-│  ├── localStorage (Monitored)                  │
-│  ├── storage-indicator.component (NEW)         │
+│               STORAGE v3.0                      │
+│  ├── localStorage (Monitored + Dates)          │
+│  ├── storage-indicator.component               │
 │  └── storage-progress-indicator.component      │
 └─────────────────────────────────────────────────┘
 ```
 
-## 📁 Estructura del Proyecto v2.1
+## 📅 Sistema de Fechas v3.0 ⭐ NEW
+
+### Funcionalidades Principales
+
+- **📅 Fechas de vencimiento**: Para tareas principales (no subtareas)
+- **✅ Fechas de completado**: Automáticas al marcar como completadas
+- **🔄 Gestión centralizada**: Un solo servicio para toda la lógica de fechas
+- **🌍 Zona horaria local**: Consistencia garantizada en todos los formatos
+- **🎨 Estados visuales**: Indicadores visuales para fechas vencidas
+- **📤 Exportación completa**: Fechas incluidas en PDF, TXT, URLs y copiar
+
+### DateManagerService - Servicio Centralizado
+
+```typescript
+@Injectable({ providedIn: "root" })
+export class DateManagerService {
+  // Conversión y normalización
+  createLocalDate(dateInput: string | Date): Date;
+  getTodayLocal(): Date;
+
+  // Formateo consistente
+  formatDateForInput(date: Date | string): string; // YYYY-MM-DD
+  formatDateForDisplay(date: Date | string): string; // DD/MM/YYYY
+  formatDateToISO(date: Date): string; // ISO local
+
+  // Validación de negocio
+  isOverdue(dueDate: string, isCompleted: boolean): boolean;
+  isSameDay(date1: Date | string, date2: Date | string): boolean;
+
+  // Gestión de tareas
+  updateTaskDueDate(listId: string, taskId: number, dueDate: string | null): void;
+  setTaskCompletedDate(listId: string, taskId: number): void;
+
+  // Estadísticas
+  getDateStats(tasks: Task[]): {
+    totalWithDueDates: number;
+    overdue: number;
+    dueToday: number;
+    completed: number;
+  };
+}
+```
+
+### DateInputComponent - Componente Visual
+
+```typescript
+@Component({
+  selector: "app-date-input",
+  template: `
+    <div class="date-input-container" [class.overdue]="isOverdue">
+      <input type="date" [value]="value" (change)="onDateChange($event)" [class]="'date-input-' + size" />
+      <button *ngIf="value" (click)="clearDate()" class="clear-btn" appTooltip="Eliminar fecha" tooltipPosition="top">×</button>
+    </div>
+  `,
+})
+export class DateInputComponent {
+  @Input() value: string | null = null;
+  @Input() size: "sm" | "md" | "lg" = "md";
+  @Output() valueChange = new EventEmitter<string | null>();
+
+  // Estados calculados automáticamente
+  get isOverdue(): boolean {
+    return this.dateManager.isOverdue(this.value || "", false);
+  }
+}
+```
+
+## 📁 Estructura del Proyecto v3.0
 
 ```
 src/app/
 ├── pages/                    # Páginas principales
 │   ├── home/                # Lista de checklists + indicadores
 │   ├── new-list/            # Creación con protección
-│   └── checklist/           # Vista + CDK drag-drop
+│   └── checklist/           # Vista + CDK drag-drop + Dates
 ├── services/                # Lógica de negocio
-│   ├── functions/           # Servicios modulares v2.1
+│   ├── date-manager.service.ts (NEW) ⭐        # Sistema de fechas centralizado
+│   ├── functions/           # Servicios modulares v3.0
 │   │   ├── checklist/       # Funciones específicas de checklist
-│   │   │   ├── checklist-reorder.service.ts (NEW)
-│   │   │   ├── checklist-export.service.ts (ENHANCED)
+│   │   │   ├── checklist-reorder.service.ts
+│   │   │   ├── checklist-export.service.ts (Date Enhanced)
 │   │   │   ├── checklist-tasks.service.ts
 │   │   │   ├── checklist-subtasks.service.ts
 │   │   │   ├── checklist-errors.service.ts
 │   │   │   ├── checklist-modals.service.ts
 │   │   │   ├── checklist-team.service.ts
-│   │   │   ├── checklist-copy.service.ts
-│   │   │   └── checklist-navigation.service.ts (ENHANCED)
+│   │   │   ├── checklist-copy.service.ts (Date Enhanced)
+│   │   │   └── checklist-navigation.service.ts
 │   │   └── home/            # Funciones de gestión de listas
 │   │       ├── duplicate-list.service.ts
 │   │       ├── rename-list.service.ts
 │   │       ├── delete-list.service.ts
 │   │       └── open-new-tab.service.ts
-│   ├── export/              # Servicios de exportación v2.1
-│   │   ├── pdf-export.service.ts (ENHANCED)
-│   │   └── txt-export.service.ts (NEW)
+│   ├── export/              # Servicios de exportación v3.0
+│   │   ├── pdf-export.service.ts (Date Enhanced)
+│   │   └── txt-export.service.ts (Date Enhanced)
+│   ├── external/            # Servicios externos v3.0
+│   │   ├── base64-url.service.ts (Date Enhanced)
+│   │   ├── url-generator.service.ts
+│   │   ├── tiny-url.service.ts
+│   │   └── shared-url-loader.service.ts
 │   ├── uuid.service.ts
-│   ├── checklist.service.ts (ENHANCED)
+│   ├── checklist.service.ts (Date Enhanced)
 │   ├── storage.service.ts (MONITORING)
-│   ├── theme.service.ts (NEW)
-│   ├── toast.service.ts (NEW)
-│   └── export-import.service.ts (ENHANCED)
-├── guards/                  # Protección de navegación (NEW)
+│   ├── theme.service.ts
+│   ├── toast.service.ts
+│   └── export-import.service.ts (Date Enhanced)
+├── guards/                  # Protección de navegación
 │   └── unsaved-changes.guard.ts
-├── shared/                  # Componentes reutilizables v2.1
+├── shared/                  # Componentes reutilizables v3.0
 │   ├── atomic/             # Componentes atómicos
 │   │   ├── buttons/        # Botones con estados avanzados
 │   │   ├── checkboxes/     # Checkboxes con CDK
-│   │   ├── inputs/         # Inputs con validación
-│   │   ├── dropdown/         # dropdown con validación
+│   │   ├── inputs/         # Inputs con validación + Dates
+│   │   │   ├── input.component.ts
+│   │   │   └── date-input.component.ts (NEW) ⭐    # Input de fechas
+│   │   ├── dropdown/       # dropdown con validación
 │   │   └── tooltip/        # Tooltips contextuales
-│   ├── components/         # Componentes complejos v2.1
+│   ├── components/         # Componentes complejos v3.0
 │   │   ├── alert-modal/    # Modales de alerta
 │   │   ├── confirm-modal/  # Modales de confirmación
-│   │   ├── reorder-modal/  # Modal de reordenamiento (NEW)
-│   │   ├── toast/          # Toast notifications (NEW)
-│   │   ├── storage-indicator/ (NEW)
-│   │   ├── storage-progress-indicator/ (NEW)
-│   │   ├── export-import-dropdown/ (ENHANCED)
-│   │   ├── header/         # Header con tema (NEW)
-│   │   ├── footer/         # Footer adaptativo (NEW)
-│   │   └── task-item/      # Item con drag & drop (ENHANCED)
-│   └── styles/             # Estilos globales v2.1
-│       ├── animations.css  # Animaciones CDK (NEW)
-│       ├── root.css        # Variables de tema (ENHANCED)
+│   │   ├── reorder-modal/  # Modal de reordenamiento
+│   │   ├── toast/          # Toast notifications
+│   │   ├── storage-indicator/
+│   │   ├── storage-progress-indicator/
+│   │   ├── export-import-dropdown/ (Date Enhanced)
+│   │   ├── header/         # Header con tema
+│   │   ├── footer/         # Footer adaptativo
+│   │   └── task-item/      # Item con drag & drop + Dates
+│   └── styles/             # Estilos globales v3.0
+│       ├── animations.css  # Animaciones CDK
+│       ├── root.css        # Variables de tema (Date Enhanced)
 │       └── scrollbar.css   # Scrollbars personalizados
-├── models/                 # Interfaces TypeScript v2.1
-│   └── task.interface.ts   # Interfaces completas (ENHANCED)
+├── models/                 # Interfaces TypeScript v3.0
+│   └── task.interface.ts   # Interfaces con fechas (Date Enhanced)
 └── main.ts
 ```
 
-### Principios Arquitecturales v2.1
+### Principios Arquitecturales v3.0
 
+- **Date Management**: Sistema centralizado para todas las operaciones de fechas
+- **Local Timezone**: Garantía de consistencia en zona horaria local
+- **Visual Feedback**: Estados visuales para fechas (vencida, completada, etc.)
 - **CDK Integration**: Drag & drop nativo con Angular CDK
 - **Servicios Especializados**: Cada función con su servicio independiente
 - **Notificaciones Centralizadas**: Sistema unificado de feedback
 - **Protección de Datos**: Guards automáticos contra pérdida
 - **Temas Dinámicos**: Sistema completo de design tokens
 - **Monitoreo de Recursos**: Gestión inteligente de almacenamiento
-- **Clean Architecture**: Dependencias hacia adentro con CDK
+- **Clean Architecture**: Dependencias hacia adentro con CDK + Dates
 - **Reactive Programming**: RxJS + BehaviorSubjects avanzados
 - **TypeScript Estricto**: Tipado completo con interfaces robustas
 
-## 🔧 Servicios de Funciones v2.1
+## 🔧 Servicios de Funciones v3.0
 
-Los servicios siguen un patrón mejorado para operaciones específicas:
+Los servicios siguen un patrón mejorado para operaciones específicas con soporte de fechas:
 
 ### Patrón Avanzado de Servicios de Funciones
 
 ```typescript
 @Injectable({ providedIn: "root" })
 export class [Function]Service {
+  // Servicios centralizados
+  constructor(
+    private toastService: ToastService,
+    private dateManager: DateManagerService // ⭐ NEW
+  ) {}
+
   // Observables para UI
   showModal$: Observable<boolean>;
   isProcessing$: Observable<boolean>;
 
-  // Notificaciones integradas
-  constructor(private toastService: ToastService) {}
-
-  // API principal mejorada
+  // API principal mejorada con fechas
   request[Action](item: any): void;
   confirm[Action](): void;
   cancel[Action](): void;
 
-  // Lógica interna con feedback
+  // Lógica interna con feedback y fechas
   private perform[Action](): void {
-    // Operación + Notificación automática
+    // Operación + Gestión de fechas + Notificación automática
+    this.dateManager.setTaskCompletedDate(listId, taskId);
     this.toastService.showAlert(message, type, duration);
   }
 }
 ```
 
-### Servicios Implementados v2.1
+### Servicios Implementados v3.0
 
-#### **ChecklistReorderService** ⭐ NEW
+#### **DateManagerService** ⭐ NEW
 
-- **Modal de reordenamiento** con vista previa completa
+- **Gestión centralizada** de todas las operaciones de fechas
+- **Zona horaria local** garantizada en todos los formatos
+- **Formateo consistente** para input, display, ISO y comparaciones
+- **Validación de negocio** para fechas vencidas y completadas
+- **Estadísticas de fechas** para análisis y reportes
+- **Integración completa** con todos los servicios de exportación
+
+#### **ChecklistReorderService** (Date Enhanced)
+
+- **Modal de reordenamiento** con vista previa completa + fechas
 - **CDK Drag & Drop** nativo con animaciones suaves
 - **Reordenamiento de subtareas** inline con handles visuales
 - **Persistencia automática** con notificaciones de confirmación
 - **Estados visuales** durante el drag con feedback inmediato
 
-#### **ToastService** ⭐ NEW
+#### **ToastService**
 
 - **4 tipos de notificación**: Success, Warning, Danger, Info
 - **Animaciones CSS** slide-in/slide-out personalizadas
@@ -184,7 +283,7 @@ export class [Function]Service {
 - **Posicionamiento inteligente** sin interferir con la UI
 - **Queue management** para múltiples notificaciones
 
-#### **ThemeService** ⭐ NEW
+#### **ThemeService**
 
 - **Detección automática** de preferencias del sistema
 - **Persistencia local** de elección manual del usuario
@@ -192,15 +291,15 @@ export class [Function]Service {
 - **Variables CSS** completas con design tokens
 - **Assets dinámicos** (logos, iconos) según tema activo
 
-#### **DuplicateListService** (ENHANCED)
+#### **DuplicateListService** (Date Enhanced)
 
 - Modal con **vista previa** del nombre generado automáticamente
 - Numeración inteligente con **regex avanzado**
 - **Regeneración completa** de IDs únicos para tareas y subtareas
-- **Reset automático** de estados completados
+- **Reset automático** de estados completados **y fechas**
 - **Notificaciones contextuales** con detalles de la operación
 
-#### **RenameListService** (ENHANCED)
+#### **RenameListService** (Date Enhanced)
 
 - **Validación en tiempo real** con colores de estado
 - **Mensajes específicos** según tipo de error encontrado
@@ -208,7 +307,7 @@ export class [Function]Service {
 - **Feedback visual inmediato** durante la edición
 - **Integración toast** para confirmaciones
 
-#### **DeleteListService** (ENHANCED)
+#### **DeleteListService** (Date Enhanced)
 
 - **Eliminación masiva** con modo selección dedicado
 - **Contadores dinámicos** en botones según cantidad
@@ -216,13 +315,16 @@ export class [Function]Service {
 - **Operaciones atómicas** con rollback automático
 - **Notificaciones detalladas** de resultados
 
-#### **ChecklistExportService** (ENHANCED)
+#### **ChecklistExportService** (Date Enhanced) ⭐ ENHANCED
 
-- **Exportación PDF** con estilos profesionales de impresión
-- **Exportación TXT** en múltiples formatos especializados
+- **Exportación PDF** con estilos profesionales de impresión **+ fechas**
+- **Exportación TXT** en múltiples formatos especializados **+ fechas**
+- **Exportación Copy** con formato completo **+ fechas**
+- **URLs compartidas** con fechas incluidas en metadatos
 - **Vista previa** antes de exportar
 - **Metadatos completos** con fecha y estadísticas
 - **Manejo de errores** con notificaciones específicas
+- **Formateo consistente** usando DateManagerService
 
 ## 🎯 Sistema de Notificaciones v2.1
 
@@ -597,9 +699,9 @@ export class Component implements OnInit, OnDestroy {
 }
 ```
 
-## 📊 Modelos de Datos v2.1
+## 📊 Modelos de Datos v3.0
 
-### Interfaces Principales Mejoradas
+### Interfaces Principales con Sistema de Fechas
 
 ```typescript
 interface ChecklistData {
@@ -607,6 +709,7 @@ interface ChecklistData {
   name?: string;
   tasks: Task[];
   observations: string;
+  team?: TeamMember[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -615,6 +718,10 @@ interface Task {
   id: number; // UUID-based único
   name: string;
   completed: boolean;
+  priority?: boolean;
+  dueDate?: string | null; // ⭐ NEW - Fecha de vencimiento (YYYY-MM-DD)
+  completedDate?: string | null; // ⭐ NEW - Fecha de completado (ISO)
+  leader?: TeamMember;
   subtasks: Subtask[];
   errors: TaskError[];
 }
@@ -623,6 +730,9 @@ interface Subtask {
   id: number; // UUID-based único
   name: string;
   completed: boolean;
+  priority?: boolean;
+  assignedMember?: string;
+  // Nota: Las subtareas NO tienen fechas por diseño
 }
 
 interface TaskError {
@@ -630,7 +740,28 @@ interface TaskError {
   name: string; // Cambio: description → name para consistencia
 }
 
-// Nuevas interfaces v2.1
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
+// Interfaces del Sistema de Fechas v3.0 ⭐ NEW
+interface DateStats {
+  totalWithDueDates: number;
+  overdue: number;
+  dueToday: number;
+  completed: number;
+}
+
+interface DateValidation {
+  isValid: boolean;
+  isOverdue: boolean;
+  isToday: boolean;
+  formattedDisplay: string;
+  formattedInput: string;
+}
+
+// Interfaces de Servicios v3.0
 interface StorageInfo {
   percentage: number;
   isNearLimit: boolean;

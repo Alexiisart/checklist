@@ -200,6 +200,26 @@ export class ChecklistComponent implements OnInit, OnDestroy {
     this.tasksService.initiateTaskDeletion(taskId);
   }
 
+  /** Maneja el cambio de prioridad de una tarea */
+  onTaskPriorityToggled(event: { taskId: number; priority: boolean }): void {
+    this.tasksService.toggleTaskPriority(event.taskId, event.priority);
+    this.stateService.markAsChanged();
+  }
+
+  /** Maneja el cambio de prioridad de una subtarea */
+  onSubtaskPriorityToggled(event: {
+    taskId: number;
+    subtaskId: number;
+    priority: boolean;
+  }): void {
+    this.subtasksService.toggleSubtaskPriority(
+      event.taskId,
+      event.subtaskId,
+      event.priority
+    );
+    this.stateService.markAsChanged();
+  }
+
   /** Confirma la eliminación de la tarea */
   confirmTaskDeletion(): void {
     this.tasksService.confirmTaskDeletion();

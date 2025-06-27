@@ -3,6 +3,7 @@
   class="list-card"
   [class.selection-mode]="isSelectionMode"
   [class.selected]="isSelected"
+  [class.priority]="list.priority"
   (click)="onCardClick()"
 >
   <!-- Checkbox de selección -->
@@ -68,6 +69,17 @@
         (clickEvent)="onOpenInNewTab()"
       >
       </app-button>
+      <app-button
+        type="icon"
+        [iconLeft]="list.priority ? 'star' : 'star_border'"
+        size="sm"
+        [title]="list.priority ? 'Quitar prioridad' : 'Marcar como prioritaria'"
+        [extraClasses]="
+          list.priority ? 'priority-btn priority-active' : 'priority-btn'
+        "
+        (clickEvent)="onTogglePriority()"
+      >
+      </app-button>
     </div>
     <div class="actions-right">
       <app-button
@@ -97,6 +109,7 @@
         (clickEvent)="onShareList()"
       >
       </app-button>
+
       <app-button
         type="icon"
         iconLeft="delete"

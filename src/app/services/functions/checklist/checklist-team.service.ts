@@ -157,9 +157,6 @@ export class ChecklistTeamService {
               (m) => m.id === task.leader!.id
             );
             if (leaderExistedBefore) {
-              console.log(
-                `🧹 Limpiando líder eliminado: ${leaderExistedBefore.name}`
-              );
               task.leader = null;
             }
           }
@@ -177,9 +174,6 @@ export class ChecklistTeamService {
                 (m) => m.id === subtask.assignedMember!.id
               );
               if (memberExistedBefore) {
-                console.log(
-                  `🧹 Limpiando asignación eliminada: ${memberExistedBefore.name}`
-                );
                 subtask.assignedMember = null;
               }
             }

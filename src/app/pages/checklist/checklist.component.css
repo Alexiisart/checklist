@@ -28,6 +28,27 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.025);
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.priority-indicator-header {
+  display: flex;
+  align-items: center;
+  color: var(--color-success);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.priority-indicator-header .material-icons-outlined {
+  font-size: 20px;
+  font-weight: 600;
+}
+
 .section-header h2 {
   margin: 0;
   font-size: 1.75rem;

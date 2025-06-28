@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { TeamMember } from '../../../models/task.interface';
 import { ButtonComponent } from '../buttons';
 import { TooltipComponent } from '../tooltip';
+import { UuidService } from '../../../services/uuid.service';
 
 /**
  * Componente dropdown para gestionar asignaciones de equipo.
@@ -39,7 +40,8 @@ export type TeamDropdownSize = 'sm' | 'md' | 'lg';
               (clickEvent)="onMemberSelect(null)"
             >
             </app-button>
-            @for (member of teamMembers; track member.id) {
+            @for (member of teamMembers; track trackByUniqueId($index, member))
+            {
             <app-button
               size="sm"
               [type]="selectedMember?.id === member.id ? 'secondary' : 'ghost'"
@@ -74,7 +76,7 @@ export type TeamDropdownSize = 'sm' | 'md' | 'lg';
           [disabled]="!teamMembers || teamMembers.length === 0"
         >
           <option value="">Sin asignar</option>
-          @for (member of teamMembers; track member.id) {
+          @for (member of teamMembers; track trackByUniqueId($index, member)) {
           <option [value]="member.id.toString()">{{ member.name }}</option>
           }
         </select>
@@ -127,7 +129,12 @@ export class TeamDropdownComponent implements OnChanges {
   /** Estado del tooltip para el dropdown de asignación */
   showTooltip: boolean = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  private memberTrackingIds = new Map<string, string>();
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private uuidService: UuidService
+  ) {}
 
   /**
    * Maneja la selección de un miembro en el dropdown tipo 'leader'
@@ -195,6 +202,24 @@ export class TeamDropdownComponent implements OnChanges {
     if (this.type === 'member') {
       this.showTooltip = true;
     }
+  }
+
+  trackByUniqueId(index: number, member: TeamMember): string {
+    // Crear clave única combinando índice, ID y nombre del miembro
+    const memberKey = `${index}_${member.id}_${member.name}_${JSON.stringify(
+      member
+    )}`;
+
+    // Si ya tenemos un tracking ID para esta combinación exacta, usarlo
+    if (this.memberTrackingIds.has(memberKey)) {
+      return this.memberTrackingIds.get(memberKey)!;
+    }
+
+    // Generar nuevo tracking ID único
+    const trackingId = this.uuidService.generateUniqueId();
+    this.memberTrackingIds.set(memberKey, trackingId);
+
+    return trackingId;
   }
 
   /** Oculta el tooltip */

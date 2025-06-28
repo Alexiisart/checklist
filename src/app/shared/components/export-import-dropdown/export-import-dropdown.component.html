@@ -106,7 +106,7 @@
       </div>
 
       <div class="selection-list">
-        @for (list of savedLists; track list.id) {
+        @for (list of savedLists; track trackByUniqueId($index, list)) {
         <label class="selection-item">
           <app-checkbox
             type="primary"
@@ -247,7 +247,8 @@ stateService.getImportPreview()) {
         </div>
 
         <div class="lists-grid">
-          @for (item of stateService.getListsWithSizes(); track item.list.id) {
+          @for (item of stateService.getListsWithSizes(); track
+          trackByUniqueId($index, item.list)) {
           <label
             class="list-item"
             [class.disabled]="

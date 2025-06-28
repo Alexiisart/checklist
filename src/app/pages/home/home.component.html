@@ -93,7 +93,8 @@
 
     <!-- Grid de listas -->
     <div class="lists-grid">
-      @for (list of filteredLists$ | async; track list.id) {
+      @for (list of filteredLists$ | async; track trackByUniqueId($index, list))
+      {
       <app-list-card
         [list]="list"
         [isSelectionMode]="(selectionState$ | async)?.isSelectionMode ?? false"
@@ -168,6 +169,16 @@
   (cancelled)="cancelDelete()"
 >
 </app-confirm-modal>
+
+<!-- Modal de comparación de listas compartidas -->
+<app-list-comparison-modal
+  [show]="(comparisonModal$ | async)?.show ?? false"
+  [data]="comparisonModal$ | async"
+  (updateExisting)="onUpdateExistingList()"
+  (createCopy)="onCreateCopyOfSharedList()"
+  (cancel)="onCancelComparison()"
+>
+</app-list-comparison-modal>
 
 <!-- Alertas -->
 <app-alert-modal

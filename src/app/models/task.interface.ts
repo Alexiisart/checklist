@@ -52,6 +52,8 @@ export interface ChecklistData {
   modifiedDate: string; // Fecha de última modificación
   team: TeamMember[]; // Lista de miembros del equipo
   priority?: boolean; // Indica si la lista es prioritaria (opcional)
+  sharedAt?: string; // Fecha cuando se compartió la lista (opcional)
+  shareVersion?: string; // Versión del formato de compartir (opcional)
 }
 
 /**

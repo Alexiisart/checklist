@@ -5,55 +5,35 @@
 >
   <div class="task-header">
     <div class="task-title-container">
-      <div class="task-title-container-left">
-        <app-checkbox
-          type="success"
+      <!-- task title -->
+      <div class="task-general-container">
+        <div class="task-title-container-left">
+          <app-checkbox
+            type="success"
+            size="md"
+            [checked]="task.completed"
+            [inputId]="'task-' + task.id"
+            ariaLabel="Marcar tarea como completada"
+            (checkedChange)="onTaskToggle($event)"
+          ></app-checkbox>
+          <span class="task-title">{{ task.name }}</span>
+        </div>
+        <div class="task-title-container-right">
+          @if (task.leader) {
+          <span class="leader-badge">Líder: {{ task.leader.name }}</span>
+          }
+        </div>
+
+        <!-- Gestión de fechas de la tarea -->
+        <app-date-input
+          inputId="task-date-{{ task.id }}"
+          label="Fecha límite:"
+          [value]="task.dueDate || null"
+          [title]="task.dueDate ? 'Fecha límite' : 'No hay fecha límite'"
           size="md"
-          [checked]="task.completed"
-          [inputId]="'task-' + task.id"
-          ariaLabel="Marcar tarea como completada"
-          (checkedChange)="onTaskToggle($event)"
-        ></app-checkbox>
-        <span class="task-title">{{ task.name }}</span>
+          (valueChange)="onTaskDueDateChanged($event)"
+        />
       </div>
-      <div class="task-title-container-right">
-        @if (task.leader) {
-        <span class="leader-badge">Líder: {{ task.leader.name }}</span>
-        }
-      </div>
-    </div>
-
-    <!-- Gestión de fechas de la tarea -->
-    <app-date-input
-      inputId="task-date-{{ task.id }}"
-      label="Fecha límite:"
-      [value]="task.dueDate || null"
-      [title]="task.dueDate ? 'Fecha límite' : 'No hay fecha límite'"
-      size="md"
-      (valueChange)="onTaskDueDateChanged($event)"
-    />
-
-    <div class="task-buttons-container">
-      <app-button
-        type="ghost"
-        text="Subtarea"
-        iconLeft="add"
-        size="sm"
-        title="Agregar subtarea"
-        extraClasses="subtask-btn add-subtask-btn"
-        (clickEvent)="showAddSubtask()"
-      >
-      </app-button>
-      <app-button
-        type="ghost"
-        text="Documentar problema"
-        iconLeft="warning"
-        size="sm"
-        title="Documentar problemas que ocurrieron al realizar esta tarea"
-        extraClasses="add-error-btn"
-        (clickEvent)="showAddError()"
-      >
-      </app-button>
 
       <div class="task-actions">
         @if (listTeam && listTeam.length > 0) {
@@ -117,6 +97,29 @@
         >
         </app-button>
       </div>
+    </div>
+
+    <div class="task-buttons-container">
+      <app-button
+        type="ghost"
+        text="Subtarea"
+        iconLeft="add"
+        size="sm"
+        title="Agregar subtarea"
+        extraClasses="subtask-btn add-subtask-btn"
+        (clickEvent)="showAddSubtask()"
+      >
+      </app-button>
+      <app-button
+        type="ghost"
+        text="Documentar problema"
+        iconLeft="warning"
+        size="sm"
+        title="Documentar problemas que ocurrieron al realizar esta tarea"
+        extraClasses="add-error-btn"
+        (clickEvent)="showAddError()"
+      >
+      </app-button>
     </div>
   </div>
 

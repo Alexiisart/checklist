@@ -5,7 +5,7 @@ Todos los cambios importantes del proyecto estarán documentados en este archivo
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [3.1.0] - 2024-01-XX
+## [3.1.0]
 
 ### ✨ Añadido
 
@@ -47,7 +47,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [3.0.0] - 2024-01-XX
+## [3.0.0]
 
 ### ✨ Añadido
 

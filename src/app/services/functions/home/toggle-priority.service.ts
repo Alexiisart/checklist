@@ -23,7 +23,7 @@ export class TogglePriorityService {
   async toggleListPriority(list: SavedList): Promise<void> {
     try {
       // Cargar los datos completos de la lista
-      const listData = this.storageService.loadList(list.id);
+      const listData = await this.storageService.loadList(list.id);
       if (!listData) {
         throw new Error('Lista no encontrada');
       }
@@ -34,7 +34,7 @@ export class TogglePriorityService {
       listData.modifiedDate = new Date().toISOString();
 
       // Guardar la lista actualizada
-      this.storageService.saveList(listData);
+      await this.storageService.saveList(listData);
 
       // Mostrar mensaje de confirmación
       const message = newPriority

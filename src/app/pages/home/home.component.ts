@@ -30,7 +30,9 @@ import {
 } from '../../services/external/shared-list-comparison.service';
 import { SharedUrlLoaderService } from '../../services/external/shared-url-loader.service';
 import { ListComparisonModalComponent } from '../../shared/components/list-comparison-modal/list-comparison-modal.component';
+import { LinkAccountModalComponent } from '../../shared/components/link-account-modal/link-account-modal.component';
 import { UuidService } from '../../services/uuid.service';
+import { FirebaseAuthService } from '../../services/firebase/firebase-auth.service';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
 @Component({
@@ -49,6 +51,7 @@ import { UuidService } from '../../services/uuid.service';
     ButtonComponent,
     DropdownComponent,
     ListComparisonModalComponent,
+    LinkAccountModalComponent,
   ],
   providers: [HomeStateService],
   templateUrl: './home.component.html',
@@ -96,6 +99,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Mapa para trackear IDs únicos de las listas
   private listTrackingIds = new Map<string, string>();
 
+  // Propiedad para el modal de vinculación
+  showLinkModal = false;
+
   constructor(
     private homeStateService: HomeStateService,
     private duplicateListService: DuplicateListService,
@@ -108,7 +114,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private togglePriorityService: TogglePriorityService,
     private comparisonService: SharedListComparisonService,
     private sharedUrlLoaderService: SharedUrlLoaderService,
-    private uuidService: UuidService
+    private uuidService: UuidService,
+    public firebaseAuth: FirebaseAuthService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -151,6 +158,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         this.searchTerm = state.searchTerm;
+      });
+
+    // Suscribirse a cambios de autenticación para sincronizar con Firebase
+    this.firebaseAuth.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (user) => {
+        // Sincronizar datos cuando cambie el estado de autenticación
+        await this.storageService.syncAfterAuthChange();
+        // Recargar las listas después de la sincronización
+        this.homeStateService.loadSavedLists();
       });
   }
 
@@ -335,7 +352,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Compartir lista desde el card
   shareListFromCard(list: SavedList): void {
     // Cargar la lista completa y generar enlace compartible
-    const fullList = this.storageService.loadList(list.id);
+    const fullList = this.storageService.loadListSync(list.id);
     if (fullList) {
       this.shareListService.generateShareLink(fullList);
     }
@@ -426,6 +443,32 @@ export class HomeComponent implements OnInit, OnDestroy {
    */
   onCancelComparison(): void {
     this.comparisonService.closeComparisonModal();
+  }
+
+  // ========== MÉTODOS PARA VINCULACIÓN DE CUENTAS FIREBASE ==========
+
+  /**
+   * Abre el modal para vincular cuenta a Firebase
+   */
+  openLinkAccountModal(): void {
+    this.showLinkModal = true;
+  }
+
+  /**
+   * Cierra el modal de vinculación de cuenta
+   */
+  closeLinkAccountModal(): void {
+    this.showLinkModal = false;
+  }
+
+  /**
+   * Maneja cuando el usuario se vincula exitosamente
+   */
+  onAccountLinked(): void {
+    this.showLinkModal = false;
+    // Recargar las listas después de vincular la cuenta
+    this.homeStateService.loadSavedLists();
+    this.homeStateService.updateStorageIndicator();
   }
 
   /**

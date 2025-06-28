@@ -118,15 +118,20 @@ export class ChecklistService {
   }
 
   // Carga una lista existente
-  loadList(listId: string): ChecklistData | null {
-    const listData = this.storageService.loadList(listId);
-    if (listData) {
-      // Verificar y corregir IDs duplicados antes de cargar
-      this.ensureUniqueIds(listData);
-      this.currentListSubject.next(listData);
-      this.setUnsavedChanges(false);
+  async loadList(listId: string): Promise<ChecklistData | null> {
+    try {
+      const listData = await this.storageService.loadList(listId);
+      if (listData) {
+        // Verificar y corregir IDs duplicados antes de cargar
+        this.ensureUniqueIds(listData);
+        this.currentListSubject.next(listData);
+        this.setUnsavedChanges(false);
+      }
+      return listData;
+    } catch (error) {
+      console.error('Error loading list:', error);
+      return null;
     }
-    return listData;
   }
 
   // Marca o desmarca una tarea como completada

@@ -19,7 +19,7 @@ export class ExportImportService {
    * Exporta todas las listas guardadas a un archivo JSON
    * @returns Datos de exportación en formato JSON
    */
-  exportAllLists(): string {
+  async exportAllLists(): Promise<string> {
     try {
       const savedLists = this.storageService.getSavedLists();
       const exportData = {
@@ -30,7 +30,7 @@ export class ExportImportService {
 
       // Cargar datos completos de cada lista
       for (const savedList of savedLists) {
-        const fullListData = this.storageService.loadList(savedList.id);
+        const fullListData = await this.storageService.loadList(savedList.id);
         if (fullListData) {
           exportData.lists.push(fullListData);
         }
@@ -48,7 +48,7 @@ export class ExportImportService {
    * @param selectedListIds Array de IDs de listas a exportar
    * @returns Datos de exportación en formato JSON
    */
-  exportSelectedLists(selectedListIds: string[]): string {
+  async exportSelectedLists(selectedListIds: string[]): Promise<string> {
     try {
       const exportData = {
         version: '1.0',
@@ -58,7 +58,7 @@ export class ExportImportService {
 
       // Cargar datos completos de las listas seleccionadas
       for (const listId of selectedListIds) {
-        const fullListData = this.storageService.loadList(listId);
+        const fullListData = await this.storageService.loadList(listId);
         if (fullListData) {
           exportData.lists.push(fullListData);
         }

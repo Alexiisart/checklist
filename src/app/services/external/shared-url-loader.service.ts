@@ -64,7 +64,7 @@ export class SharedUrlLoaderService {
    * Verifica si existe una lista con el mismo nombre y muestra opciones de comparación
    * @param sharedData Datos de la lista compartida
    */
-  private loadSharedList(sharedData: ChecklistData): void {
+  private async loadSharedList(sharedData: ChecklistData): Promise<void> {
     try {
       // Validar que los datos son válidos
       if (!this.isValidSharedData(sharedData)) {
@@ -81,8 +81,9 @@ export class SharedUrlLoaderService {
       }
 
       // Verificar si existe una lista con el mismo nombre
-      const existingList =
-        this.comparisonService.findExistingListByName(sharedData);
+      const existingList = await this.comparisonService.findExistingListByName(
+        sharedData
+      );
 
       if (existingList) {
         // Existe una lista con el mismo nombre, mostrar modal de comparación

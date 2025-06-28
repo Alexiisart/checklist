@@ -221,11 +221,11 @@ export class DownloadNamingService {
   /**
    * Ejecuta la exportación de todas las listas
    */
-  private executeExportAllLists(fileName: string): void {
+  private async executeExportAllLists(fileName: string): Promise<void> {
     const savedLists = this.currentContext?.data?.savedLists;
     if (!savedLists) return;
 
-    const jsonData = this.exportImportService.exportAllLists();
+    const jsonData = await this.exportImportService.exportAllLists();
     this.exportImportService.downloadJsonFileWithCustomName(jsonData, fileName);
     this.toastService.showAlert(
       `${savedLists.length} listas exportadas con nombre "${fileName}"`,
@@ -236,11 +236,13 @@ export class DownloadNamingService {
   /**
    * Ejecuta la exportación de listas seleccionadas
    */
-  private executeExportSelectedLists(fileName: string): void {
+  private async executeExportSelectedLists(fileName: string): Promise<void> {
     const selectedIds = this.currentContext?.data?.selectedIds;
     if (!selectedIds) return;
 
-    const jsonData = this.exportImportService.exportSelectedLists(selectedIds);
+    const jsonData = await this.exportImportService.exportSelectedLists(
+      selectedIds
+    );
     this.exportImportService.downloadJsonFileWithCustomName(jsonData, fileName);
     this.toastService.showAlert(
       `${selectedIds.length} listas exportadas con nombre "${fileName}"`,

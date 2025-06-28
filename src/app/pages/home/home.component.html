@@ -5,6 +5,17 @@
     <div class="header-actions">
       <!-- Acciones normales -->
       @if (!(selectionState$ | async)?.isSelectionMode) {
+      <!-- Botón de vinculación Firebase -->
+      @if (!(firebaseAuth.user$ | async)) {
+      <app-button
+        type="secondary"
+        text="☁️ Vincular a la nube"
+        iconLeft="cloud"
+        (clickEvent)="openLinkAccountModal()"
+        size="sm"
+      >
+      </app-button>
+      }
       <app-export-import-dropdown
         [savedLists]="(savedLists$ | async) ?? []"
         (listsUpdated)="onListsUpdated()"
@@ -179,6 +190,14 @@
   (cancel)="onCancelComparison()"
 >
 </app-list-comparison-modal>
+
+<!-- Modal de vinculación de cuenta Firebase -->
+<app-link-account-modal
+  [show]="showLinkModal"
+  (close)="closeLinkAccountModal()"
+  (accountLinked)="onAccountLinked()"
+>
+</app-link-account-modal>
 
 <!-- Alertas -->
 <app-alert-modal

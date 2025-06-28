@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ChecklistData, SavedList } from '../models/task.interface';
 import { ToastService } from './toast.service';
+import { FirebaseStorageService } from './firebase/firebase-storage.service';
+import { FirebaseAuthService } from './firebase/firebase-auth.service';
 
 /**
  * Servicio para gestionar el almacenamiento local de datos de la aplicación.
@@ -19,7 +21,38 @@ export class StorageService {
   /** Tamaño máximo de almacenamiento permitido (3.5 MB) */
   private readonly MAX_STORAGE_SIZE = 3.5 * 1024 * 1024; // 3.5 MB en bytes
 
-  constructor(private toastService: ToastService) {}
+  constructor(
+    private toastService: ToastService,
+    private firebaseStorage: FirebaseStorageService,
+    private firebaseAuth: FirebaseAuthService
+  ) {}
+
+  /**
+   * Verifica si el usuario está autenticado con Firebase
+   */
+  private isUserAuthenticated(): boolean {
+    const user = this.firebaseAuth.getCurrentUser();
+    return user !== null && user.isLinked;
+  }
+
+  /**
+   * Sincroniza datos cuando el usuario cambia de estado de autenticación
+   * Debe ser llamado cuando el usuario se autentica o desautentica
+   */
+  public async syncAfterAuthChange(): Promise<void> {
+    if (this.isUserAuthenticated()) {
+      console.log('🔄 Sincronizando datos después del login...');
+      try {
+        // Cargar listas desde Firebase y sincronizar con localStorage
+        await this.loadListsFromFirebaseAsync();
+        console.log('✅ Datos sincronizados exitosamente');
+      } catch (error) {
+        console.warn('⚠️ Error sincronizando datos después del login:', error);
+      }
+    } else {
+      console.log('📱 Usuario desautenticado, usando datos locales');
+    }
+  }
 
   /**
    * Guarda el progreso actual en el almacenamiento local
@@ -57,11 +90,37 @@ export class StorageService {
   }
 
   /**
+   * Guarda una lista completa (Firebase si está autenticado, sino localStorage)
+   * @param listData Datos de la lista a guardar
+   * @throws Error si no hay espacio suficiente
+   */
+  async saveList(listData: ChecklistData): Promise<void> {
+    // Si está autenticado, usar Firebase
+    if (this.isUserAuthenticated()) {
+      try {
+        await this.firebaseStorage.saveList(listData);
+        // También guardar en localStorage como backup
+        this.saveListLocally(listData);
+        return;
+      } catch (error) {
+        console.warn(
+          'Error guardando en Firebase, fallback a localStorage:',
+          error
+        );
+        // Continuar con localStorage como fallback
+      }
+    }
+
+    // Lógica original de localStorage
+    this.saveListLocally(listData);
+  }
+
+  /**
    * Guarda una lista completa en el almacenamiento local
    * @param listData Datos de la lista a guardar
    * @throws Error si no hay espacio suficiente
    */
-  saveList(listData: ChecklistData): void {
+  private saveListLocally(listData: ChecklistData): void {
     try {
       // Calcular el tamaño que ocupará la nueva lista
       const listJson = JSON.stringify(listData);
@@ -137,10 +196,56 @@ export class StorageService {
   }
 
   /**
-   * Obtiene todas las listas guardadas
+   * Obtiene todas las listas guardadas (Firebase si está autenticado, sino localStorage)
    * @returns Array de listas guardadas
    */
   getSavedLists(): SavedList[] {
+    // Si está autenticado, usar Firebase de forma síncrona (esperando que ya estén sincronizadas)
+    if (this.isUserAuthenticated()) {
+      // En paralelo intentar cargar desde Firebase y devolver localStorage como respuesta inmediata
+      this.loadListsFromFirebaseAsync();
+    }
+
+    // Siempre devolver datos de localStorage como respuesta inmediata
+    return this.getSavedListsLocally();
+  }
+
+  /**
+   * Carga listas desde Firebase de forma asíncrona y actualiza localStorage
+   */
+  private async loadListsFromFirebaseAsync(): Promise<void> {
+    try {
+      const firebaseLists = await this.firebaseStorage.getSavedLists();
+
+      // Actualizar localStorage con los metadatos de las listas
+      if (firebaseLists.length > 0) {
+        localStorage.setItem(this.LISTS_KEY, JSON.stringify(firebaseLists));
+
+        // Cargar cada lista completa desde Firebase y guardarla en localStorage
+        for (const listMeta of firebaseLists) {
+          try {
+            const fullList = await this.firebaseStorage.loadList(listMeta.id);
+            if (fullList) {
+              this.saveListLocally(fullList);
+            }
+          } catch (error) {
+            console.warn(
+              `Error cargando lista ${listMeta.id} desde Firebase:`,
+              error
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error cargando desde Firebase de forma asíncrona:', error);
+    }
+  }
+
+  /**
+   * Obtiene todas las listas guardadas desde localStorage
+   * @returns Array de listas guardadas
+   */
+  private getSavedListsLocally(): SavedList[] {
     try {
       const data = localStorage.getItem(this.LISTS_KEY);
       return data ? JSON.parse(data) : [];
@@ -151,11 +256,72 @@ export class StorageService {
   }
 
   /**
-   * Carga una lista específica desde el almacenamiento local
+   * Carga una lista específica (Firebase si está autenticado, sino localStorage)
    * @param listId ID de la lista a cargar
    * @returns Datos de la lista o null si no existe
    */
-  loadList(listId: string): ChecklistData | null {
+  async loadList(listId: string): Promise<ChecklistData | null> {
+    // Si está autenticado, intentar cargar desde Firebase primero
+    if (this.isUserAuthenticated()) {
+      try {
+        const firebaseList = await this.firebaseStorage.loadList(listId);
+        if (firebaseList) {
+          // Guardar en localStorage como backup
+          this.saveListLocally(firebaseList);
+          return firebaseList;
+        }
+      } catch (error) {
+        console.warn(
+          'Error cargando lista desde Firebase, usando localStorage:',
+          error
+        );
+      }
+    }
+
+    // Fallback a localStorage
+    return this.loadListLocally(listId);
+  }
+
+  /**
+   * Carga una lista específica de forma síncrona (solo localStorage por compatibilidad)
+   * @param listId ID de la lista a cargar
+   * @returns Datos de la lista o null si no existe
+   * @deprecated Usar loadList async para soporte completo de Firebase
+   */
+  loadListSync(listId: string): ChecklistData | null {
+    // En paralelo intentar cargar desde Firebase si está autenticado
+    if (this.isUserAuthenticated()) {
+      this.loadListFromFirebaseAsync(listId);
+    }
+
+    // Siempre devolver datos de localStorage de forma inmediata
+    return this.loadListLocally(listId);
+  }
+
+  /**
+   * Carga una lista desde Firebase de forma asíncrona y actualiza localStorage
+   */
+  private async loadListFromFirebaseAsync(listId: string): Promise<void> {
+    try {
+      const firebaseList = await this.firebaseStorage.loadList(listId);
+      if (firebaseList) {
+        // Actualizar localStorage con los datos de Firebase
+        this.saveListLocally(firebaseList);
+      }
+    } catch (error) {
+      console.warn(
+        'Error cargando lista desde Firebase de forma asíncrona:',
+        error
+      );
+    }
+  }
+
+  /**
+   * Carga una lista específica desde localStorage
+   * @param listId ID de la lista a cargar
+   * @returns Datos de la lista o null si no existe
+   */
+  private loadListLocally(listId: string): ChecklistData | null {
     try {
       const data = localStorage.getItem(`list_${listId}`);
       return data ? JSON.parse(data) : null;
@@ -166,17 +332,43 @@ export class StorageService {
   }
 
   /**
+   * Elimina una lista (Firebase si está autenticado, sino localStorage)
+   * @param listId ID de la lista a eliminar
+   * @throws Error si no se puede eliminar la lista
+   */
+  async deleteList(listId: string): Promise<void> {
+    // Si está autenticado, usar Firebase
+    if (this.isUserAuthenticated()) {
+      try {
+        await this.firebaseStorage.deleteList(listId);
+        // También eliminar de localStorage para mantener sincronización
+        this.deleteListLocally(listId);
+        return;
+      } catch (error) {
+        console.warn(
+          'Error eliminando en Firebase, fallback a localStorage:',
+          error
+        );
+        // Continuar con localStorage como fallback
+      }
+    }
+
+    // Lógica original de localStorage
+    this.deleteListLocally(listId);
+  }
+
+  /**
    * Elimina una lista del almacenamiento local
    * @param listId ID de la lista a eliminar
    * @throws Error si no se puede eliminar la lista
    */
-  deleteList(listId: string): void {
+  private deleteListLocally(listId: string): void {
     try {
       // Eliminar la lista completa
       localStorage.removeItem(`list_${listId}`);
 
       // Actualizar el índice
-      const existingLists = this.getSavedLists();
+      const existingLists = this.getSavedListsLocally();
       const updatedLists = existingLists.filter((list) => list.id !== listId);
       localStorage.setItem(this.LISTS_KEY, JSON.stringify(updatedLists));
     } catch (error) {
@@ -191,10 +383,10 @@ export class StorageService {
    * @param newName Nuevo nombre para la lista
    * @throws Error si no se puede renombrar la lista
    */
-  renameList(listId: string, newName: string): void {
+  async renameList(listId: string, newName: string): Promise<void> {
     try {
-      // Cargar la lista completa
-      const listData = this.loadList(listId);
+      // Cargar la lista completa usando el método async
+      const listData = await this.loadList(listId);
       if (!listData) {
         throw new Error('Lista no encontrada');
       }
@@ -203,18 +395,8 @@ export class StorageService {
       listData.name = newName;
       listData.modifiedDate = new Date().toISOString();
 
-      // Guardar la lista completa actualizada
-      localStorage.setItem(`list_${listId}`, JSON.stringify(listData));
-
-      // Actualizar el índice de listas
-      const existingLists = this.getSavedLists();
-      const listIndex = existingLists.findIndex((list) => list.id === listId);
-
-      if (listIndex >= 0) {
-        existingLists[listIndex].name = newName;
-        existingLists[listIndex].date = listData.modifiedDate;
-        localStorage.setItem(this.LISTS_KEY, JSON.stringify(existingLists));
-      }
+      // Guardar la lista completa actualizada usando el método async
+      await this.saveList(listData);
     } catch (error) {
       console.error('Error renaming list:', error);
       throw new Error('No se pudo renombrar la lista.');

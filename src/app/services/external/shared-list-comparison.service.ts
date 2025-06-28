@@ -36,7 +36,9 @@ export class SharedListComparisonService {
    * @param sharedList Lista compartida a verificar
    * @returns Lista existente si la encuentra, null si no existe
    */
-  findExistingListByName(sharedList: ChecklistData): ChecklistData | null {
+  async findExistingListByName(
+    sharedList: ChecklistData
+  ): Promise<ChecklistData | null> {
     const savedLists = this.storageService.getSavedLists();
 
     // Buscar una lista con el mismo nombre (sin el sufijo "(Compartida)")
@@ -54,7 +56,7 @@ export class SharedListComparisonService {
     });
 
     if (existingSavedList) {
-      return this.storageService.loadList(existingSavedList.id);
+      return await this.storageService.loadList(existingSavedList.id);
     }
 
     return null;

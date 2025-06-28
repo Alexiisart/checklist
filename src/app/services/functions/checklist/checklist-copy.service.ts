@@ -74,7 +74,7 @@ export class ChecklistCopyService {
    */
   async copyListFromCard(savedList: SavedList): Promise<void> {
     try {
-      const fullList = this.storageService.loadList(savedList.id);
+      const fullList = await this.storageService.loadList(savedList.id);
 
       if (!fullList) {
         this.toastService.showAlert(

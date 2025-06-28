@@ -1,0 +1,73 @@
+/* Importar estilos base del modal */
+@import "../modal/modal.component.css";
+
+/* Estilos específicos para link-account-modal */
+.modal-content {
+  max-width: 450px;
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+}
+
+/* Pestañas específicas */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tabs app-button {
+  flex: 1;
+}
+
+.tabs app-button.active {
+  background: var(--primary-500);
+  color: white;
+}
+
+/* Sección de formulario */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section app-input {
+  width: 100%;
+}
+
+/* Caja de información específica */
+.info-box {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  border-left: 2px solid var(--primary-500);
+}
+
+.info-box p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.info-box p:first-child {
+  margin-top: 0;
+}
+
+.info-box p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive específico */
+@media (max-width: 480px) {
+  .modal-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+}

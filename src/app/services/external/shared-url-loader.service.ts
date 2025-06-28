@@ -4,6 +4,8 @@ import { Base64UrlService } from './base64-url.service';
 import { ChecklistService } from '../checklist.service';
 import { ToastService } from '../toast.service';
 import { ChecklistData } from '../../models/task.interface';
+import { SharedListComparisonService } from './shared-list-comparison.service';
+import { StorageService } from '../storage.service';
 
 /**
  * Servicio para detectar y cargar URLs compartidas
@@ -17,7 +19,9 @@ export class SharedUrlLoaderService {
     private router: Router,
     private base64UrlService: Base64UrlService,
     private checklistService: ChecklistService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private comparisonService: SharedListComparisonService,
+    private storageService: StorageService
   ) {}
 
   /**
@@ -30,8 +34,6 @@ export class SharedUrlLoaderService {
       const storedData = sessionStorage.getItem('pendingSharedData');
 
       if (storedData) {
-        console.log('Lista compartida encontrada, cargando...');
-
         // Limpiar el storage
         sessionStorage.removeItem('pendingSharedData');
 
@@ -41,14 +43,12 @@ export class SharedUrlLoaderService {
         if (sharedData) {
           this.loadSharedList(sharedData);
         } else {
-          console.log('Error decodificando datos compartidos');
           this.showInvalidDataError();
         }
       } else {
         // Fallback: intentar extraer de URL actual (para compatibilidad)
         const sharedData = this.base64UrlService.extractFromCurrentUrl();
         if (sharedData) {
-          console.log('Lista compartida encontrada en URL, cargando...');
           this.loadSharedList(sharedData);
           this.clearUrlFragment();
         }
@@ -61,6 +61,7 @@ export class SharedUrlLoaderService {
 
   /**
    * Carga una lista compartida en el checklist
+   * Verifica si existe una lista con el mismo nombre y muestra opciones de comparación
    * @param sharedData Datos de la lista compartida
    */
   private loadSharedList(sharedData: ChecklistData): void {
@@ -71,6 +72,40 @@ export class SharedUrlLoaderService {
         return;
       }
 
+      // Agregar metadatos de compartir si no existen
+      if (!sharedData.sharedAt) {
+        sharedData.sharedAt = new Date().toISOString();
+      }
+      if (!sharedData.shareVersion) {
+        sharedData.shareVersion = '1.2';
+      }
+
+      // Verificar si existe una lista con el mismo nombre
+      const existingList =
+        this.comparisonService.findExistingListByName(sharedData);
+
+      if (existingList) {
+        // Existe una lista con el mismo nombre, mostrar modal de comparación
+        this.comparisonService.showComparisonModal(sharedData, existingList);
+
+        // Navegar al home para mostrar el modal
+        this.router.navigate(['/']);
+      } else {
+        // No existe lista con el mismo nombre, cargar directamente
+        this.loadSharedListDirectly(sharedData);
+      }
+    } catch (error) {
+      console.error('Error cargando lista compartida:', error);
+      this.showError();
+    }
+  }
+
+  /**
+   * Carga la lista compartida directamente sin comparación
+   * @param sharedData Datos de la lista compartida
+   */
+  public loadSharedListDirectly(sharedData: ChecklistData): void {
+    try {
       // Cargar la lista compartida en el servicio
       this.checklistService.loadSharedList(sharedData);
 
@@ -82,8 +117,49 @@ export class SharedUrlLoaderService {
         this.showSuccessMessage(sharedData.name || 'Lista compartida');
       }, 500);
     } catch (error) {
-      console.error('Error cargando lista compartida:', error);
+      console.error('Error cargando lista compartida directamente:', error);
       this.showError();
+    }
+  }
+
+  /**
+   * Actualiza una lista existente con los datos compartidos
+   * @param sharedData Datos de la lista compartida
+   * @param existingList Lista existente a actualizar
+   */
+  public updateExistingList(
+    sharedData: ChecklistData,
+    existingList: ChecklistData
+  ): void {
+    try {
+      // Crear datos actualizados manteniendo el ID original
+      const updatedData: ChecklistData = {
+        ...sharedData,
+        id: existingList.id, // Mantener el ID original
+        name: existingList.name, // Mantener el nombre original (sin sufijo)
+        createdDate: existingList.createdDate, // Mantener fecha de creación original
+        modifiedDate: new Date().toISOString(), // Actualizar fecha de modificación
+      };
+
+      // Guardar la lista actualizada
+      this.storageService.saveList(updatedData);
+
+      // Navegar al checklist con la lista actualizada
+      this.router.navigate(['/checklist', existingList.id]);
+
+      // Mostrar mensaje de éxito
+      setTimeout(() => {
+        this.toastService.showAlert(
+          `Lista "${existingList.name}" actualizada exitosamente con los cambios compartidos`,
+          'success'
+        );
+      }, 500);
+    } catch (error) {
+      console.error('Error actualizando lista existente:', error);
+      this.toastService.showAlert(
+        'Error al actualizar la lista existente. Inténtalo de nuevo.',
+        'danger'
+      );
     }
   }
 

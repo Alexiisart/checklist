@@ -5,6 +5,8 @@ import {
   Output,
   OnInit,
   OnChanges,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +25,7 @@ import { DateManagerService } from '../../../services/date-manager.service';
         (mouseleave)="showTooltip = false"
       >
         <input
+          #dateInput
           [id]="inputId"
           type="date"
           class="date-input"
@@ -33,6 +36,17 @@ import { DateManagerService } from '../../../services/date-manager.service';
           [min]="minDate"
           [disabled]="disabled"
         />
+
+        <!-- Icono personalizado de calendario -->
+        <button
+          type="button"
+          class="calendar-icon-btn"
+          (click)="openDatePicker()"
+          [disabled]="disabled"
+          title="Seleccionar fecha"
+        >
+          <span class="material-icons-outlined">calendar_today</span>
+        </button>
 
         @if (title) {
         <app-tooltip
@@ -58,6 +72,9 @@ import { DateManagerService } from '../../../services/date-manager.service';
   styleUrls: ['./date-input.component.css'],
 })
 export class DateInputComponent implements OnInit, OnChanges {
+  /** Referencia al input de fecha */
+  @ViewChild('dateInput') dateInput!: ElementRef<HTMLInputElement>;
+
   /** ID del input de fecha */
   @Input() inputId = 'date-input';
 
@@ -126,6 +143,15 @@ export class DateInputComponent implements OnInit, OnChanges {
   clearDate(): void {
     this.dateValue = '';
     this.valueChange.emit(null);
+  }
+
+  /**
+   * Abre el selector de fecha nativo haciendo clic en el input
+   */
+  openDatePicker(): void {
+    if (!this.disabled && this.dateInput?.nativeElement) {
+      this.dateInput.nativeElement.showPicker();
+    }
   }
 
   /**

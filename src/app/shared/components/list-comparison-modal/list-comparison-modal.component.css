@@ -1,0 +1,71 @@
+/* Importar estilos base del modal */
+@import "../modal/modal.component.css";
+
+/* Clases específicas para el modal de comparación */
+.comparison-modal {
+  max-width: 600px;
+}
+
+.list-info {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.list-info h4 {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.list-name {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  gap: var(--space-2);
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-weight: 600;
+  min-width: 120px;
+  color: var(--color-text-secondary);
+}
+
+.date {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.decision-section {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.decision-section h4 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.decision-message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}

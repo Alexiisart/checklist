@@ -24,6 +24,13 @@ import { ChecklistCopyService } from '../../services/functions/checklist/checkli
 import { StorageService } from '../../services/storage.service';
 import { TogglePriorityService } from '../../services/functions/home/toggle-priority.service';
 import { SavedList } from '../../models/task.interface';
+import {
+  SharedListComparisonService,
+  ComparisonModalData,
+} from '../../services/external/shared-list-comparison.service';
+import { SharedUrlLoaderService } from '../../services/external/shared-url-loader.service';
+import { ListComparisonModalComponent } from '../../shared/components/list-comparison-modal/list-comparison-modal.component';
+import { UuidService } from '../../services/uuid.service';
 
 // Componente principal de la página de inicio. Muestra las listas guardadas y proporciona opciones para gestionar y crear listas
 @Component({
@@ -41,6 +48,7 @@ import { SavedList } from '../../models/task.interface';
     StorageProgressIndicatorComponent,
     ButtonComponent,
     DropdownComponent,
+    ListComparisonModalComponent,
   ],
   providers: [HomeStateService],
   templateUrl: './home.component.html',
@@ -69,6 +77,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   public deleteShowConfirmModal$!: Observable<boolean>;
   public deleteConfirmModalData$!: Observable<any>;
 
+  // Observables del servicio de comparación de listas compartidas
+  public comparisonModal$!: Observable<ComparisonModalData>;
+
   // Subject para limpiar subscripciones
   private readonly destroy$ = new Subject<void>();
 
@@ -82,6 +93,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     { value: 'incomplete', label: 'Incompletas' },
   ];
 
+  // Mapa para trackear IDs únicos de las listas
+  private listTrackingIds = new Map<string, string>();
+
   constructor(
     private homeStateService: HomeStateService,
     private duplicateListService: DuplicateListService,
@@ -91,7 +105,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     private shareListService: ShareListService,
     private copyService: ChecklistCopyService,
     private storageService: StorageService,
-    private togglePriorityService: TogglePriorityService
+    private togglePriorityService: TogglePriorityService,
+    private comparisonService: SharedListComparisonService,
+    private sharedUrlLoaderService: SharedUrlLoaderService,
+    private uuidService: UuidService
   ) {
     // Inicializar observables en el constructor
     this.savedLists$ = this.homeStateService.savedLists$;
@@ -116,12 +133,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Observables del servicio de eliminar
     this.deleteShowConfirmModal$ = this.deleteListService.showConfirmModal$;
     this.deleteConfirmModalData$ = this.deleteListService.confirmModalData$;
+
+    // Observable del servicio de comparación de listas compartidas
+    this.comparisonModal$ = this.comparisonService.comparisonModal$;
   }
 
   // Inicializa el componente
   ngOnInit(): void {
     this.homeStateService.initialize();
     this.setupServiceSubscriptions();
+
+    // Verificar si hay una URL compartida para procesar
+    this.sharedUrlLoaderService.checkAndLoadSharedUrl();
 
     // Suscribirse al término de búsqueda para el two-way binding
     this.homeStateService.searchState$
@@ -369,5 +392,61 @@ export class HomeComponent implements OnInit, OnDestroy {
   getSelectedCount(): number {
     return this.homeStateService.getCurrentSelectionState().selectedListIds
       .size;
+  }
+
+  // ========== MÉTODOS PARA MODAL DE COMPARACIÓN DE LISTAS COMPARTIDAS ==========
+
+  /**
+   * Actualiza la lista existente con los datos compartidos
+   */
+  onUpdateExistingList(): void {
+    const modalData = this.comparisonService.getCurrentModalData();
+    if (modalData.sharedList && modalData.existingList) {
+      this.sharedUrlLoaderService.updateExistingList(
+        modalData.sharedList,
+        modalData.existingList
+      );
+    }
+    this.comparisonService.closeComparisonModal();
+  }
+
+  /**
+   * Crea una copia nueva de la lista compartida
+   */
+  onCreateCopyOfSharedList(): void {
+    const modalData = this.comparisonService.getCurrentModalData();
+    if (modalData.sharedList) {
+      this.sharedUrlLoaderService.loadSharedListDirectly(modalData.sharedList);
+    }
+    this.comparisonService.closeComparisonModal();
+  }
+
+  /**
+   * Maneja la acción de cancelar la comparación de listas
+   */
+  onCancelComparison(): void {
+    this.comparisonService.closeComparisonModal();
+  }
+
+  /**
+   * Función trackBy que genera IDs únicos para evitar duplicados
+   * @param index Índice del elemento
+   * @param list Lista a trackear
+   * @returns ID único para tracking
+   */
+  trackByUniqueId(index: number, list: SavedList): string {
+    // Crear clave única combinando índice, ID, nombre y fecha de la lista
+    const listKey = `${index}_${list.id}_${list.name}_${list.date}`;
+
+    // Si ya tenemos un tracking ID para esta combinación exacta, usarlo
+    if (this.listTrackingIds.has(listKey)) {
+      return this.listTrackingIds.get(listKey)!;
+    }
+
+    // Generar nuevo tracking ID único
+    const trackingId = this.uuidService.generateUniqueId();
+    this.listTrackingIds.set(listKey, trackingId);
+
+    return trackingId;
   }
 }

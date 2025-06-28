@@ -1,0 +1,77 @@
+@if (isModalVisible()) {
+<div class="modal" (click)="onCancel()">
+  <div class="modal-overlay"></div>
+  <div
+    class="modal-content comparison-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h3>Lista ya existe</h3>
+      <app-button
+        type="icon"
+        iconLeft="close"
+        size="sm"
+        (clickEvent)="onCancel()"
+      ></app-button>
+    </div>
+
+    @if (hasValidData()) {
+    <div class="modal-body">
+      <!-- Información básica -->
+      <div class="list-info">
+        <h4>Información de las listas:</h4>
+        <div class="info-row">
+          <span class="label">Lista existente:</span>
+          <span>{{ getExistingTasksCount() }} tareas</span>
+          @if (getExistingModifiedDate()) {
+          <span class="date">
+            (Modificada: {{ formatDate(getExistingModifiedDate()) }})
+          </span>
+          }
+        </div>
+        <div class="info-row">
+          <span class="label">Lista compartida:</span>
+          <span>{{ getSharedTasksCount() }} tareas</span>
+          @if (getSharedDate()) {
+          <span class="date"> ({{ formatDate(getSharedDate()) }}) </span>
+          }
+        </div>
+      </div>
+
+      <!-- Mensaje de decisión -->
+      <div class="decision-section">
+        <h4>¿Qué deseas hacer?</h4>
+        <p class="decision-message">
+          Ya tienes una lista con el nombre
+          <span class="list-name">{{ getListName() }}</span
+          >. Puedes actualizar tu lista existente con los datos compartidos o
+          crear una copia nueva.
+        </p>
+      </div>
+    </div>
+    }
+
+    <div class="modal-footer">
+      <app-button
+        type="ghost"
+        text="Cancelar"
+        (clickEvent)="onCancel()"
+      ></app-button>
+
+      <app-button
+        type="secondary"
+        text="Crear Copia"
+        iconLeft="copy"
+        (clickEvent)="onCreateCopy()"
+      ></app-button>
+
+      <app-button
+        type="primary"
+        text="Actualizar Existente"
+        iconLeft="refresh"
+        (clickEvent)="onUpdateExisting()"
+      ></app-button>
+    </div>
+  </div>
+</div>
+}

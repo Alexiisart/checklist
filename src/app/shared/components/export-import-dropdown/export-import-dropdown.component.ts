@@ -18,6 +18,7 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 import { ModalComponent } from '../modal/modal.component';
 import { ButtonComponent } from '../../atomic/buttons';
 import { CheckboxComponent } from '../../atomic/checkboxes';
+import { UuidService } from '../../../services/uuid.service';
 
 /**
  * Componente dropdown para opciones de exportar/importar listas
@@ -49,12 +50,15 @@ export class ExportImportDropdownComponent implements OnDestroy {
   showNameDownloadModal$!: Observable<boolean>;
   nameDownloadModalData$!: Observable<ModalData | null>;
 
+  // Mapa para trackear IDs únicos de las listas
+  private listTrackingIds = new Map<string, string>();
+
   constructor(
-    private exportImportService: ExportImportService,
     public stateService: ExportImportStateService,
     private downloadNamingService: DownloadNamingService,
     private toastService: ToastService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private uuidService: UuidService
   ) {
     // Inicializar observables después del constructor
     this.showNameDownloadModal$ = this.downloadNamingService.showModal$;
@@ -309,5 +313,27 @@ export class ExportImportDropdownComponent implements OnDestroy {
   /** Maneja la cancelación del nombrado de descarga */
   onDownloadNameCancelled(): void {
     this.downloadNamingService.onModalCancelled();
+  }
+
+  /**
+   * Función trackBy que genera IDs únicos para evitar duplicados
+   * @param index Índice del elemento
+   * @param list Lista a trackear
+   * @returns ID único para tracking
+   */
+  trackByUniqueId(index: number, list: SavedList): string {
+    // Crear clave única combinando índice, ID, nombre y fecha de la lista
+    const listKey = `${index}_${list.id}_${list.name}_${list.date}`;
+
+    // Si ya tenemos un tracking ID para esta combinación exacta, usarlo
+    if (this.listTrackingIds.has(listKey)) {
+      return this.listTrackingIds.get(listKey)!;
+    }
+
+    // Generar nuevo tracking ID único
+    const trackingId = this.uuidService.generateUniqueId();
+    this.listTrackingIds.set(listKey, trackingId);
+
+    return trackingId;
   }
 }

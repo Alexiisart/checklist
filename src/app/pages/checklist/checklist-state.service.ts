@@ -32,6 +32,7 @@ export class ChecklistStateService implements OnDestroy {
   private destroy$ = new Subject<void>();
   private autoSaveInterval: any = null;
   private listId: string | null = null;
+  private hasShownCongratulations = false; // Bandera para evitar mostrar felicitaciones múltiples veces
 
   // Observable público para el estado
   state$ = this.stateSubject.asObservable();
@@ -52,6 +53,7 @@ export class ChecklistStateService implements OnDestroy {
   /** Inicializa el estado con un ID de lista específico y comienza el autoguardado */
   initializeWithListId(listId: string): void {
     this.listId = listId;
+    this.hasShownCongratulations = false; // Resetear bandera al cargar nueva lista
     if (this.listId) {
       this.loadList(this.listId);
     }
@@ -62,6 +64,7 @@ export class ChecklistStateService implements OnDestroy {
   /** Limpia recursos y detiene el autoguardado */
   cleanup(): void {
     this.stopAutoSave();
+    this.hasShownCongratulations = false; // Resetear bandera al limpiar
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -89,12 +92,19 @@ export class ChecklistStateService implements OnDestroy {
     this.updateState({ progress });
 
     if (progress.total > 0 && progress.completed === progress.total) {
-      setTimeout(() => {
-        this.toastService.showAlert(
-          '¡Felicitaciones! Has completado todas las tareas',
-          'success'
-        );
-      }, 300);
+      // Todas las tareas están completas
+      if (!this.hasShownCongratulations) {
+        setTimeout(() => {
+          this.toastService.showAlert(
+            '¡Felicitaciones! Has completado todas las tareas',
+            'success'
+          );
+          this.hasShownCongratulations = true;
+        }, 300);
+      }
+    } else {
+      // No todas las tareas están completas, resetear bandera
+      this.hasShownCongratulations = false;
     }
   }
 

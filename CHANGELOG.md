@@ -73,7 +73,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [2.1.0] - 2023-XX-XX
+## [2.1.0]
 
 ### ✨ Añadido
 
@@ -90,7 +90,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [2.0.0] - 2023-XX-XX
+## [2.0.0]
 
 ### ✨ Añadido
 
@@ -107,7 +107,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [1.0.0] - 2023-XX-XX
+## [1.0.0]
 
 ### ✨ Inicial
 

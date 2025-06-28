@@ -1,14 +1,14 @@
 # 📖 Documentación Técnica
 
-> Arquitectura y APIs de Checkliist v3.0
+> Arquitectura y APIs de Checkliist v3.1
 
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![Angular CDK](https://img.shields.io/badge/Angular_CDK-19.2+-green.svg)](https://material.angular.io/cdk)
 
-## 🏗️ Arquitectura v3.0
+## 🏗️ Arquitectura v3.1
 
-### Patrón Clean Architecture con CDK Integration + Date Management System
+### Patrón Clean Architecture con Shared Lists, Custom Icons & Enhanced Tracking
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -16,12 +16,37 @@
 │  ├── pages/ (UI + Navigation + CDK + Dates)     │
 │  └── shared/ (Reusable Components + CDK)        │
 ├─────────────────────────────────────────────────┤
-│            DATE MANAGEMENT SYSTEM v3.0          │ ⭐ NEW
+│          SHARED LISTS SYSTEM v3.1               │ ⭐ NEW
+│  ├── SharedListComparisonService (NEW)         │
+│  ├── ListComparisonModal (NEW)                 │
+│  ├── URL Generation (Enhanced)                 │
+│  ├── Base64 Encoding (Enhanced)                │
+│  └── Intelligent Comparison (Name Based)       │
+├─────────────────────────────────────────────────┤
+│          CUSTOM ICONS SYSTEM v3.1               │ ⭐ ENHANCED
+│  ├── DateInputComponent (Custom Icons)         │
+│  ├── Theme Adaptation (Auto Dark/Light)        │
+│  ├── Cross-browser Consistency                 │
+│  └── Material Icons Integration                │
+├─────────────────────────────────────────────────┤
+│          ENHANCED TRACKING v3.1                 │ ⭐ ENHANCED
+│  ├── UuidService (Improved)                    │
+│  ├── Universal TrackBy Functions               │
+│  ├── Duplicate Prevention (NG0955)             │
+│  └── Unique ID Generation (Index + Content)    │
+├─────────────────────────────────────────────────┤
+│            DATE MANAGEMENT SYSTEM               │
 │  ├── DateManagerService (Centralized)          │
-│  ├── DateInputComponent (Visual)               │
+│  ├── DateInputComponent (Custom Icons)         │ ⭐ ENHANCED
 │  ├── Due Date Logic (Business)                 │
 │  ├── Local Timezone (Consistency)              │
 │  └── Format Standardization (Display)          │
+├─────────────────────────────────────────────────┤
+│           OPTIMIZED NOTIFICATIONS v3.1          │ ⭐ ENHANCED
+│  ├── toast.service (Smart Duplicates)          │
+│  ├── alert-modal.component (Context Aware)     │
+│  ├── Congratulations Control (No Repeats)      │
+│  └── Contextual Feedback (Enhanced)            │
 ├─────────────────────────────────────────────────┤
 │              CDK INTEGRATION                    │
 │  ├── DragDropModule (Reordenamiento)           │
@@ -29,26 +54,22 @@
 │  ├── Drop Zones (Áreas de destino)             │
 │  └── Animations (Transiciones suaves)          │
 ├─────────────────────────────────────────────────┤
-│            NOTIFICATION SYSTEM                  │
-│  ├── toast.service (Toast notifications)       │
-│  ├── alert-modal.component (Modales)           │
-│  └── visual-feedback.service (Estados)         │
-├─────────────────────────────────────────────────┤
-│            FUNCTION SERVICES v3.0               │
+│            FUNCTION SERVICES v3.1               │
 │  ├── duplicate-list.service                    │
 │  ├── rename-list.service                       │
 │  ├── delete-list.service                       │
 │  ├── checklist-reorder.service                 │
 │  ├── open-new-tab.service                      │
 │  ├── checklist-export.service (Date Enhanced)  │
-│  └── date-manager.service (NEW)                │ ⭐ NEW
+│  ├── date-manager.service                      │
+│  └── shared-list-comparison.service (NEW)      │ ⭐ NEW
 ├─────────────────────────────────────────────────┤
 │               CORE SERVICES                     │
 │  ├── checklist.service (Date Enhanced)         │
 │  ├── storage.service (Monitoring)              │
-│  ├── uuid.service                              │
+│  ├── uuid.service (Enhanced Tracking)          │ ⭐ ENHANCED
 │  ├── theme.service                             │
-│  ├── toast.service                             │
+│  ├── toast.service (Smart Notifications)       │ ⭐ ENHANCED
 │  └── export-import.service (Date Enhanced)     │
 ├─────────────────────────────────────────────────┤
 │               GUARDS & PROTECTION               │
@@ -57,20 +78,132 @@
 ├─────────────────────────────────────────────────┤
 │              STATE SERVICES                     │
 │  ├── home-state.service (UI + Indicators)      │
-│  ├── checklist-state.service (Date Enhanced)   │
+│  ├── checklist-state.service (Enhanced)        │ ⭐ ENHANCED
 │  └── new-list-state.service                    │
 ├─────────────────────────────────────────────────┤
 │                  MODELS                         │
 │  └── task.interface (Date Enhanced)            │
 ├─────────────────────────────────────────────────┤
-│               STORAGE v3.0                      │
+│               STORAGE v3.1                      │
 │  ├── localStorage (Monitored + Dates)          │
 │  ├── storage-indicator.component               │
 │  └── storage-progress-indicator.component      │
 └─────────────────────────────────────────────────┘
 ```
 
-## 📅 Sistema de Fechas v3.0 ⭐ NEW
+## 🔗 Sistema de Listas Compartidas v3.1 ⭐ NEW
+
+### Funcionalidades Principales
+
+- **🔍 Detección automática**: Reconoce listas con el mismo nombre
+- **📊 Comparación inteligente**: Modal que muestra opciones de actualización
+- **🔄 Preservación de datos**: Mantiene información original al actualizar
+- **📝 Decisión del usuario**: Elegir entre actualizar o crear copia nueva
+- **🔒 URLs seguras**: Codificación Base64 para enlaces compartidos
+
+### SharedListComparisonService - Gestión de Comparación
+
+```typescript
+@Injectable({ providedIn: "root" })
+export class SharedListComparisonService {
+  private comparisonModalSubject = new BehaviorSubject<ComparisonModalData>({
+    show: false,
+    sharedList: {} as ChecklistData,
+    existingList: {} as ChecklistData,
+  });
+
+  // Busca lista existente por nombre (sin sufijo "Compartida")
+  findExistingListByName(sharedList: ChecklistData): ChecklistData | null;
+
+  // Muestra modal de comparación con opciones
+  showComparisonModal(sharedList: ChecklistData, existingList: ChecklistData): void;
+
+  // Control del modal
+  closeComparisonModal(): void;
+  getCurrentModalData(): ComparisonModalData;
+}
+```
+
+### ComparisonModalData Interface
+
+```typescript
+export interface ComparisonModalData {
+  show: boolean;
+  sharedList: ChecklistData; // Lista entrante
+  existingList: ChecklistData; // Lista local existente
+}
+```
+
+## 📅 Iconos Personalizados v3.1 ⭐ ENHANCED
+
+### DateInputComponent con Iconos Personalizados
+
+- **🎨 Material Icons**: Icono `calendar_today` personalizado
+- **🌙 Adaptación automática**: Cambio de color según tema
+- **🔧 Cross-browser**: Funciona igual en todos los navegadores
+- **🎯 UX mejorada**: Interfaz consistente sin depender del navegador
+
+### Implementación CSS Avanzada
+
+```css
+/* Ocultar icono nativo del navegador */
+.date-input::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.date-input::-moz-calendar-picker-indicator {
+  display: none;
+}
+
+/* Icono personalizado */
+.calendar-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.calendar-icon-btn:hover:not(:disabled) {
+  color: var(--color-primary);
+}
+```
+
+## 🔧 Sistema de Tracking Mejorado v3.1 ⭐ ENHANCED
+
+### UuidService Optimizado
+
+- **🎯 Prevención NG0955**: Elimina errores de tracking duplicado
+- **🔄 IDs únicos universales**: Combinación de índice, ID y contenido
+- **📊 Funciones trackBy**: Implementación estándar para todos los componentes
+
+### Implementación Universal de TrackBy
+
+```typescript
+// En cada componente con @for loops
+trackByUniqueId(index: number, item: any): string {
+  return this.uuidService.generateTrackingId(index, item.id, item.name, item.date);
+}
+
+// UuidService mejorado
+@Injectable({ providedIn: "root" })
+export class UuidService {
+  generateTrackingId(index: number, id: string, name: string, additional?: string): string {
+    const base = `${index}-${id}-${name}`;
+    return additional ? `${base}-${additional}` : base;
+  }
+
+  generateUniqueId(): string {
+    return crypto.randomUUID();
+  }
+}
+```
+
+## 📅 Sistema de Fechas (Actualizado)
 
 ### Funcionalidades Principales
 
@@ -80,6 +213,7 @@
 - **🌍 Zona horaria local**: Consistencia garantizada en todos los formatos
 - **🎨 Estados visuales**: Indicadores visuales para fechas vencidas
 - **📤 Exportación completa**: Fechas incluidas en PDF, TXT, URLs y copiar
+- **🎯 Iconos personalizados**: Interfaz consistente cross-browser ⭐ ENHANCED
 
 ### DateManagerService - Servicio Centralizado
 
@@ -137,7 +271,7 @@ export class DateInputComponent {
 }
 ```
 
-## 📁 Estructura del Proyecto v3.0
+## 📁 Estructura del Proyecto v3.1
 
 ```
 src/app/
@@ -146,8 +280,8 @@ src/app/
 │   ├── new-list/            # Creación con protección
 │   └── checklist/           # Vista + CDK drag-drop + Dates
 ├── services/                # Lógica de negocio
-│   ├── date-manager.service.ts (NEW) ⭐        # Sistema de fechas centralizado
-│   ├── functions/           # Servicios modulares v3.0
+│   ├── date-manager.service.ts                     # Sistema de fechas centralizado
+│   ├── functions/           # Servicios modulares v3.1
 │   │   ├── checklist/       # Funciones específicas de checklist
 │   │   │   ├── checklist-reorder.service.ts
 │   │   │   ├── checklist-export.service.ts (Date Enhanced)
@@ -163,36 +297,38 @@ src/app/
 │   │       ├── rename-list.service.ts
 │   │       ├── delete-list.service.ts
 │   │       └── open-new-tab.service.ts
-│   ├── export/              # Servicios de exportación v3.0
+│   ├── export/              # Servicios de exportación v3.1
 │   │   ├── pdf-export.service.ts (Date Enhanced)
 │   │   └── txt-export.service.ts (Date Enhanced)
-│   ├── external/            # Servicios externos v3.0
+│   ├── external/            # Servicios externos v3.1
 │   │   ├── base64-url.service.ts (Date Enhanced)
 │   │   ├── url-generator.service.ts
 │   │   ├── tiny-url.service.ts
-│   │   └── shared-url-loader.service.ts
-│   ├── uuid.service.ts
+│   │   ├── shared-url-loader.service.ts
+│   │   └── shared-list-comparison.service.ts (NEW) ⭐  # Comparación de listas
+│   ├── uuid.service.ts (Enhanced Tracking) ⭐          # UUIDs mejorados
 │   ├── checklist.service.ts (Date Enhanced)
 │   ├── storage.service.ts (MONITORING)
 │   ├── theme.service.ts
-│   ├── toast.service.ts
+│   ├── toast.service.ts (Smart Notifications) ⭐       # Notificaciones optimizadas
 │   └── export-import.service.ts (Date Enhanced)
 ├── guards/                  # Protección de navegación
 │   └── unsaved-changes.guard.ts
-├── shared/                  # Componentes reutilizables v3.0
+├── shared/                  # Componentes reutilizables v3.1
 │   ├── atomic/             # Componentes atómicos
 │   │   ├── buttons/        # Botones con estados avanzados
 │   │   ├── checkboxes/     # Checkboxes con CDK
 │   │   ├── inputs/         # Inputs con validación + Dates
 │   │   │   ├── input.component.ts
-│   │   │   └── date-input.component.ts (NEW) ⭐    # Input de fechas
+│   │   │   └── date-input.component.ts (Custom Icons) ⭐  # Input con iconos personalizados
 │   │   ├── dropdown/       # dropdown con validación
 │   │   └── tooltip/        # Tooltips contextuales
-│   ├── components/         # Componentes complejos v3.0
+│   ├── components/         # Componentes complejos v3.1
 │   │   ├── alert-modal/    # Modales de alerta
 │   │   ├── confirm-modal/  # Modales de confirmación
+│   │   ├── list-comparison-modal/ (NEW) ⭐           # Modal de comparación de listas
 │   │   ├── reorder-modal/  # Modal de reordenamiento
-│   │   ├── toast/          # Toast notifications
+│   │   ├── toast/          # Toast notifications (Enhanced)
 │   │   ├── storage-indicator/
 │   │   ├── storage-progress-indicator/
 │   │   ├── export-import-dropdown/ (Date Enhanced)
@@ -923,6 +1059,109 @@ export class PerformanceService {
 }
 ```
 
+## 🐛 Mejoras y Correcciones v3.1 ⭐ NEW
+
+### Correcciones Críticas
+
+#### **Notificaciones Repetitivas SOLUCIONADO**
+
+- **Problema**: Felicitaciones se mostraban cada vez al escribir comentarios
+- **Causa**: `updateProgress()` se ejecutaba en cada cambio de la lista
+- **Solución**: Bandera `hasShownCongratulations` en `checklist-state.service.ts`
+- **Resultado**: Felicitaciones solo se muestran una vez por completado
+
+```typescript
+// ChecklistStateService v3.1
+private hasShownCongratulations = false;
+
+updateProgress(): void {
+  const allCompleted = this.allTasksCompleted();
+
+  if (allCompleted && !this.hasShownCongratulations) {
+    this.hasShownCongratulations = true;
+    this.toastService.showToast("¡Felicitaciones! Has completado todas las tareas", "success");
+  } else if (!allCompleted) {
+    this.hasShownCongratulations = false;
+  }
+}
+```
+
+#### **Errores de Tracking Duplicado (NG0955) SOLUCIONADO**
+
+- **Problema**: Errores `NG0955` por claves duplicadas en `@for` loops
+- **Archivos afectados**: `home.component.html`, `export-import-dropdown.component.html`, `team-dropdown.component.ts`
+- **Solución**: Funciones `trackByUniqueId()` con UuidService mejorado
+- **Resultado**: Eliminación completa de errores de tracking
+
+```typescript
+// Implementación universal de trackBy
+trackByUniqueId(index: number, item: any): string {
+  return this.uuidService.generateTrackingId(
+    index,
+    item.id,
+    item.name,
+    item.date || JSON.stringify(item)
+  );
+}
+```
+
+#### **Iconos de Fecha Nativos REEMPLAZADO**
+
+- **Problema**: Iconos nativos del navegador inconsistentes entre browsers
+- **Afectaba**: Safari, Chrome, Firefox con diferentes estilos
+- **Solución**: Icono personalizado `calendar_today` de Material Icons
+- **Resultado**: Interfaz consistente que se adapta al tema automáticamente
+
+### Mejoras de Arquitectura
+
+#### **Sistema de Listas Compartidas Inteligente**
+
+- **Detección automática** por nombre de lista
+- **Modal de decisión** para actualizar vs crear copia
+- **Comparación regex** case-insensitive sin sufijo "(Compartida)"
+- **Preservación de datos** originales en actualizaciones
+
+#### **UuidService Robusto**
+
+- **Generación de IDs únicos** combinando múltiples factores
+- **Prevención de colisiones** en elementos dinámicos
+- **Compatibilidad universal** para todos los componentes con loops
+
+#### **Sistema de Notificaciones Optimizado**
+
+- **Control de contexto** para evitar spam
+- **Timing inteligente** basado en acciones del usuario
+- **Estados persistentes** que se resetean apropiadamente
+
+### Optimizaciones de Performance
+
+#### **Menos Re-renders**
+
+- **TrackBy functions** optimizadas para todos los loops
+- **Cambios mínimos** en el DOM
+- **Estados calculados** solo cuando es necesario
+
+#### **Mejor UX Cross-browser**
+
+- **Iconos personalizados** que funcionan igual en todos los browsers
+- **CSS robusto** con fallbacks apropiados
+- **Adaptación automática** al tema sin JavaScript adicional
+
+### Compatibilidad y Estabilidad
+
+#### **Compatibilidad Total**
+
+- ✅ **Chrome/Edge**: Iconos consistentes
+- ✅ **Firefox**: Iconos consistentes
+- ✅ **Safari**: Iconos consistentes
+- ✅ **Mobile browsers**: Responsive completo
+
+#### **Robustez del Sistema**
+
+- **Error handling** mejorado en comparación de listas
+- **Fallbacks** apropiados para funciones críticas
+- **Validación** de datos en servicios externos
+
 ---
 
-**📖 Documentación Técnica v2.1 - Checkliist con Angular 19+, TypeScript 5.7+ y Angular CDK 19+**
+**📖 Documentación Técnica v3.1 - Checkliist con Shared Lists, Custom Icons & Enhanced Tracking**

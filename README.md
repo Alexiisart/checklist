@@ -7,32 +7,47 @@
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 
-## ✨ Características v3.0
+## ✨ Características v3.1
 
 - 📝 **Creación rápida**: Tareas separadas por comas
 - ✅ **Subtareas y errores**: Seguimiento detallado por tarea
-- 📅 **Fechas de vencimiento**: Para tareas principales con indicadores visuales ⭐ NEW
-- ✅ **Fechas de completado**: Automáticas al marcar como completadas ⭐ NEW
-- 🔔 **Estados visuales**: Indicadores para tareas vencidas y completadas ⭐ NEW
+- 📅 **Fechas de vencimiento**: Para tareas principales con indicadores visuales
+- ✅ **Fechas de completado**: Automáticas al marcar como completadas
+- 🔔 **Estados visuales**: Indicadores para tareas vencidas y completadas
 - 🔄 **Reordenamiento**: Drag & drop visual de tareas y subtareas
 - 💾 **Auto-guardado**: Sin pérdida de datos
-- 🌙 **Temas**: Claro/oscuro automático
+- 🌙 **Temas**: Claro/oscuro automático con iconos adaptados ⭐ ENHANCED
 - 📱 **Responsive**: Móvil, tablet y desktop
-- 📄 **Exportación completa**: PDF, TXT y URLs con fechas incluidas ⭐ ENHANCED
-- 🔒 **IDs únicos**: Sistema UUID para estabilidad
+- 📄 **Exportación completa**: PDF, TXT y URLs con fechas incluidas
+- 🔒 **IDs únicos**: Sistema UUID mejorado para máxima estabilidad ⭐ ENHANCED
 - 📋 **Gestión de listas**: Duplicar, renombrar y eliminar
 - 👥 **Gestión de equipos**: Miembros y asignaciones de tareas
-- 🎯 **Notificaciones**: Sistema de alertas contextual
+- 🎯 **Notificaciones optimizadas**: Sistema de alertas sin repeticiones ⭐ ENHANCED
 - 🛡️ **Protección**: Guards contra pérdida de cambios
+- 🔗 **Compartir listas inteligente**: Detección y comparación automática ⭐ NEW
+- 📅 **Iconos de fecha personalizados**: Adaptados al modo oscuro ⭐ NEW
 
-### 📅 Sistema de Fechas v3.0 ⭐ NEW
+### 🔗 Sistema de Listas Compartidas v3.1 ⭐ NEW
 
-- **Fechas de vencimiento**: Solo para tareas principales (no subtareas)
-- **Fechas automáticas**: Se establece fecha de completado al marcar tarea
-- **Indicadores visuales**: Bordes rojos para fechas vencidas
-- **Tooltips informativos**: Información contextual sobre fechas
-- **Zona horaria local**: Consistencia garantizada en todos los formatos
-- **Exportación completa**: Fechas incluidas en PDF, TXT, copiar y URLs
+- **Detección automática**: Reconoce cuando existe una lista con el mismo nombre
+- **Modal de comparación**: Permite decidir entre actualizar o crear copia nueva
+- **Comparación inteligente**: Analiza diferencias entre listas compartidas y existentes
+- **Preservación de datos**: Mantiene información original al actualizar
+- **URLs seguras**: Sistema de codificación Base64 para enlaces compartidos
+
+### 📅 Mejoras del Sistema de Fechas v3.1 ⭐ ENHANCED
+
+- **Iconos personalizados**: Reemplaza iconos nativos del navegador
+- **Adaptación automática**: Iconos que cambian con el tema claro/oscuro
+- **Mejor UX**: Interfaz más consistente entre navegadores
+- **Accesibilidad mejorada**: Tooltips y estados visuales optimizados
+
+### 🔧 Optimizaciones Técnicas v3.1 ⭐ ENHANCED
+
+- **Tracking mejorado**: Sistema UUID único que elimina errores de duplicados
+- **Notificaciones inteligentes**: Previene mensajes repetitivos durante edición
+- **Rendimiento optimizado**: Menos re-renders innecesarios
+- **Estabilidad aumentada**: Mejor manejo de estados y actualizaciones
 
 ## 🚀 Instalación
 
@@ -62,46 +77,71 @@ npm test        # Pruebas
 npm run lint    # Linting
 ```
 
-## 📖 Uso v3.0
+## 📖 Uso v3.1
+
+### Funcionalidades Básicas
 
 1. **Nueva Lista**: Escribe tareas separadas por comas
 2. **Gestionar**: Marca completadas, añade subtareas/errores
-3. **Fechas**: Asigna fechas de vencimiento con el selector de fecha ⭐ NEW
-4. **Estados visuales**: Observa indicadores de fechas vencidas ⭐ NEW
+3. **Fechas**: Asigna fechas de vencimiento con el selector personalizado ⭐ ENHANCED
+4. **Estados visuales**: Observa indicadores de fechas vencidas
 5. **Reordenar**: Arrastra para organizar visualmente
 6. **Guardar**: Auto-guardado o manual con nombre
 7. **Duplicar**: Crea copias con numeración automática
-8. **Exportar**: PDF, TXT y URLs con fechas incluidas ⭐ ENHANCED
+8. **Exportar**: PDF, TXT y URLs con fechas incluidas
 
-### Casos Especiales v3.0
+### 🔗 Compartir Listas v3.1 ⭐ NEW
 
-- **Fechas de tareas**: Solo tareas principales tienen fechas, subtareas no
-- **Fechas vencidas**: Se muestran con borde rojo si la fecha es anterior a hoy
-- **Fechas completadas**: Se establecen automáticamente al completar tarea
-- **Tareas duplicadas**: Cada instancia se maneja independientemente
-- **Subtareas múltiples**: Usa `+` para separar (ej: "tarea1+tarea2+tarea3")
-- **Nombres únicos**: El sistema previene duplicados
-- **Exportación con fechas**: Todas las exportaciones incluyen información de fechas
+1. **Generar enlace**: Click en "Compartir" para crear URL
+2. **Compartir URL**: Envía el enlace a otros usuarios
+3. **Abrir enlace**: El destinatario abre la URL compartida
+4. **Comparación automática**: Si existe lista con el mismo nombre, aparece modal
+5. **Decidir acción**: Elegir entre actualizar lista existente o crear copia nueva
 
-### 📅 Uso del Sistema de Fechas
+### 📅 Selector de Fechas Mejorado v3.1 ⭐ ENHANCED
 
-1. **Asignar fecha**: Click en selector de fecha junto a la tarea
-2. **Ver estado**: Las fechas vencidas aparecen con borde rojo
-3. **Información adicional**: Hover para ver tooltip con detalles
-4. **Completar tarea**: Se establece fecha de completado automáticamente
-5. **Eliminar fecha**: Click en "×" para remover fecha de vencimiento
+1. **Icono personalizado**: Click en el icono de calendario (no depende del navegador)
+2. **Adaptación automática**: El icono cambia color según el tema activo
+3. **Mejor visibilidad**: Iconos más claros y consistentes
+4. **Doble funcionalidad**: Icono de calendario + botón de limpiar fecha
 
-## 🏗️ Arquitectura v3.0
+### Casos Especiales v3.1
+
+- **Listas duplicadas por nombre**: Sistema inteligente ofrece opciones de fusión
+- **Fechas personalizadas**: Iconos que funcionan igual en todos los navegadores
+- **Notificaciones contextuales**: No se repiten durante la edición de texto
+- **Tracking robusto**: Eliminación completa de errores de elementos duplicados
+- **Compatibilidad total**: Funciona idénticamente en Chrome, Firefox, Safari, Edge
+
+## 🏗️ Arquitectura v3.1
 
 La aplicación utiliza una arquitectura modular con:
 
-- **Sistema de fechas centralizado**: DateManagerService para toda la lógica ⭐ NEW
+- **Sistema de listas compartidas**: Comparación y fusión inteligente ⭐ NEW
+- **Iconos personalizados**: Componentes propios que se adaptan al tema ⭐ NEW
+- **UUID avanzado**: Sistema de tracking único mejorado ⭐ ENHANCED
+- **Notificaciones optimizadas**: Control de duplicados y contexto ⭐ ENHANCED
+- **Sistema de fechas centralizado**: DateManagerService para toda la lógica
 - **Servicios especializados**: Cada función con su servicio independiente
 - **Angular CDK**: Para componentes nativos y drag & drop
 - **Sistema reactivo**: RxJS + BehaviorSubjects
 - **Guards de protección**: Prevención de pérdida de datos
-- **Componentes atómicos**: Design system reutilizable con fechas
-- **Zona horaria local**: Garantía de consistencia en formatos de fecha
+- **Componentes atómicos**: Design system reutilizable
+- **Zona horaria local**: Garantía de consistencia en formatos
+
+### 🆕 Nuevos Servicios v3.1
+
+- **SharedListComparisonService**: Gestión de comparación de listas
+- **UuidService mejorado**: Generación de IDs únicos optimizada
+- **Tracking universal**: Sistema común para todos los componentes
+
+## 🐛 Correcciones v3.1
+
+- ✅ **Notificaciones repetitivas**: Eliminado el bug de felicitaciones constantes
+- ✅ **Tracking duplicado**: Solucionados errores NG0955 de elementos repetidos
+- ✅ **Iconos de fecha**: Reemplazados iconos nativos por versiones personalizadas
+- ✅ **Comparación de listas**: Detección inteligente mejorada por nombre
+- ✅ **Estabilidad general**: Múltiples mejoras de rendimiento y consistencia
 
 ## 🤝 Contribuir
 
@@ -113,7 +153,7 @@ Lee la [Guía de Contribución](CONTRIBUTING.md) para:
 
 ## 📚 Documentación
 
-- [Documentación Técnica](TECHNICAL_DOCS.md) - Arquitectura completa y APIs v3.0
+- [Documentación Técnica](TECHNICAL_DOCS.md) - Arquitectura completa y APIs v3.1
 - [App en Vivo](https://checkliist.netlify.app) - Demo funcional
 
 ---

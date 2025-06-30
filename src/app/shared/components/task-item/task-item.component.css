@@ -21,8 +21,22 @@
 }
 
 .task-item.completed {
-  opacity: 0.7;
   background: var(--color-surface);
+}
+
+.task-item.completed .task-title,
+.task-item.completed .subtasks-container,
+.task-item.completed .errors-container,
+.task-item.completed .subtask-btn,
+.task-item.completed
+  .micro-actions-container
+  > *:not(.team-dropdown):not(.team-btn) {
+  opacity: 0.7;
+}
+
+.task-item.completed .team-dropdown,
+.task-item.completed .team-btn {
+  opacity: 1;
 }
 
 .task-actions {

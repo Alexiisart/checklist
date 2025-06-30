@@ -10,7 +10,7 @@
   padding: 16px;
   box-shadow: var(--shadow-sm);
   position: absolute;
-  top: 100%;
+  bottom: -6rem;
   right: 0;
   z-index: 1000;
   width: auto;

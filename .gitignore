@@ -6,6 +6,7 @@
 /out-tsc
 /bazel-out
 /checklist
+/openiis-ui
 
 # Node
 /node_modules

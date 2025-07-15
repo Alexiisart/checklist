@@ -2,7 +2,7 @@
 
 > Aplicación web moderna para gestionar tareas diarias con Angular
 
-🌐 **[Ver App en Vivo](https://checkliist.netlify.app)**
+🌐 **[Ver App en Vivo](https://checkliist.openiis.org)**
 
 [![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
@@ -154,7 +154,7 @@ Lee la [Guía de Contribución](CONTRIBUTING.md) para:
 ## 📚 Documentación
 
 - [Documentación Técnica](TECHNICAL_DOCS.md) - Arquitectura completa y APIs v3.1
-- [App en Vivo](https://checkliist.netlify.app) - Demo funcional
+- [App en Vivo](https://checkliist.openiis.org) - Demo funcional
 
 ---
 

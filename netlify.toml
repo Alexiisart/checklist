@@ -1,0 +1,11 @@
+[[redirects]]
+  from = "https://checkliist.netlify.app/*"
+  to = "https://checkliist.openiis.org/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.checkliist.netlify.app/*"
+  to = "https://checkliist.openiis.org/:splat"
+  status = 301
+  force = true

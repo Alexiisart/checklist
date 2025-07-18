@@ -25,7 +25,6 @@ import { ButtonComponent } from '../../atomic/buttons';
         </app-button>
         <div class="header-text">
           <div class="logo-container">
-            <img [src]="logoSrc" alt="Checkliist" class="main-logo" />
             <div class="logo-text">
               <h1>Checkliist</h1>
             </div>
